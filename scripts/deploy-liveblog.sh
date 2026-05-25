@@ -221,27 +221,9 @@ nginx_conf_path() {
   esac
 }
 
-install_nginx() {
-  if [[ "${USE_NGINX}" != "true" || "${INSTALL_NGINX}" != "true" ]]; then
-    return 0
-  fi
-  detect_pkg_mgr
-  log "nginx for ${PUBLIC_HOST}..."
-  pkg_install nginx
-  local site
-  site="$(nginx_conf_path)"
-  mkdir -p "$(dirname "${site}")"
-  cat >"${site}" <<NGX
-upstream liveblog_api { server 127.0.0.1:${API_PORT}; }
-upstream liveblog_ws  { server 127.0.0.1:${WS_PORT}; }
-upstream liveblog_ui  { server 127.0.0.1:${UI_PORT}; }
-
-server {
-    listen 80;
-    listen [::]:80;
-    server_name ${PUBLIC_HOST};
-    client_max_body_size 50m;
-
+# Shared location blocks — /embed goes to API :5000 (NOT /api/embed, NOT :9000)
+write_nginx_locations() {
+  cat <<NGX
     location /api {
         proxy_pass http://liveblog_api;
         proxy_redirect off;
@@ -251,7 +233,6 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    # Public blog embed HTML (Flask on :5000 — NOT the webpack client on :9000)
     location /embed {
         proxy_pass http://liveblog_api;
         proxy_redirect off;
@@ -297,17 +278,89 @@ server {
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
     }
-}
 NGX
-  if [[ "${PKG_MGR}" == "apt" ]]; then
-    mkdir -p /etc/nginx/sites-enabled
-    ln -sf "${site}" /etc/nginx/sites-enabled/liveblog
-    rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+}
+
+write_nginx_config_file() {
+  local site ssl_block=""
+  site="$(nginx_conf_path)"
+  mkdir -p "$(dirname "${site}")"
+  if [[ -d "/etc/letsencrypt/live/${PUBLIC_HOST}" ]]; then
+    ssl_block="
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ${PUBLIC_HOST};
+    client_max_body_size 50m;
+    ssl_certificate /etc/letsencrypt/live/${PUBLIC_HOST}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PUBLIC_HOST}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+$(write_nginx_locations)
+}
+"
   fi
+  cat >"${site}" <<NGX
+# Liveblog — written by deploy-liveblog.sh (do not hand-edit; re-run deploy)
+upstream liveblog_api { server 127.0.0.1:${API_PORT}; }
+upstream liveblog_ws  { server 127.0.0.1:${WS_PORT}; }
+upstream liveblog_ui  { server 127.0.0.1:${UI_PORT}; }
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${PUBLIC_HOST};
+    client_max_body_size 50m;
+$(write_nginx_locations)
+}
+${ssl_block}
+NGX
+  log "Wrote nginx config: ${site}"
+}
+
+enable_nginx_site_only() {
+  local site
+  site="$(nginx_conf_path)"
+  case "${PKG_MGR}" in
+    apt)
+      mkdir -p /etc/nginx/sites-enabled /etc/nginx/sites-available
+      rm -f /etc/nginx/sites-enabled/default
+      for f in /etc/nginx/sites-enabled/*; do
+        [[ -e "${f}" ]] || continue
+        [[ "$(readlink -f "${f}" 2>/dev/null || echo "${f}")" == "${site}" ]] && continue
+        rm -f "${f}"
+        log "Disabled old nginx site: ${f}"
+      done
+      ln -sf "${site}" /etc/nginx/sites-enabled/liveblog
+      ;;
+  esac
+}
+
+nginx_reload() {
   nginx -t
   svc_enable nginx
   svc_reload nginx
-  log "nginx OK"
+}
+
+nginx_verify_embed() {
+  if nginx -T 2>/dev/null | grep -q "location /embed"; then
+    log "nginx OK: location /embed → API :${API_PORT}"
+    return 0
+  fi
+  die "nginx still missing location /embed — check $(nginx_conf_path)"
+}
+
+install_nginx() {
+  if [[ "${USE_NGINX}" != "true" || "${INSTALL_NGINX}" != "true" ]]; then
+    return 0
+  fi
+  detect_pkg_mgr
+  log "Installing/configuring nginx for ${PUBLIC_HOST}..."
+  pkg_install nginx
+  write_nginx_config_file
+  enable_nginx_site_only
+  nginx_reload
+  nginx_verify_embed
 }
 
 install_tls() {
@@ -323,8 +376,23 @@ install_tls() {
   if certbot --nginx -d "${PUBLIC_HOST}" --non-interactive --agree-tos -m "${CERTBOT_EMAIL}" --redirect 2>/dev/null; then
     log "TLS OK"
   else
-    log "WARN: certbot failed — run: certbot --nginx -d ${PUBLIC_HOST}"
+    log "WARN: certbot failed — set CERTBOT_EMAIL and re-run, or: certbot --nginx -d ${PUBLIC_HOST}"
   fi
+  # Re-apply our full config so HTTPS block always has /embed (certbot can drop it)
+  write_nginx_config_file
+  enable_nginx_site_only
+  nginx_reload
+  nginx_verify_embed
+}
+
+nginx_finalize() {
+  if [[ "${USE_NGINX}" != "true" ]]; then
+    return 0
+  fi
+  write_nginx_config_file
+  enable_nginx_site_only
+  nginx_reload
+  nginx_verify_embed
 }
 
 clone_or_pull() {
@@ -412,7 +480,10 @@ print_done() {
     echo "Use https://${PUBLIC_HOST} — NOT :9000 with https"
   fi
   if [[ "${USE_HTTPS}" == "true" && -z "${CERTBOT_EMAIL}" ]]; then
-    echo "TLS:   certbot --nginx -d ${PUBLIC_HOST}"
+    echo "TLS:   set CERTBOT_EMAIL in deploy script and re-run"
+  fi
+  if [[ "${USE_NGINX}" == "true" ]]; then
+    echo "Embed: https://${PUBLIC_HOST}/embed/<blog_id>/theme/default"
   fi
   echo "================================================================================"
 }
@@ -426,6 +497,7 @@ main() {
   compose_up
   install_nginx
   install_tls
+  nginx_finalize
   print_done
 }
 
