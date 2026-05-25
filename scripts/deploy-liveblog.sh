@@ -361,35 +361,6 @@ EOF
   grep "^SUPERDESK" "${f}" || true
 }
 
-port_is_up() {
-  local port="$1"
-  if curl -sf --max-time 3 "http://127.0.0.1:${port}/" -o /dev/null 2>/dev/null; then
-    return 0
-  fi
-  if curl -sf --max-time 3 "http://127.0.0.1:${port}" -o /dev/null 2>/dev/null; then
-    return 0
-  fi
-  return 1
-}
-
-wait_for_port() {
-  local port="$1"
-  local label="$2"
-  local max="${3:-360}"
-  local i=0
-  log "wait ${label} :${port} (max ${max}s)..."
-  while [[ "${i}" -lt "${max}" ]]; do
-    if port_is_up "${port}"; then
-      log "${label} up on :${port}"
-      return 0
-    fi
-    sleep 5
-    i=$((i + 5))
-  done
-  log "WARN: ${label} not up on :${port}"
-  return 1
-}
-
 fix_selinux_nginx() {
   if command -v getenforce >/dev/null 2>&1; then
     if [[ "$(getenforce 2>/dev/null)" == "Enforcing" ]]; then
@@ -405,8 +376,7 @@ compose_up() {
   docker compose up -d --build
   docker compose up -d --force-recreate client server
   fix_selinux_nginx
-  wait_for_port "${API_PORT}" "API" 240 || true
-  wait_for_port "${UI_PORT}" "UI" 480 || true
+  log "Containers started in background (client can take several minutes to compile)"
 }
 
 print_done() {
