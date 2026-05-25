@@ -1,4 +1,5 @@
 import 'lb-bootstrap.scss';
+import '../styles/tailwind/portal.css';
 
 import 'jquery-ui/jquery-ui';
 import 'jquery-jcrop';

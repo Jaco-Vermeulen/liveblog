@@ -1,0 +1,833 @@
+/**
+ * Maroela admin portal — responsive layout + readable typography (plain CSS).
+ * Superdesk defaults ~12px body; we reset to 16px / 17px. No PostCSS/Tailwind build step (Node 10 safe).
+ */
+
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --mar-page: #f5efe7;
+  --mar-orange: #c45712;
+  --mar-orange-dark: #a0450e;
+  --mar-teal: #157578;
+  --mar-teal-dark: #0d4f52;
+  --mar-accent: #c8503a;
+  --mar-text: #1c1917;
+  --mar-muted: #57534e;
+  --mar-meta: #78716c;
+  --mar-card: #ffffff;
+  --mar-border: #e2dcd2;
+  --mar-beige: #f0e9df;
+  --mar-nav-width: 16rem;
+  --mar-topbar: 4rem;
+  --mar-font: 'Lato', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body.maroela-portal {
+    font-family: var(--mar-font) !important;
+    font-size: 1.0625rem !important;
+    line-height: 1.6 !important;
+    color: var(--mar-text) !important;
+    background-color: var(--mar-page) !important;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body.maroela-portal .btn,
+  body.maroela-portal button,
+  body.maroela-portal input,
+  body.maroela-portal select,
+  body.maroela-portal textarea {
+    font-size: 1rem !important;
+  }
+
+/* Shell */
+  body.maroela-portal #main-container,
+  body.maroela-portal .sd-workspace,
+  body.maroela-portal .main-section {
+    background-color: var(--mar-page) !important;
+  }
+
+  body.maroela-portal #main-container {
+    padding-top: var(--mar-topbar) !important;
+    transition: left 0.28s ease, right 0.28s ease;
+  }
+
+  body.maroela-portal .main-section {
+    top: 7rem !important;
+  }
+
+  body.maroela-portal .main-section.search {
+    top: var(--mar-topbar) !important;
+  }
+
+  body.maroela-portal #side-menu {
+    top: var(--mar-topbar) !important;
+  }
+
+  /* Top bar */
+  body.maroela-portal #top-menu {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: var(--mar-topbar) !important;
+    height: var(--mar-topbar) !important;
+    padding: 0 0.75rem 0 0 !important;
+    background-color: var(--mar-card) !important;
+    border-bottom: 1px solid var(--mar-border) !important;
+    box-shadow: 0 1px 0 rgba(21, 117, 120, 0.12);
+    transition: left 0.28s ease, right 0.28s ease;
+  }
+
+  body.maroela-portal #top-menu .nav {
+    display: flex;
+    align-items: center;
+    float: none !important;
+    height: var(--mar-topbar);
+  }
+
+  body.maroela-portal #top-menu a,
+  body.maroela-portal #top-menu button {
+    height: auto !important;
+    line-height: normal !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.maroela-portal .sd-top-menu__header,
+  body.maroela-portal .m-top-nav__title {
+    margin: 0 0 0 0.5rem !important;
+    padding: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    color: var(--mar-teal-dark) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 28rem;
+  }
+
+  body.maroela-portal .m-top-nav__start {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  body.maroela-portal .m-top-nav__end {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  body.maroela-portal .m-top-nav__brand {
+    display: none;
+    align-items: center;
+    margin-left: 0.35rem;
+  }
+
+  body.maroela-portal .m-top-nav__brand img {
+    height: 2rem;
+    width: auto;
+  }
+
+  body.maroela-portal #top-menu .current-user {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0.25rem;
+    padding: 0 !important;
+    border-radius: 50%;
+  }
+
+  body.maroela-portal #top-menu .current-user:hover {
+    background-color: var(--mar-beige) !important;
+  }
+
+  body.maroela-portal #top-menu .current-user .avatar img {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 2px solid var(--mar-border);
+    object-fit: cover;
+  }
+
+  /* Hamburger */
+  body.maroela-portal .m-hamburger.collapse-nav {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0 0.15rem 0 0.35rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0.375rem;
+    background: transparent !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    cursor: pointer;
+  }
+
+  body.maroela-portal .m-hamburger.collapse-nav:hover {
+    background-color: var(--mar-beige) !important;
+  }
+
+  body.maroela-portal .m-hamburger__box {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 20px;
+    height: 16px;
+  }
+
+  body.maroela-portal .m-hamburger__bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 9999px;
+    background-color: var(--mar-teal-dark);
+    transition: transform 0.22s ease, opacity 0.22s ease, width 0.22s ease;
+  }
+
+  body.maroela-portal #top-menu.menu-open .m-hamburger__bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  body.maroela-portal #top-menu.menu-open .m-hamburger__bar:nth-child(2) {
+    opacity: 0;
+    width: 0;
+  }
+
+  body.maroela-portal #top-menu.menu-open .m-hamburger__bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Backdrop */
+  body.maroela-portal .m-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background-color: rgba(28, 25, 23, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+  }
+
+  body.maroela-portal .m-nav-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Side nav */
+  body.maroela-portal #main-menu {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--mar-nav-width) !important;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--mar-teal) 0%, var(--mar-teal-dark) 100%) !important;
+    box-shadow: 4px 0 32px rgba(13, 79, 82, 0.22);
+    transition: transform 0.28s ease;
+  }
+
+  body.maroela-portal #main-menu .header.m-menu-brand {
+    display: flex;
+    min-height: var(--mar-topbar);
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none !important;
+  }
+
+  body.maroela-portal #main-menu .m-menu-brand__logo {
+    max-width: 9rem;
+    height: auto;
+    filter: brightness(0) invert(1);
+  }
+
+  body.maroela-portal #main-menu .m-menu-close {
+    display: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.375rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  body.maroela-portal #main-menu .content {
+    position: relative !important;
+    flex: 1;
+    overflow-y: auto;
+    top: auto !important;
+    bottom: auto !important;
+  }
+
+  body.maroela-portal #main-menu .content > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0 1rem;
+  }
+
+  body.maroela-portal #main-menu .content ul li > a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem !important;
+    font-size: 1rem !important;
+    font-weight: 600;
+    line-height: 1.4 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-decoration: none;
+    text-transform: none !important;
+    border-left: 4px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    height: auto !important;
+  }
+
+  /* Beat stale liveblog.scss bundle rule that still hides core Superdesk nav */
+  body.maroela-portal #main-menu .content ul li > a[href="#/workspace"],
+  body.maroela-portal #main-menu .content ul li > a[href="#/publish_queue"] {
+    display: flex !important;
+  }
+
+  body.maroela-portal #main-menu .content ul li > a:hover,
+  body.maroela-portal #main-menu .content ul li.active > a {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+    border-left-color: var(--mar-accent) !important;
+    color: #fff !important;
+  }
+
+  body.maroela-portal #main-menu .main-menu_group-header {
+    padding: 1rem 1.25rem 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  body.maroela-portal #main-menu .footer {
+    position: relative !important;
+    flex-shrink: 0;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    height: auto !important;
+    box-shadow: none !important;
+  }
+
+  body.maroela-portal #main-menu .footer::before {
+    content: 'Maroela Media';
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  body.maroela-portal #main-menu .footer .about a {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  body.maroela-portal .beta-switch,
+  body.maroela-portal #main-menu .footer .icon-superdesk,
+  body.maroela-portal #main-menu .footer .powered {
+    display: none !important;
+  }
+
+  /* Desktop nav */
+  @media (min-width: 1024px) {
+    body.maroela-portal .m-nav-backdrop {
+      display: none !important;
+    }
+
+    body.maroela-portal #main-menu {
+      transform: none !important;
+    }
+
+    body.maroela-portal #top-menu {
+      left: var(--mar-nav-width) !important;
+      right: 0 !important;
+    }
+
+    body.maroela-portal #top-menu.menu-open {
+      left: var(--mar-nav-width) !important;
+    }
+
+    body.maroela-portal .m-hamburger.collapse-nav {
+      display: none !important;
+    }
+
+    body.maroela-portal #main-container,
+    body.maroela-portal #main-container.menu {
+      left: var(--mar-nav-width) !important;
+    }
+
+    body.maroela-portal #side-menu.menu-open {
+      left: var(--mar-nav-width) !important;
+    }
+  }
+
+  /* Mobile nav */
+  @media (max-width: 1023px) {
+    body.maroela-portal #main-menu {
+      transform: translateX(-100%);
+    }
+
+    body.maroela-portal #main-menu.menu-open {
+      transform: translateX(0);
+    }
+
+    body.maroela-portal #main-menu .m-menu-close {
+      display: inline-flex;
+    }
+
+    body.maroela-portal .m-top-nav__brand {
+      display: inline-flex;
+    }
+
+    body.maroela-portal #top-menu {
+      left: 0 !important;
+      right: 0 !important;
+    }
+
+    body.maroela-portal #main-container {
+      left: 0 !important;
+    }
+
+    body.maroela-portal #main-container.menu {
+      left: var(--mar-nav-width) !important;
+      right: calc(-1 * var(--mar-nav-width)) !important;
+    }
+  }
+
+  /* Portal chrome */
+  body.maroela-portal .m-portal-chrome.subnav,
+  body.maroela-portal .subnav.m-portal-chrome {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0.5rem 1rem !important;
+    background-color: var(--mar-card) !important;
+    border-bottom: 2px solid var(--mar-teal) !important;
+    box-shadow: 0 4px 20px rgba(56, 25, 6, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .m-portal-chrome.subnav,
+    body.maroela-portal .subnav.m-portal-chrome {
+      padding-left: 1.25rem !important;
+      padding-right: 1.25rem !important;
+    }
+  }
+
+  body.maroela-portal .m-portal-chrome .nav-tabs {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin: 0 !important;
+    padding: 0.25rem;
+    border: none !important;
+    border-radius: 9999px;
+    background-color: var(--mar-beige);
+  }
+
+  body.maroela-portal .m-portal-chrome .nav-tabs li {
+    float: none !important;
+    margin: 0 !important;
+  }
+
+  body.maroela-portal .m-portal-chrome .nav-tabs li button {
+    padding: 0.5rem 1rem !important;
+    height: auto !important;
+    font-size: 0.9375rem !important;
+    font-weight: 600;
+    color: var(--mar-muted) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 9999px;
+    text-transform: none !important;
+    box-shadow: none !important;
+  }
+
+  body.maroela-portal .m-portal-chrome .nav-tabs li.active button,
+  body.maroela-portal .m-portal-chrome .nav-tabs li button:hover {
+    background-color: var(--mar-card) !important;
+    color: var(--mar-orange-dark) !important;
+    box-shadow: 0 4px 6px -1px rgba(56, 25, 6, 0.08);
+  }
+
+  body.maroela-portal .m-portal-chrome .page-nav-title {
+    flex: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700;
+    color: var(--mar-text) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .m-portal-chrome .page-nav-title {
+      font-size: 1.75rem !important;
+    }
+  }
+
+  body.maroela-portal .m-portal-chrome .page-nav-title::after {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 3px;
+    margin-top: 0.35rem;
+    border-radius: 2px;
+    background-color: var(--mar-accent);
+  }
+
+  body.maroela-portal .m-portal-chrome .sd-create-btn {
+    width: 3rem !important;
+    height: 3rem !important;
+    border-radius: 50% !important;
+    background-color: var(--mar-orange) !important;
+    border: 0 !important;
+  }
+
+  /* Blog list */
+  body.maroela-portal .m-portal-page.bloglist {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    min-height: calc(100vh - 4rem);
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem 1rem;
+    position: relative !important;
+    height: auto !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .m-portal-page.bloglist .m-page-toolbar {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__title {
+    width: 100%;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--mar-text);
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__title {
+      font-size: 2.25rem;
+    }
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__title::after {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 2px;
+    background-color: var(--mar-accent);
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__search {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__search {
+      min-width: 16rem;
+    }
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__actions,
+  body.maroela-portal .m-portal-page.bloglist .m-page-toolbar__pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .list-container,
+  body.maroela-portal .m-portal-page.bloglist .m-portal-content {
+    position: relative !important;
+    top: auto !important;
+    overflow: visible !important;
+    padding: 0.5rem 1rem 3rem;
+  }
+
+  @media (min-width: 1024px) {
+    body.maroela-portal .m-portal-page.bloglist .list-container,
+    body.maroela-portal .m-portal-page.bloglist .m-portal-content {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  body.maroela-portal .m-portal-page.bloglist .row-list.table {
+    display: none !important;
+  }
+
+  body.maroela-portal .m-blog-grid.card-list {
+    display: grid !important;
+    gap: 1.25rem;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 480px) {
+    body.maroela-portal .m-blog-grid.card-list {
+      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    body.maroela-portal .m-blog-grid.card-list {
+      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  body.maroela-portal .m-blog-grid > li {
+    display: flex !important;
+    flex-direction: column;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    float: none !important;
+    width: auto !important;
+    opacity: 1 !important;
+  }
+
+  body.maroela-portal .m-blog-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid var(--mar-border);
+    background-color: var(--mar-card);
+    box-shadow: 0 4px 6px -1px rgba(56, 25, 6, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  body.maroela-portal .m-blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(56, 25, 6, 0.12);
+  }
+
+  body.maroela-portal .m-blog-card__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background-color: var(--mar-beige);
+  }
+
+  body.maroela-portal .m-blog-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  body.maroela-portal .m-blog-card__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--mar-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  body.maroela-portal .m-blog-card__dek {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--mar-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  body.maroela-portal .m-blog-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    padding-top: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--mar-meta);
+    border-top: 1px solid var(--mar-border);
+  }
+
+  body.maroela-portal .m-blog-card__meta dt {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  body.maroela-portal .m-blog-card__meta dd {
+    margin: 0 0.5rem 0 0;
+  }
+
+  /* Buttons & forms */
+  body.maroela-portal .btn {
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem !important;
+    font-weight: 600;
+    border-radius: 0.375rem;
+  }
+
+  body.maroela-portal .btn--primary,
+  body.maroela-portal .btn.btn--primary {
+    background-color: var(--mar-orange) !important;
+    border-color: var(--mar-orange-dark) !important;
+    color: #fff !important;
+  }
+
+  body.maroela-portal .form-control,
+  body.maroela-portal .sd-line-input__input,
+  body.maroela-portal input[type='text'],
+  body.maroela-portal input[type='search'],
+  body.maroela-portal input[type='email'],
+  body.maroela-portal input[type='password'],
+  body.maroela-portal textarea,
+  body.maroela-portal select {
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem !important;
+    border-radius: 0.375rem;
+    border: 1px solid var(--mar-border);
+  }
+
+  body.maroela-portal .sd-searchbar input,
+  body.maroela-portal [class*='searchbar'] input {
+    min-height: 3rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    font-size: 1rem !important;
+    border-radius: 9999px;
+  }
+
+  /* Login */
+  body.maroela-portal .maroela-login__heading {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--mar-text);
+  }
+
+  @media (min-width: 640px) {
+    body.maroela-portal .maroela-login__heading {
+      font-size: 2.25rem;
+    }
+  }
+
+  body.maroela-portal .maroela-login__subheading {
+    font-size: 1.125rem;
+    color: var(--mar-muted);
+  }
+
+  body.maroela-portal .maroela-login__label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mar-muted);
+  }
+
+  body.maroela-portal .maroela-login__input {
+    min-height: 3rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--mar-border);
+  }
+
+  body.maroela-portal .maroela-login__submit {
+    min-height: 3rem;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  body.maroela-portal .maroela-login__brand-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  /* Modals */
+  body.maroela-portal .modal__header {
+    padding: 1rem 1.25rem !important;
+    font-size: 1.125rem;
+  }
+
+  body.maroela-portal .modal__body {
+    padding: 1.25rem !important;
+    font-size: 1rem;
+  }

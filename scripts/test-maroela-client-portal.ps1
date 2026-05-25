@@ -11,7 +11,7 @@ if (-not $cssFiles) {
     exit 0
 }
 $css = ($cssFiles | ForEach-Object { Get-Content $_.FullName -Raw }) -join "`n"
-$required = @("#f5efe7", "#c45712", "#157578", "Lato", ".blogedit", ".bloglist", ".m-hamburger", ".m-nav-backdrop")
+$required = @("#f5efe7", "#c45712", "#157578", "Lato", ".blogedit", ".bloglist", "--mar-page", "1.0625rem", 'a[href="#/workspace"]', 'a[href="#/publish_queue"]')
 $forbidden = @("data-color-scheme", ".mm-dark-toggle")
 $failed = @()
 foreach ($token in $required) {

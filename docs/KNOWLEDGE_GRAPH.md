@@ -9,13 +9,15 @@
 
 ## Client portal (admin) — maroela_web2 UX redux
 
-Light-mode admin shell only (dark mode removed for now). Responsive nav: persistent teal sidebar on desktop (≥1024px), hamburger + off-canvas drawer + backdrop on tablet/mobile.
+Light-mode admin shell. Responsive layout + readable typography in **`portal.css`** (plain CSS, Maroela tokens). **17px** body overrides Superdesk ~12px. Sidebar ≥1024px; hamburger drawer below.
 
 | File | Role |
 |------|------|
-| `client/app/styles/sass/maroela-brand.scss` | Tokens + imports nav/shell/portal/ui |
-| `client/app/styles/sass/maroela-nav.scss` | App chrome: hamburger, drawer, backdrop, layout offsets |
-| `client/app/styles/sass/maroela-shell.scss` | Portal chrome, blog card grid, editor rail |
+| `client/app/styles/tailwind/portal.css` | Portal UX: nav, blog grid, forms, login (CSS variables) |
+| `client/tailwind.config.js` | Reserved for future Tailwind build (Node 14+); not in webpack pipeline today |
+| `docker/Dockerfile.client` | Node 10 (Superdesk/node-sass toolchain) |
+| `client/app/styles/sass/maroela-brand.scss` | SCSS tokens + editor/settings (shell/ui) |
+| `client/app/styles/sass/maroela-shell.scss` | Editor rail, modals (legacy SCSS) |
 | `client/app/styles/sass/maroela-portal.scss` | Timeline posts, Sir Trevor, panels |
 | `client/app/styles/sass/maroela-ui.scss` | Buttons, forms, settings shell, themes, login |
 | `client/app/images/maroela-logo.svg` | Nav + login branding |
@@ -29,7 +31,11 @@ Local admin: http://localhost:9000/ — hard-refresh after `liveblog-client` reb
 
 **SCSS note:** libsass cannot evaluate `calc(100vh - Npx)` — use `#{"calc(100vh - 56px)"}` in maroela SCSS.
 
-**Nav breakpoints:** `$mm-nav-width: 260px`, desktop sidebar from `1024px`. Hamburger uses Superdesk `toggleMenu()` / `flags.menu`.
+**Build:** `portal.css` imported after `lb-bootstrap.scss` (style-loader + css-loader only — no PostCSS on Node 10).
+
+**Why it was tiny:** Superdesk ~12px body + small rem-based SCSS. Fix: `html` 16px, body `1.0625rem`, larger cards/titles/inputs in `portal.css`.
+
+**Refresh:** `docker compose restart client` then hard-refresh http://localhost:9000/
 
 ## Design alignment (nuwe-maroela ↔ maroela_web2)
 
@@ -46,7 +52,7 @@ Local admin: http://localhost:9000/ — hard-refresh after `liveblog-client` reb
 - `server/liveblog/themes/themes_assets/maroela/` — legacy theme (unchanged behaviour)
 - `server/liveblog/themes/themes_assets/nuwe-maroela/` — web2 modern theme
 
-**Deploy:** These folders must be **committed to git** (see `.gitignore` exceptions). `git clone` on staging only gets embed themes that are in the repo; admin SCSS branding is separate from embed theme assets.
+**Base repo:** `maroela` and `nuwe-maroela` are **tracked in git** under `themes_assets/` (same as `default`, `classic`, etc.). A fresh `git clone` + `docker compose up` or `register_local_themes` loads them into Mongo. No separate theme export step for new servers. Admin SCSS (`client/app/styles/sass/maroela-*.scss`) is portal branding, not embed themes.
 - `server/liveblog/system_themes.py` — registers both themes
 - `client/app/styles/sass/maroela-brand.scss` — admin brand (legacy maroela colours)
 - `docker/scripts/set-blog-nuwe-maroela.js` — assign test blog to nuwe-maroela
@@ -133,6 +139,12 @@ iframe.src = iframe.src.includes('?')
 docker exec liveblog-server bash -c "find /opt/server -name '*.pyc' -newer /opt/server/liveblog/themes/template/loaders.py -delete"
 docker restart liveblog-server
 ```
+
+## Deploy / SMTP (Mandrill)
+
+`scripts/deploy-liveblog.sh` `write_env()` writes `MAIL_*` into `${INSTALL_DIR}/.env`. Defaults: `smtp.mandrillapp.com:587`, TLS on, Mandrill API key as `MAIL_PASSWORD`. Set `MAIL_FROM` to a **verified sender** in Mailchimp Transactional. `docker-compose.yml` passes `MAIL_*` into `server` (and celery via honcho).
+
+Do not commit a filled server copy with secrets — use gitignored `/deploy-liveblog.sh` on the box or edit CONFIG only on the server.
 
 ## Tests
 

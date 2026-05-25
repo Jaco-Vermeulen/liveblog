@@ -123,13 +123,11 @@
     cursor: pointer;
 }
 
-// Hide the link to desks in the menu.
-// Needed since we import superdesk.desks in the modules
-#main-menu li > a[href="#/workspace"],
+// Hide legacy Superdesk menu items not used in the Maroela portal.
+// Workspace and Publish Queue stay visible — editors need them daily.
 #main-menu li > a[href="#/desks/"],
 #main-menu li > a[href="#/legal_archive/"],
 #main-menu li > a[href="#/settings"],
-#main-menu li > a[href="#/publish_queue"],
 #main-menu li > a[href="#/ingest_dashboard"]
 {
     display: none !important;

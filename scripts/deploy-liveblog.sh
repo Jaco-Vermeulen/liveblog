@@ -14,6 +14,7 @@ INSTALL_DIR="/opt/liveblog"
 
 # Domain only — no http:// no trailing slash
 PUBLIC_HOST="live.nuwe-maroela.co.za"
+EXTRA_SERVER_NAMES="maroelablog.jnb1.cloudlet.cloud"
 
 USE_NGINX="true"
 USE_HTTPS="true"
@@ -35,6 +36,16 @@ AMAZON_SECRET_ACCESS_KEY=""
 AMAZON_REGION=""
 AMAZON_CONTAINER_NAME=""
 SENTRY_DSN=""
+
+# Mandrill (Mailchimp Transactional) — password is the API key; username is not validated by Mandrill
+MAIL_SERVER="smtp.mandrillapp.com"
+MAIL_PORT="587"
+MAIL_USE_TLS="true"
+MAIL_USE_SSL="false"
+MAIL_USERNAME="Maroela Media"
+MAIL_PASSWORD="md-Gx3eRIxK5Gu77P-HHycn3w"
+MAIL_FROM="noreply@nuwe-maroela.co.za"
+MAIL_SUPPRESS_SEND="false"
 
 INSTALL_DOCKER="true"
 FRESH_INSTALL="false"
@@ -281,19 +292,36 @@ write_nginx_locations() {
 NGX
 }
 
+nginx_server_names() {
+  local names="${PUBLIC_HOST}"
+  if [[ -n "${EXTRA_SERVER_NAMES}" ]]; then
+    names="${names} ${EXTRA_SERVER_NAMES}"
+  fi
+  echo "${names}"
+}
+
+nginx_tls_host() {
+  local h
+  for h in "${PUBLIC_HOST}" ${EXTRA_SERVER_NAMES}; do
+    [[ -d "/etc/letsencrypt/live/${h}" ]] && echo "${h}" && return 0
+  done
+  return 1
+}
+
 write_nginx_config_file() {
-  local site ssl_block=""
+  local site ssl_block="" tls_host names
   site="$(nginx_conf_path)"
+  names="$(nginx_server_names)"
   mkdir -p "$(dirname "${site}")"
-  if [[ -d "/etc/letsencrypt/live/${PUBLIC_HOST}" ]]; then
+  if tls_host="$(nginx_tls_host)"; then
     ssl_block="
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    server_name ${PUBLIC_HOST};
+    server_name ${names};
     client_max_body_size 50m;
-    ssl_certificate /etc/letsencrypt/live/${PUBLIC_HOST}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${PUBLIC_HOST}/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/${tls_host}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${tls_host}/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 $(write_nginx_locations)
@@ -309,7 +337,7 @@ upstream liveblog_ui  { server 127.0.0.1:${UI_PORT}; }
 server {
     listen 80;
     listen [::]:80;
-    server_name ${PUBLIC_HOST};
+    server_name ${names};
     client_max_body_size 50m;
 $(write_nginx_locations)
 }
@@ -319,7 +347,7 @@ NGX
 }
 
 enable_nginx_site_only() {
-  local site
+  local site f
   site="$(nginx_conf_path)"
   case "${PKG_MGR}" in
     apt)
@@ -333,6 +361,22 @@ enable_nginx_site_only() {
       done
       ln -sf "${site}" /etc/nginx/sites-enabled/liveblog
       ;;
+    apk)
+      rm -f /etc/nginx/http.d/default.conf 2>/dev/null || true
+      for f in /etc/nginx/http.d/*.conf; do
+        [[ -f "${f}" && "${f}" != "${site}" ]] || continue
+        rm -f "${f}"
+        log "Disabled old nginx site: ${f}"
+      done
+      ;;
+    dnf|yum)
+      rm -f /etc/nginx/conf.d/default.conf 2>/dev/null || true
+      for f in /etc/nginx/conf.d/*.conf; do
+        [[ -f "${f}" && "${f}" != "${site}" ]] || continue
+        rm -f "${f}"
+        log "Disabled old nginx site: ${f}"
+      done
+      ;;
   esac
 }
 
@@ -343,11 +387,23 @@ nginx_reload() {
 }
 
 nginx_verify_embed() {
+  local site
+  site="$(nginx_conf_path)"
+  if ! grep -q "location /embed" "${site}" 2>/dev/null; then
+    die "Config file missing /embed: ${site} — re-run deploy script"
+  fi
+  log "Config file OK: ${site} has location /embed"
   if nginx -T 2>/dev/null | grep -q "location /embed"; then
-    log "nginx OK: location /embed → API :${API_PORT}"
+    log "nginx active: location /embed → :${API_PORT}"
     return 0
   fi
-  die "nginx still missing location /embed — check $(nginx_conf_path)"
+  log "WARN: config has /embed but nginx -T does not — reloading..."
+  nginx_reload
+  if nginx -T 2>/dev/null | grep -q "location /embed"; then
+    log "nginx active after reload"
+    return 0
+  fi
+  die "nginx -T still missing /embed — run: nginx -T | grep server_name; check $(dirname "${site}")"
 }
 
 install_nginx() {
@@ -443,12 +499,28 @@ EOF
   if [[ -n "${SENTRY_DSN}" ]]; then
     echo "SENTRY_DSN=${SENTRY_DSN}" >>"${f}"
   fi
+  local mail_from="${MAIL_FROM}"
+  if [[ -z "${mail_from}" ]]; then
+    mail_from="noreply@${PUBLIC_HOST}"
+  fi
+  cat >>"${f}" <<EOF
+MAIL_SERVER=${MAIL_SERVER}
+MAIL_PORT=${MAIL_PORT}
+MAIL_USE_TLS=${MAIL_USE_TLS}
+MAIL_USE_SSL=${MAIL_USE_SSL}
+MAIL_USERNAME="${MAIL_USERNAME}"
+MAIL_PASSWORD="${MAIL_PASSWORD}"
+MAIL_FROM=${mail_from}
+MAIL_SUPPRESS_SEND=${MAIL_SUPPRESS_SEND}
+EOF
   chmod 600 "${f}"
   if grep -q "maroelablog.jnb1.cloudlet.cloud" "${f}" 2>/dev/null; then
     log "WARN: .env still contains old host maroelablog — check PUBLIC_HOST"
   fi
   log "Verify: grep SUPERDESK ${f}"
   grep "^SUPERDESK" "${f}" || true
+  log "Verify: grep MAIL_SERVER ${f}"
+  grep "^MAIL_SERVER=" "${f}" || true
 }
 
 fix_selinux_nginx() {

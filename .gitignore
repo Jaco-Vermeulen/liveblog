@@ -71,15 +71,25 @@ dump.rdb
 
 .editor-settings
 
-# Themes folder
+# Themes folder (ignore all except bundled base themes)
 server/liveblog/themes/themes_assets/*
 !server/liveblog/themes/themes_assets/angular
+!server/liveblog/themes/themes_assets/angular/**
 !server/liveblog/themes/themes_assets/classic
+!server/liveblog/themes/themes_assets/classic/**
 !server/liveblog/themes/themes_assets/default
+!server/liveblog/themes/themes_assets/default/**
 !server/liveblog/themes/themes_assets/amp
+!server/liveblog/themes/themes_assets/amp/**
 !server/liveblog/themes/themes_assets/simple
+!server/liveblog/themes/themes_assets/simple/**
+# Maroela base themes (shipped with this repo — not optional uploads)
 !server/liveblog/themes/themes_assets/maroela
+!server/liveblog/themes/themes_assets/maroela/**
 !server/liveblog/themes/themes_assets/nuwe-maroela
+!server/liveblog/themes/themes_assets/nuwe-maroela/**
+# Never commit theme-local node_modules
+server/liveblog/themes/themes_assets/*/node_modules/
 
 # Vim stuff
 *.swo

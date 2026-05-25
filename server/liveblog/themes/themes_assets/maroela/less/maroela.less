@@ -1,0 +1,106 @@
+// Maroela Media brand — compiled to dist/maroela.css for deployment
+
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap");
+
+
+
+@maroela-orange: #c45c26;
+
+@maroela-orange-dark: #9a4419;
+
+@maroela-text: #1a1a1a;
+
+@maroela-muted: #5c5c5c;
+
+
+
+.lb-timeline {
+
+  font-family: "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  color: @maroela-text;
+
+  max-width: 100%;
+
+
+
+  a {
+
+    color: @maroela-orange;
+
+
+
+    &:hover {
+
+      color: @maroela-orange-dark;
+
+    }
+
+  }
+
+
+
+  .header-bar {
+
+    border-bottom: 3px solid @maroela-orange;
+
+    padding-bottom: 0.5rem;
+
+  }
+
+
+
+  .header-bar__highlight,
+
+  .lb-button,
+
+  .comment__button:not(.comment__button--grey) {
+
+    background-color: @maroela-orange !important;
+
+    border-color: @maroela-orange !important;
+
+    color: #ffffff !important;
+
+
+
+    &:hover {
+
+      background-color: @maroela-orange-dark !important;
+
+      border-color: @maroela-orange-dark !important;
+
+    }
+
+  }
+
+
+
+  .lb-post.highlight {
+
+    border-left: 4px solid @maroela-orange;
+
+  }
+
+
+
+  .lb-author__name,
+
+  .lb-post-date {
+
+    color: @maroela-muted;
+
+  }
+
+
+
+  h1 {
+
+    font-weight: 700;
+
+    color: @maroela-text;
+
+  }
+
+}
+

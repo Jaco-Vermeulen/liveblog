@@ -30,6 +30,14 @@ x-liveblog-env: &liveblog-env
   C_FORCE_ROOT: "true"
   # Public Iframely key (MD5); editor uses key= on iframe.ly/api/oembed
   IFRAMELY_KEY: ${IFRAMELY_KEY:-a5ee9a89addd13b7a2e3a48c23e74e8d}
+  MAIL_SERVER: ${MAIL_SERVER:-}
+  MAIL_PORT: ${MAIL_PORT:-}
+  MAIL_USE_TLS: ${MAIL_USE_TLS:-}
+  MAIL_USE_SSL: ${MAIL_USE_SSL:-}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM: ${MAIL_FROM:-}
+  MAIL_SUPPRESS_SEND: ${MAIL_SUPPRESS_SEND:-}
 
 services:
   redis:

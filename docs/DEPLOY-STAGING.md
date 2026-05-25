@@ -21,7 +21,7 @@ The script will:
 
 - Install Docker + Compose (optional, `INSTALL_DOCKER=true`)
 - Clone or `git pull` into `INSTALL_DIR` (default `/opt/liveblog`)
-- Write `.env` with your URLs and keys
+- Write `.env` with your URLs, keys, and SMTP (`MAIL_*` — Mandrill by default in CONFIG)
 - Run `docker compose up -d --build`
 
 **Do not commit** your filled script — add only the `.example` to git. `scripts/deploy-liveblog-staging.sh` is gitignored.

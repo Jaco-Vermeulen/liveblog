@@ -1,0 +1,432 @@
+{
+
+    "label": "Nuwe Maroela Media",
+
+    "name": "nuwe-maroela",
+
+    "version": "1.0.0",
+
+    "asyncTheme": true,
+
+    "seoTheme": true,
+
+    "extends": "default",
+
+    "author": "Maroela Media",
+
+    "license": "AGPL-3.0",
+
+    "devStyles": ["dist/nuwe-maroela.css"],
+
+    "devScripts": [],
+
+    "styles": ["dist/nuwe-maroela.css"],
+
+    "scripts": [],
+
+    "settings": {
+
+        "language": "af",
+
+        "showLiveblogLogo": false,
+
+        "showTitle": true,
+
+        "showDescription": false,
+
+        "showImage": false,
+
+        "hidePostOrder": false,
+
+        "hasHighlights": false,
+
+        "canComment": false,
+
+        "showTagsDropdown": true,
+
+        "datetimeFormat": "D MMM YYYY HH:mm",
+
+        "showRelativeDate": true,
+
+        "showUpdateDatetime": false,
+
+        "showAuthor": true,
+
+        "showAuthorAvatar": true,
+
+        "showSharingButtons": true,
+
+        "showPermalinkButton": true,
+
+        "postsPerPage": 25,
+
+        "postOrder": "editorial",
+
+        "autoApplyUpdates": true,
+
+        "stickyPosition": "bottom"
+
+    },
+
+    "options": [
+
+        {
+
+            "name": "language",
+
+            "label": "Taal / Theme language",
+
+            "type": "select",
+
+            "options": [
+
+                {"value": "af", "label": "Afrikaans"},
+
+                {"value": "en", "label": "English"}
+
+            ],
+
+            "default": "af"
+
+        },
+
+        {
+
+            "name": "showLiveblogLogo",
+
+            "label": "Show Liveblog logo",
+
+            "type": "checkbox",
+
+            "default": false,
+
+            "help": "Turn off for Maroela-branded embeds (recommended)."
+
+        },
+
+        {
+
+            "name": "showTitle",
+
+            "label": "Show the blog title",
+
+            "type": "checkbox",
+
+            "default": true
+
+        },
+
+        {
+
+            "name": "showDescription",
+
+            "label": "Show the blog description",
+
+            "type": "checkbox",
+
+            "default": false
+
+        },
+
+        {
+
+            "name": "hasHighlights",
+
+            "label": "Show highlight button",
+
+            "type": "checkbox",
+
+            "default": false,
+
+            "help": "Lets readers filter the timeline to highlighted posts only."
+
+        },
+
+        {
+
+            "name": "postsPerPage",
+
+            "label": "Posts per page",
+
+            "type": "number",
+
+            "default": 25
+
+        },
+
+        {
+
+            "name": "postOrder",
+
+            "label": "Default post order",
+
+            "type": "select",
+
+            "options": [
+
+                {"value": "editorial", "label": "Editorial"},
+
+                {"value": "newest_first", "label": "Newest first"},
+
+                {"value": "oldest_first", "label": "Oldest first"}
+
+            ],
+
+            "default": "editorial"
+
+        },
+
+        {
+
+            "name": "datetimeFormat",
+
+            "label": "Pick a format or add a custom one",
+
+            "type": "datetimeformat",
+
+            "default": "D MMM YYYY HH:mm",
+
+            "help": "Afrikaans-friendly date format (moment.js)."
+
+        }
+
+    ],
+
+    "supportStylesSettings": true,
+
+    "styleOptions": [
+
+        {
+
+            "label": "General",
+
+            "name": "general",
+
+            "cssSelector": "div.lb-timeline",
+
+            "columns": 3,
+
+            "options": [
+
+                {
+
+                    "label": "Background",
+
+                    "property": "background",
+
+                    "type": "colorpicker",
+
+                    "default": "#f5efe7"
+
+                },
+
+                {
+
+                    "label": "Link Color",
+
+                    "property": "color",
+
+                    "type": "colorpicker",
+
+                    "tagName": "a",
+
+                    "default": "#c45712"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            "label": "Buttons",
+
+            "name": "lb-buttons",
+
+            "cssSelector": "div.lb-timeline .lb-button",
+
+            "columns": 4,
+
+            "options": [
+
+                {
+
+                    "label": "Background Color",
+
+                    "property": "background-color",
+
+                    "type": "colorpicker",
+
+                    "default": "#c45712"
+
+                },
+
+                {
+
+                    "label": "Font Color",
+
+                    "property": "color",
+
+                    "type": "colorpicker",
+
+                    "default": "#ffffff"
+
+                }
+
+            ]
+
+        }
+
+    ],
+
+    "i18n": {
+
+        "af": {
+
+            "Highlights": "Hoogtepunte",
+
+            "Comment by": "Kommentaar deur",
+
+            "Powered by": "Aangedryf deur",
+
+            "Advertisement": "Advertensie",
+
+            "Cancel": "Kanselleer",
+
+            "Comment": "Kommentaar",
+
+            "Comment *": "Kommentaar *",
+
+            "Comment should be maximum 300 characters in length": "Kommentaar mag hoogstens 300 karakters lank wees",
+
+            "Editorial": "Redaksioneel",
+
+            "Load more posts": "Laai meer plasings",
+
+            "Loading": "Laai tans",
+
+            "Name *": "Naam *",
+
+            "Name should be maximum 30 characters in length": "Naam mag hoogstens 30 karakters lank wees",
+
+            "Newest first": "Nuutste eerste",
+
+            "No posts for now": "Geen plasings op die oomblik nie",
+
+            "Oldest first": "Oudste eerste",
+
+            "One pinned post": "Een vasgespelde plasing",
+
+            "pinned posts": "vasgespelde plasings",
+
+            "Please fill in your Comment": "Vul asseblief jou kommentaar in",
+
+            "Please fill in your Name": "Vul asseblief jou naam in",
+
+            "Post a comment": "Lewer kommentaar",
+
+            "See one new update": "Sien een nuwe opdatering",
+
+            "See new updates": "Sien nuwe opdaterings",
+
+            "See latest updates": "Sien jongste opdaterings",
+
+            " new updates": " nuwe opdaterings",
+
+            "Send": "Stuur",
+
+            "Show all posts": "Wys alle plasings",
+
+            "Show highlighted post only": "Wys slegs hoogtepunte",
+
+            "Sort by:": "Sorteer volgens:",
+
+            "Updated": "Opgedateer",
+
+            "Your comment is being reviewed and will be published as soon as it's approved": "Jou kommentaar word hersien en sal gepubliseer word sodra dit goedgekeur is",
+
+            "credit:": "krediet:",
+
+            "Activate": "Aktiveer",
+
+            "Filter": "Filter"
+
+        },
+
+        "en": {
+
+            "Highlights": "Highlights",
+
+            "Comment by": "Comment by",
+
+            "Powered by": "Powered by",
+
+            "Advertisement": "Advertisement",
+
+            "Cancel": "Cancel",
+
+            "Comment": "Comment",
+
+            "Comment *": "Comment *",
+
+            "Comment should be maximum 300 characters in length": "Comment should be maximum 300 characters in length",
+
+            "Editorial": "Editorial",
+
+            "Load more posts": "Load more posts",
+
+            "Loading": "Loading",
+
+            "Name *": "Name *",
+
+            "Name should be maximum 30 characters in length": "Name should be maximum 30 characters in length",
+
+            "Newest first": "Newest first",
+
+            "No posts for now": "No posts for now",
+
+            "Oldest first": "Oldest first",
+
+            "One pinned post": "One pinned post",
+
+            "pinned posts": "pinned posts",
+
+            "Please fill in your Comment": "Please fill in your Comment",
+
+            "Please fill in your Name": "Please fill in your Name",
+
+            "Post a comment": "Post a comment",
+
+            "See one new update": "See one new update",
+
+            "See new updates": "See new updates",
+
+            "See latest updates": "See latest updates",
+
+            " new updates": " new updates",
+
+            "Send": "Send",
+
+            "Show all posts": "Show all posts",
+
+            "Show highlighted post only": "Show highlighted post only",
+
+            "Sort by:": "Sort by:",
+
+            "Updated": "Updated",
+
+            "Your comment is being reviewed and will be published as soon as it's approved": "Your comment is being reviewed and will be published as soon as it's approved",
+
+            "credit:": "credit:",
+
+            "Activate": "Activate",
+
+            "Filter": "Filter"
+
+        }
+
+    }
+
+}
+

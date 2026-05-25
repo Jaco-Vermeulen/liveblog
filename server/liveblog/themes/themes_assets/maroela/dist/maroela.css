@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap");
+.lb-timeline {
+  font-family: "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #1a1a1a;
+  max-width: 100%;
+}
+.lb-timeline a {
+  color: #c45c26;
+}
+.lb-timeline a:hover {
+  color: #9a4419;
+}
+.lb-timeline .header-bar {
+  border-bottom: 3px solid #c45c26;
+  padding-bottom: 0.5rem;
+}
+.lb-timeline .header-bar__highlight,
+.lb-timeline .lb-button,
+.lb-timeline .comment__button:not(.comment__button--grey) {
+  background-color: #c45c26 !important;
+  border-color: #c45c26 !important;
+  color: #ffffff !important;
+}
+.lb-timeline .header-bar__highlight:hover,
+.lb-timeline .lb-button:hover,
+.lb-timeline .comment__button:not(.comment__button--grey):hover {
+  background-color: #9a4419 !important;
+  border-color: #9a4419 !important;
+}
+.lb-timeline .lb-post.highlight {
+  border-left: 4px solid #c45c26;
+}
+.lb-timeline .lb-author__name,
+.lb-timeline .lb-post-date {
+  color: #5c5c5c;
+}
+.lb-timeline h1 {
+  font-weight: 700;
+  color: #1a1a1a;
+}

@@ -1,0 +1,1063 @@
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  Nuwe Maroela — Liveblog Embed Theme                                        ║
+// ║  Aligned with maroela_web2 design system (Lato · teal · warm cream)        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+@import (css) url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap");
+
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+:root {
+  --maroela-page-bg-light:   #f5efe7;
+  --mh-accent:               #c8503a;
+  --maroela-orange:          #c45712;
+  --maroela-orange-light:    #e66a2a;
+  --maroela-orange-dark:     #9c400a;
+  --maroela-teal:            #157578;
+  --maroela-teal-dark:       #0d5254;
+  --maroela-teal-light:      #e6f2f2;
+  --maroela-text:            #1c1917;
+  --maroela-text-muted:      #57534e;
+  --maroela-meta:            #78716c;
+  --maroela-card-bg:         #ffffff;
+  --maroela-card-border:     #e8e1d6;
+  --maroela-card-shadow:     0 1px 3px rgba(56, 25, 6, 0.07), 0 1px 2px rgba(56, 25, 6, 0.04);
+  --maroela-card-shadow-lg:  0 8px 24px rgba(56, 25, 6, 0.10), 0 2px 6px rgba(56, 25, 6, 0.06);
+  --maroela-radius:          0.625rem;
+  --maroela-font:            "Lato", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --maroela-toolbar-h:       2.875rem;
+}
+
+// ─── Base ─────────────────────────────────────────────────────────────────────
+html.lb-wrapHtml,
+body.lb-wrapBody {
+  background-color: var(--maroela-page-bg-light) !important;
+  font-family: var(--maroela-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ─── Animations ───────────────────────────────────────────────────────────────
+@keyframes mm-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 117, 120, 0.45); }
+  50%       { box-shadow: 0 0 0 6px rgba(21, 117, 120, 0); }
+}
+
+// ─── Blog Title (Cinematic Heading) ───────────────────────────────────────────
+.maroela-heading-cinema {
+  --mh-accent: #c8503a;
+  font-weight: 900;
+  font-family: var(--maroela-font);
+  letter-spacing: -0.03em;
+  color: var(--maroela-text);
+  margin: 0;
+  display: block;
+  max-width: 100%;
+}
+
+.maroela-heading-cinema::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  max-width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 0.4em;
+  background: var(--mh-accent);
+}
+
+.maroela-heading-cinema--lead {
+  font-size: clamp(1.5rem, 0.8rem + 2.5vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.maroela-heading-cinema-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-top: 0.25rem;
+}
+
+// ─── Timeline Shell ───────────────────────────────────────────────────────────
+.lb-timeline {
+  font-family: var(--maroela-font);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--maroela-text);
+  max-width: ~"min(52rem, 96vw)";
+  margin: 0 auto;
+  padding: 1.25rem 0 8rem;
+  background: transparent !important;
+
+  a {
+    color: var(--maroela-orange);
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--maroela-orange-dark);
+      text-decoration: underline;
+    }
+  }
+
+  .maroela-heading-cinema-stack h1,
+  h1 {
+    font-weight: 900;
+    color: var(--maroela-text);
+  }
+
+  .description {
+    color: var(--maroela-text-muted);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--maroela-card-border);
+  }
+
+  // ─── Editorial Toolbar ──────────────────────────────────────────────────────
+  .header-bar {
+    display: flex !important;
+    align-items: stretch;
+    width: 100%;
+    margin: 0 0 1.25rem !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: var(--maroela-radius);
+    background: linear-gradient(135deg, var(--maroela-teal-dark) 0%, var(--maroela-teal) 100%) !important;
+    box-shadow: 0 2px 8px rgba(13, 82, 84, 0.28), 0 1px 2px rgba(0, 0, 0, 0.08);
+    min-height: var(--maroela-toolbar-h);
+    overflow: hidden;
+    flex-wrap: nowrap;
+  }
+
+  .sorting-bar {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .sorting-bar__title {
+    display: none;
+  }
+
+  .sorting-bar__orders {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    float: none;
+    width: 100%;
+  }
+
+  .sorting-bar__order {
+    float: none;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+
+    button {
+      font-family: var(--maroela-font);
+      width: 100%;
+      height: 100%;
+      padding: 0 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      white-space: nowrap;
+
+      &:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.09);
+        border-bottom-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    &--active button {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.9) !important;
+    }
+  }
+
+  .sorting-bar__dropdownBtn {
+    display: none;
+    font-family: var(--maroela-font);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: transparent;
+    border: none;
+    padding: 0 1.25rem;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    text-align: left;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    &::after {
+      content: "▾";
+      font-size: 0.75rem;
+      margin-left: auto;
+      opacity: 0.7;
+    }
+  }
+
+  .sorting-bar__dropdownContent {
+    background: var(--maroela-card-bg);
+    border: 1px solid var(--maroela-card-border);
+    border-radius: var(--maroela-radius);
+    box-shadow: var(--maroela-card-shadow-lg);
+    padding: 0.25rem 0;
+    z-index: 20;
+
+    .sorting-bar__order {
+      button {
+        color: var(--maroela-text-muted);
+        font-size: 0.875rem;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        padding: 0.75rem 1.25rem;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        text-align: left;
+
+        &:hover {
+          background: #f5f0e8;
+          color: var(--maroela-text);
+          border-left-color: transparent;
+          border-bottom: none;
+        }
+      }
+
+      &--active button {
+        color: var(--maroela-teal) !important;
+        border-left-color: var(--maroela-teal) !important;
+        background: var(--maroela-teal-light) !important;
+        border-bottom: none !important;
+        border-bottom-color: transparent !important;
+      }
+    }
+  }
+
+  .tags-filter-bar {
+    display: flex;
+    align-items: stretch;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .tags-filter-bar__orders {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .tags-filter-bar__dropdownBtn {
+    font-family: var(--maroela-font);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 100%;
+    transition: color 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    &::after {
+      content: "▾";
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+  }
+
+  .tags-filter-bar__dropdownContent {
+    background: var(--maroela-card-bg);
+    border: 1px solid var(--maroela-card-border);
+    border-radius: var(--maroela-radius);
+    box-shadow: var(--maroela-card-shadow-lg);
+    padding: 0.25rem 0;
+
+    .tags-filter-bar__order {
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.125rem;
+        font-size: 0.875rem;
+        color: var(--maroela-text);
+        cursor: pointer;
+        transition: background 0.1s ease;
+
+        &:hover { background: #f5f0e8; }
+
+        input[type="checkbox"] {
+          accent-color: var(--maroela-teal);
+          width: 0.9rem;
+          height: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .header-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .header-bar__highlight,
+  .header-bar__comment {
+    font-family: var(--maroela-font);
+    font-size: 0.725rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 0.3rem 0.875rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.38);
+    }
+  }
+
+  .header-bar__logo {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    height: 100%;
+    text-decoration: none !important;
+
+    img { height: 1rem; opacity: 0.65; }
+  }
+
+  // ─── Post List ──────────────────────────────────────────────────────────────
+  .lb-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  // ─── Post Card ──────────────────────────────────────────────────────────────
+  .lb-post,
+  .lb-sticky-top-post {
+    position: relative;
+    margin: 0 !important;
+    padding: 1.125rem 1.25rem 1rem 1.375rem !important;
+    background: var(--maroela-card-bg);
+    border: 1px solid var(--maroela-card-border);
+    border-left: 4px solid var(--maroela-teal);
+    border-radius: var(--maroela-radius);
+    box-shadow: var(--maroela-card-shadow);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    animation: mm-slide-up 0.3s ease both;
+    overflow: visible;
+
+    &:hover {
+      box-shadow: var(--maroela-card-shadow-lg);
+      transform: translateY(-1px);
+    }
+
+    &:before,
+    &:after {
+      display: none !important;
+    }
+  }
+
+  // Per-type left accent colours
+  .lb-post {
+    &.twitter   { border-left-color: #000000; }
+    &.facebook  { border-left-color: #1877f2; }
+    &.instagram { border-left-color: #c13584; }
+    &.youtube   { border-left-color: #ff0000; }
+    &.text      { border-left-color: var(--maroela-teal); }
+    &.image     { border-left-color: var(--maroela-teal); }
+    &.video     { border-left-color: var(--maroela-teal); }
+    &.embed     { border-left-color: var(--maroela-meta); }
+    &.quote     { border-left-color: var(--maroela-orange); }
+    &.comment   { border-left-color: #7c3aed; }
+  }
+
+  .lb-post.lb-post--highlighted,
+  .lb-post.highlight {
+    border-left-color: var(--maroela-orange) !important;
+    background: linear-gradient(100deg, rgba(196, 87, 18, 0.04) 0%, var(--maroela-card-bg) 18%);
+  }
+
+  .lb-sticky-top-post {
+    border-left-color: var(--maroela-orange) !important;
+    background: linear-gradient(100deg, rgba(196, 87, 18, 0.035) 0%, var(--maroela-card-bg) 14%);
+  }
+
+  // ─── Post Header ────────────────────────────────────────────────────────────
+  .lb-post-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0;
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--maroela-card-border);
+    min-height: 1.875rem;
+  }
+
+  // Platform type badge
+  .lb-type {
+    flex-shrink: 0;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 50%;
+    background-color: var(--maroela-teal);
+    box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(21, 117, 120, 0.18);
+    display: block;
+
+    &.lb-type--twitter   { background-color: #000000; box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(0, 0, 0, 0.12); }
+    &.lb-type--facebook  { background-color: #1877f2; box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(24, 119, 242, 0.18); }
+    &.lb-type--instagram { background-color: #c13584; box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(193, 53, 132, 0.18); }
+    &.lb-type--youtube   { background-color: #ff0000; box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(255, 0, 0, 0.14); }
+    &.lb-type--quote     { background-color: var(--maroela-orange); box-shadow: 0 0 0 2px var(--maroela-card-bg), 0 0 0 3.5px rgba(196, 87, 18, 0.18); }
+    &.lb-type--text      { background-color: var(--maroela-teal); }
+  }
+
+  // Timestamp + icons row
+  .lb-post-date-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+
+    .pin-icon,
+    .highlight-icon {
+      width: 0.9375rem;
+      height: 0.9375rem;
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
+  }
+
+  // Timestamp chip
+  .lb-post-date,
+  .lb-post-date__fulldate {
+    font-family: var(--maroela-font);
+    font-size: 0.7188rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--maroela-meta);
+    background: #f0ece5;
+    border-radius: 999px;
+    padding: 0.175rem 0.625rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    line-height: 1.5;
+    border: none;
+  }
+
+  .lb-post-date__fulldate {
+    position: static;
+    display: inline-flex;
+    margin: 0;
+    width: auto;
+  }
+
+  .lb-advertisement {
+    font-size: 0.6563rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--maroela-meta);
+    background: #f0ece5;
+    border-radius: 999px;
+    padding: 0.175rem 0.625rem;
+  }
+
+  // Author info — pushed right
+  .lb-author {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .lb-author__name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--maroela-text-muted);
+    white-space: nowrap;
+  }
+
+  .lb-author__avatar {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    border-radius: 50%;
+    border: 2px solid var(--maroela-card-border);
+    object-fit: cover;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  // ─── Post Body ──────────────────────────────────────────────────────────────
+  .items-container {
+    margin-left: 0 !important;
+  }
+
+  .lb-item {
+    margin-left: 0 !important;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--maroela-text);
+
+    article {
+      font-size: inherit;
+      line-height: inherit;
+
+      p {
+        margin-bottom: 0.9rem;
+        &:last-child { margin-bottom: 0; }
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--maroela-font);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        margin-top: 1.25em;
+        margin-bottom: 0.4em;
+        color: var(--maroela-text);
+      }
+
+      h2 { font-size: 1.25rem; }
+      h3 { font-size: 1.125rem; }
+
+      blockquote {
+        margin: 1.125rem 0;
+        padding: 0.875rem 1.125rem;
+        border-left: 4px solid var(--maroela-orange);
+        background: linear-gradient(90deg, rgba(196, 87, 18, 0.04) 0%, #faf8f5 100%);
+        color: var(--maroela-text-muted);
+        font-style: italic;
+        border-radius: 0 var(--maroela-radius) var(--maroela-radius) 0;
+        font-size: 1.0625rem;
+        line-height: 1.65;
+      }
+
+      strong { font-weight: 700; color: var(--maroela-text); }
+
+      a {
+        color: var(--maroela-orange);
+        text-decoration-color: rgba(196, 87, 18, 0.3);
+        text-underline-offset: 2px;
+
+        &:hover {
+          color: var(--maroela-orange-dark);
+          text-decoration-color: var(--maroela-orange-dark);
+        }
+      }
+    }
+
+    // Images
+    figure {
+      margin: 0.75rem 0 0;
+
+      img {
+        width: 100%;
+        height: auto;
+        border-radius: ~"calc(var(--maroela-radius) - 2px)";
+        display: block;
+        box-shadow: 0 2px 8px rgba(56, 25, 6, 0.1);
+      }
+
+      figcaption {
+        font-size: 0.8125rem;
+        color: var(--maroela-meta);
+        margin-top: 0.35rem;
+        line-height: 1.45;
+        font-style: italic;
+      }
+    }
+
+    figure img,
+    img {
+      border-radius: ~"calc(var(--maroela-radius) - 2px)";
+    }
+
+    // Social / embed wrapper
+    &.embed {
+      margin-top: 0.25rem;
+      border-radius: var(--maroela-radius);
+      overflow: hidden;
+    }
+  }
+
+  // ─── Post Footer ────────────────────────────────────────────────────────────
+  .lb-post-bottom {
+    margin-left: 0 !important;
+    margin-top: 0.875rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid var(--maroela-card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+  }
+
+  .lb-post-updated {
+    font-size: 0.75rem;
+    color: var(--maroela-meta);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    span { color: var(--maroela-teal); font-weight: 700; font-style: normal; }
+  }
+
+  // ─── Sticky Section ─────────────────────────────────────────────────────────
+  .timeline-top .lb-sticky-top-post {
+    margin-bottom: 0.875rem !important;
+  }
+
+  .timeline-top .items-container,
+  .timeline-top .lb-item,
+  .timeline-top .lb-post-bottom {
+    margin-left: 0 !important;
+  }
+
+  // ─── New Updates Notification ───────────────────────────────────────────────
+  .new-updates {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    background: linear-gradient(90deg, var(--maroela-teal-dark) 0%, var(--maroela-teal) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--maroela-radius);
+    font-family: var(--maroela-font);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 0 0 0.75rem !important;
+    padding: 0.875rem 1.5rem;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(13, 82, 84, 0.28);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    animation: mm-pulse 2.4s ease-in-out infinite;
+
+    &::before {
+      content: "↑";
+      font-size: 1.0625rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(13, 82, 84, 0.36);
+      transform: translateY(-1px);
+      animation: none;
+    }
+
+    > div { display: contents; }
+  }
+
+  // ─── Empty State ─────────────────────────────────────────────────────────────
+  .empty-message {
+    background: var(--maroela-card-bg);
+    border: 2px dashed var(--maroela-card-border);
+    border-radius: var(--maroela-radius);
+    color: var(--maroela-meta);
+    margin-left: 0 !important;
+    padding: 3rem 2rem;
+    text-align: center;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  // ─── Load More ───────────────────────────────────────────────────────────────
+  .load-more-posts {
+    position: relative;
+    left: auto;
+    margin: 1.75rem auto 0;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: fit-content;
+    min-width: 13rem;
+    padding: 0.75rem 2.25rem !important;
+    font-family: var(--maroela-font) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.07em !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
+    color: var(--maroela-teal) !important;
+    border: 2px solid var(--maroela-teal) !important;
+    border-radius: 999px !important;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      background: var(--maroela-teal) !important;
+      color: #fff !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 14px rgba(21, 117, 120, 0.3) !important;
+    }
+
+    &:active { transform: translateY(0) !important; }
+  }
+
+  // ─── General Buttons ─────────────────────────────────────────────────────────
+  .lb-button {
+    background-color: var(--maroela-orange) !important;
+    border-color: var(--maroela-orange) !important;
+    color: #fff !important;
+    border-radius: 999px !important;
+    font-family: var(--maroela-font) !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
+    letter-spacing: 0.02em !important;
+    padding: 0.65rem 1.75rem !important;
+    border-width: 0 !important;
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease !important;
+
+    &:hover {
+      background-color: var(--maroela-orange-dark) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(196, 87, 18, 0.32) !important;
+    }
+
+    &:active { transform: translateY(0) !important; }
+  }
+
+  // ─── Comment Form ────────────────────────────────────────────────────────────
+  form.comment {
+    border-radius: var(--maroela-radius);
+    border: 1px solid var(--maroela-card-border);
+    box-shadow: var(--maroela-card-shadow);
+    font-family: var(--maroela-font);
+    overflow: hidden;
+    background: var(--maroela-card-bg);
+  }
+
+  form.comment input,
+  form.comment textarea {
+    font-family: var(--maroela-font);
+    border-radius: ~"calc(var(--maroela-radius) - 2px)";
+    border: 1px solid var(--maroela-card-border);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: var(--maroela-teal);
+      box-shadow: 0 0 0 3px rgba(21, 117, 120, 0.1);
+      outline: none;
+    }
+  }
+
+  .comment__button:not(.comment__button--grey) {
+    background-color: var(--maroela-orange) !important;
+    border-color: var(--maroela-orange) !important;
+    color: #fff !important;
+    border-radius: var(--maroela-radius) !important;
+    font-family: var(--maroela-font) !important;
+    font-weight: 700 !important;
+    transition: background-color 0.15s ease !important;
+
+    &:hover {
+      background-color: var(--maroela-orange-dark) !important;
+      border-color: var(--maroela-orange-dark) !important;
+    }
+  }
+
+  // ─── Responsive: Mobile ──────────────────────────────────────────────────────
+  @media screen and (max-width: 580px) {
+    padding: 0.75rem 0 6rem;
+
+    .sorting-bar__orders {
+      display: none;
+    }
+
+    .sorting-bar__dropdownBtn {
+      display: flex !important;
+      align-items: center;
+      height: var(--maroela-toolbar-h);
+    }
+
+    .lb-post,
+    .lb-sticky-top-post {
+      padding: 1rem 1rem 0.875rem 1.25rem !important;
+    }
+
+    .lb-type {
+      width: 1.625rem;
+      height: 1.625rem;
+    }
+
+    .lb-post-header {
+      gap: 0.5rem;
+    }
+
+    .load-more-posts {
+      min-width: 11rem;
+    }
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  Dark Mode                                                                  ║
+// ║  Three layers, highest specificity wins:                                    ║
+// ║  1. @media prefers-color-scheme: dark  — OS/browser automatic              ║
+// ║  2. html[data-color-scheme="dark"]     — forced by URL param or postMessage ║
+// ║  3. html[data-color-scheme="light"]    — force-light override               ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ─── Dark palette mixin ───────────────────────────────────────────────────────
+// Reused inside both the media query and the attribute selector so there is
+// a single source of truth for every dark-mode token value.
+.mm-dark-vars() {
+  --maroela-page-bg-light:  #111210;
+  --maroela-card-bg:        #1e1b17;
+  --maroela-card-border:    #302c25;
+  --maroela-card-shadow:    0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --maroela-card-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --maroela-text:           #f0ebe2;
+  --maroela-text-muted:     #c9c2b8;
+  --maroela-meta:           #9c948c;
+  --maroela-teal-light:     #0e2d2f;
+  // Keep --maroela-teal, --maroela-orange etc. — they're brand-safe on dark bg
+}
+
+// ─── Dark surface overrides (shared ruleset) ──────────────────────────────────
+// Applied when dark-mode vars are active, regardless of which trigger fired.
+// Target the nuwe-maroela timeline shell so the specificity bump is narrow.
+.mm-dark-surfaces() {
+  .lb-timeline {
+    // Override the inline <style> injected by generate_theme_styles()
+    // (it hardcodes `background: #f5efe7` without !important, so (0,1,2) beats (0,1,1))
+    background: var(--maroela-page-bg-light) !important;
+    color: var(--maroela-text) !important;
+
+    // Post and sticky cards
+    .lb-post,
+    .lb-sticky-top-post {
+      background: var(--maroela-card-bg) !important;
+      border-color: var(--maroela-card-border) !important;
+      color: var(--maroela-text) !important;
+
+      .lb-item p,
+      .lb-item h1,
+      .lb-item h2,
+      .lb-item h3,
+      .lb-item h4,
+      .lb-item h5,
+      .lb-item h6 {
+        color: var(--maroela-text) !important;
+      }
+    }
+
+    // Timestamp + advertisement chips
+    .lb-post-date,
+    .lb-post-date__fulldate,
+    .lb-advertisement {
+      background: #2a2620;
+      color: var(--maroela-meta);
+    }
+
+    // Sorting dropdown panel
+    .sorting-bar__dropdownContent {
+      background: #1e1b17;
+      border-color: var(--maroela-card-border);
+
+      .sorting-bar__order button {
+        color: var(--maroela-text-muted);
+        &:hover { background: #272420; }
+      }
+
+      .sorting-bar__order--active button {
+        color: #5fc8cc !important;
+        border-left-color: var(--maroela-teal) !important;
+        background: #0e2d2f !important;
+      }
+    }
+
+    // Tags filter dropdown panel
+    .tags-filter-bar__dropdownContent {
+      background: #1e1b17;
+      border-color: var(--maroela-card-border);
+
+      .tags-filter-bar__order label {
+        color: var(--maroela-text-muted);
+        &:hover { background: #272420; }
+      }
+    }
+
+    // Blockquote inside posts
+    .lb-item article blockquote {
+      background: linear-gradient(90deg, rgba(196, 87, 18, 0.09) 0%, #1e1b17 100%);
+      color: var(--maroela-text-muted);
+    }
+
+    // Embed item wrapper (social media)
+    .lb-item.embed {
+      background: #17150f;
+      border-color: var(--maroela-card-border);
+    }
+
+    // Comment form
+    form.comment {
+      background: #1e1b17;
+      border-color: var(--maroela-card-border);
+    }
+
+    form.comment input,
+    form.comment textarea {
+      background: #15130f;
+      color: var(--maroela-text);
+      border-color: var(--maroela-card-border);
+
+      &::placeholder { color: var(--maroela-meta); }
+
+      &:focus {
+        border-color: var(--maroela-teal);
+        box-shadow: 0 0 0 3px rgba(21, 117, 120, 0.18);
+      }
+    }
+
+    // Load-more outline button: teal turns lighter for contrast
+    .load-more-posts {
+      color: #5fc8cc !important;
+      border-color: #5fc8cc !important;
+
+      &:hover {
+        background: var(--maroela-teal) !important;
+        color: #fff !important;
+        border-color: var(--maroela-teal) !important;
+      }
+    }
+
+    // Empty state
+    .empty-message {
+      background: #1e1b17;
+      border-color: #302c25;
+      color: var(--maroela-meta);
+    }
+
+    // Description separator
+    .description {
+      border-bottom-color: var(--maroela-card-border);
+    }
+
+    // Post header separator
+    .lb-post-header {
+      border-bottom-color: var(--maroela-card-border);
+    }
+
+    // Post footer separator
+    .lb-post-bottom {
+      border-top-color: var(--maroela-card-border);
+    }
+
+    // Author avatar ring
+    .lb-author__avatar {
+      border-color: var(--maroela-card-border);
+    }
+
+    // Platform badge rings (keep ring visible on dark bg)
+    .lb-type {
+      box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(21, 117, 120, 0.3);
+      &.lb-type--twitter   { box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(255,255,255,0.1); }
+      &.lb-type--facebook  { box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(24,119,242,0.25); }
+      &.lb-type--instagram { box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(193,53,132,0.25); }
+      &.lb-type--youtube   { box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(255,0,0,0.2); }
+      &.lb-type--quote     { box-shadow: 0 0 0 2px #1e1b17, 0 0 0 3.5px rgba(196,87,18,0.25); }
+    }
+
+    // Heading underline accent — keep brand colour
+    .maroela-heading-cinema::after {
+      background: var(--mh-accent);
+    }
+  }
+
+  // Outer html/body background
+  html.lb-wrapHtml,
+  body.lb-wrapBody {
+    background-color: #111210 !important;
+  }
+}
+
+// ─── Layer 1: OS / browser dark mode ─────────────────────────────────────────
+@media (prefers-color-scheme: dark) {
+  :root { .mm-dark-vars(); }
+
+  html.lb-wrapHtml,
+  body.lb-wrapBody {
+    background-color: var(--maroela-page-bg-light) !important;
+  }
+
+  .mm-dark-surfaces();
+}
+
+// ─── Layer 2: Explicit dark (URL param / postMessage) ────────────────────────
+html[data-color-scheme="dark"] {
+  .mm-dark-vars();
+  .mm-dark-surfaces();
+}
+
+// ─── Layer 3: Force light (URL param / postMessage — overrides OS dark) ──────
+@media (prefers-color-scheme: dark) {
+  html[data-color-scheme="light"] {
+    --maroela-page-bg-light:  #f5efe7;
+    --maroela-card-bg:        #ffffff;
+    --maroela-card-border:    #e8e1d6;
+    --maroela-card-shadow:    0 1px 3px rgba(56, 25, 6, 0.07), 0 1px 2px rgba(56, 25, 6, 0.04);
+    --maroela-card-shadow-lg: 0 8px 24px rgba(56, 25, 6, 0.10), 0 2px 6px rgba(56, 25, 6, 0.06);
+    --maroela-text:           #1c1917;
+    --maroela-text-muted:     #57534e;
+    --maroela-meta:           #78716c;
+    --maroela-teal-light:     #e6f2f2;
+  }
+}

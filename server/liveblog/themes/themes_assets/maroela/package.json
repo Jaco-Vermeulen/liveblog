@@ -1,0 +1,12 @@
+{
+  "name": "liveblog-maroela-theme",
+  "version": "1.0.0",
+  "description": "Maroela Media branded Liveblog embed theme",
+  "private": true,
+  "scripts": {
+    "build:css": "lessc less/maroela.less dist/maroela.css"
+  },
+  "dependencies": {
+    "liveblog-default-theme": "file:../default"
+  }
+}

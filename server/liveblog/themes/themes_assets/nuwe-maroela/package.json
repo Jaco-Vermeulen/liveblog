@@ -1,0 +1,24 @@
+{
+
+  "name": "liveblog-nuwe-maroela-theme",
+
+  "version": "1.0.0",
+
+  "description": "Nuwe Maroela Media Liveblog embed theme (maroela_web2 design)",
+
+  "private": true,
+
+  "scripts": {
+
+    "build:css": "lessc less/nuwe-maroela.less dist/nuwe-maroela.css"
+
+  },
+
+  "dependencies": {
+
+    "liveblog-default-theme": "file:../default"
+
+  }
+
+}
+
