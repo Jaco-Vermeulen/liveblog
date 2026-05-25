@@ -45,6 +45,8 @@ Local admin: http://localhost:9000/ — hard-refresh after `liveblog-client` reb
 
 - `server/liveblog/themes/themes_assets/maroela/` — legacy theme (unchanged behaviour)
 - `server/liveblog/themes/themes_assets/nuwe-maroela/` — web2 modern theme
+
+**Deploy:** These folders must be **committed to git** (see `.gitignore` exceptions). `git clone` on staging only gets embed themes that are in the repo; admin SCSS branding is separate from embed theme assets.
 - `server/liveblog/system_themes.py` — registers both themes
 - `client/app/styles/sass/maroela-brand.scss` — admin brand (legacy maroela colours)
 - `docker/scripts/set-blog-nuwe-maroela.js` — assign test blog to nuwe-maroela

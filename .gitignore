@@ -78,6 +78,8 @@ server/liveblog/themes/themes_assets/*
 !server/liveblog/themes/themes_assets/default
 !server/liveblog/themes/themes_assets/amp
 !server/liveblog/themes/themes_assets/simple
+!server/liveblog/themes/themes_assets/maroela
+!server/liveblog/themes/themes_assets/nuwe-maroela
 
 # Vim stuff
 *.swo
