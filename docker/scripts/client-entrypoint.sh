@@ -18,5 +18,12 @@ if [[ "${SUPERDESK_CLIENT_URL:-}" == https://* && "${API_URL}" == http://* ]]; t
   exit 1
 fi
 
-echo "Starting Liveblog client on :9000 (API=${API_URL}, WS=${WS_URL})..."
+export SUPERDESK_URL="${API_URL}"
+export SUPERDESK_WS_URL="${WS_URL}"
+
+echo "Starting Liveblog client on :9000"
+echo "  SUPERDESK_CLIENT_URL=${SUPERDESK_CLIENT_URL:-not set}"
+echo "  SUPERDESK_URL=${API_URL}"
+echo "  SUPERDESK_WS_URL=${WS_URL}"
+
 exec grunt --force server --server="${API_URL}" --ws="${WS_URL}"

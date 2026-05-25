@@ -3,6 +3,36 @@
 const path = require('path');
 const makeConfig = require('../../webpack.config.js');
 
+/**
+ * webpack-dev-server/sockjs URL for the browser.
+ * Behind nginx (SUPERDESK_CLIENT_URL without :9000) we skip the WDS client entirely
+ * so the browser does not call https://domain:9000/sockjs-node/...
+ */
+function buildAppEntry(webpackConfig) {
+    const clientUrl = (process.env.SUPERDESK_CLIENT_URL || '').replace(/\/$/, '');
+
+    if (clientUrl && !/:9000(\/|$)/.test(clientUrl)) {
+        return webpackConfig.entry.app;
+    }
+
+    const devBase = clientUrl || 'http://localhost:9000';
+    return [`webpack-dev-server/client?${devBase}/`].concat(webpackConfig.entry.app);
+}
+
+function wdsPublicOption() {
+    const clientUrl = process.env.SUPERDESK_CLIENT_URL || '';
+    if (!clientUrl || /:9000/.test(clientUrl)) {
+        return 'localhost:9000';
+    }
+    try {
+        const u = new URL(clientUrl);
+        const port = u.port || (u.protocol === 'https:' ? '443' : '80');
+        return `${u.hostname}:${port}`;
+    } catch (e) {
+        return 'localhost:9000';
+    }
+}
+
 module.exports = function(grunt) {
     const webpackConfig = makeConfig(grunt);
 
@@ -11,7 +41,7 @@ module.exports = function(grunt) {
             webpack: webpackConfig,
             port: 9000,
             host: '0.0.0.0',
-            // Allow nginx/reverse proxy (e.g. maroelablog.jnb1.cloudlet.cloud)
+            public: wdsPublicOption(),
             disableHostCheck: true,
             contentBase: './dist',
             hot: false,
@@ -23,7 +53,7 @@ module.exports = function(grunt) {
             webpack: {
                 devtool: 'source-map',
                 entry: {
-                    app: ['webpack-dev-server/client?http://0.0.0.0:9000/'].concat(webpackConfig.entry.app)
+                    app: buildAppEntry(webpackConfig)
                 },
                 output: {
                     publicPath: ''

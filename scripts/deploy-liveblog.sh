@@ -354,6 +354,11 @@ EOF
     echo "SENTRY_DSN=${SENTRY_DSN}" >>"${f}"
   fi
   chmod 600 "${f}"
+  if grep -q "maroelablog.jnb1.cloudlet.cloud" "${f}" 2>/dev/null; then
+    log "WARN: .env still contains old host maroelablog — check PUBLIC_HOST"
+  fi
+  log "Verify: grep SUPERDESK ${f}"
+  grep "^SUPERDESK" "${f}" || true
 }
 
 port_is_up() {
