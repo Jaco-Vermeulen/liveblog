@@ -5,8 +5,7 @@ Fast path: push this repo to **your** Git remote, then on the Linux staging serv
 ## 1. Push the repo
 
 ```bash
-git remote add mine git@github.com:YOUR_ORG/liveblog.git   # once
-git push mine master
+git push origin master   # repo: https://github.com/Jaco-Vermeulen/liveblog
 ```
 
 ## 2. On the staging server

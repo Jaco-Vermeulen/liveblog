@@ -13,7 +13,7 @@ set -euo pipefail
 # ─── CONFIG — edit these ─────────────────────────────────────────────────────
 
 # Git (use HTTPS with token, or SSH URL if the server has a deploy key)
-REPO_URL="https://github.com/YOUR_ORG/liveblog.git"
+REPO_URL="https://github.com/Jaco-Vermeulen/liveblog.git"
 BRANCH="master"
 INSTALL_DIR="/opt/liveblog"
 
@@ -197,7 +197,7 @@ EOF
 }
 
 main() {
-  [[ -n "${REPO_URL}" && "${REPO_URL}" != *"YOUR_ORG"* ]] || die "Set REPO_URL in CONFIG"
+  [[ -n "${REPO_URL}" ]] || die "Set REPO_URL in CONFIG"
   [[ -n "${PUBLIC_HOST}" && "${PUBLIC_HOST}" != "staging.example.com" ]] || die "Set PUBLIC_HOST in CONFIG"
   install_docker
   build_public_urls
