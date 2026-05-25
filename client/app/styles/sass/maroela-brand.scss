@@ -1,0 +1,25 @@
+// Maroela Media — client portal design system (maroela_web2)
+
+$maroela-page-bg: #f5efe7;
+$maroela-orange: #c45712;
+$maroela-orange-dark: #a0450e;
+$maroela-teal: #157578;
+$maroela-teal-dark: #0d4f52;
+$maroela-accent: #c8503a;
+$maroela-text: #1c1917;
+$maroela-text-muted: #57534e;
+$maroela-meta: #78716c;
+$maroela-card-bg: #ffffff;
+$maroela-card-border: #e2dcd2;
+$maroela-beige2: #f0e9df;
+$maroela-font: "Lato", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+$maroela-radius: 0.5rem;
+$maroela-radius-sm: 0.375rem;
+$maroela-card-shadow: 0 4px 6px -1px rgba(56, 25, 6, 0.08), 0 2px 4px -2px rgba(56, 25, 6, 0.06);
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");
+
+@import "maroela-nav";
+@import "maroela-shell";
+@import "maroela-portal";
+@import "maroela-ui";

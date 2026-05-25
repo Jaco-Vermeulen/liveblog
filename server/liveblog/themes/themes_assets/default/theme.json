@@ -1,7 +1,7 @@
 {
     "label": "Liveblog 3 Default SEO Theme",
     "name": "default",
-    "version": "3.93.0",
+    "version": "3.93.2",
     "asyncTheme": true,
     "seoTheme": true,
     "author": "Sourcefabric <contact@sourcefabric.org>",
@@ -17,10 +17,10 @@
         "url" : "git@github.com:liveblog/liveblog-default-theme"
     },
     "license": "AGPL-3.0",
-    "devStyles": ["dist/default-000bd8bf1b.css"],
-    "devScripts": ["dist/default-d72507300a.js"],
-    "styles": ["dist/default-000bd8bf1b.css"],
-    "scripts": ["dist/default-d72507300a.js"],
+    "devStyles": ["dist/default-a9e961ac13.css"],
+    "devScripts": ["dist/default-0444b3fa5d.js"],
+    "styles": ["dist/default-a9e961ac13.css"],
+    "scripts": ["dist/default-0444b3fa5d.js"],
     "options": [
         {
             "name": "language",
@@ -78,6 +78,10 @@
                 {
                     "value": "pt",
                     "label": "Português"
+                },
+                {
+                    "value": "af",
+                    "label": "Afrikaans"
                 }
             ],
             "default": "en"
@@ -335,7 +339,7 @@
         },
         {
             "name": "twitterDNT",
-            "label": "Twitter - do not track",
+            "label": "X (Twitter) - do not track",
             "type": "checkbox",
             "help": "You can opt out of having information from your website used for personalization.",
             "default": false,
@@ -451,7 +455,7 @@
             "dependsOn": {
                 "enableGdprConsent": true
             },
-            "default": "twitter.com, facebook.com, instagram.com, youtube.com",
+            "default": "twitter.com, x.com, facebook.com, instagram.com, youtube.com",
             "help": "Domains separated by comma that will require user's consent to display embeds"
         }
     ],
@@ -1198,6 +1202,41 @@
             "credit:": "crédito:",
             "Activate": "Ativar",
             "Filter": "Filtrar"
+        }, "af": {
+            "Highlights": "Hoogtepunte",
+            "Comment by": "Kommentaar deur",
+            "Powered by": "Aangedryf deur",
+            "Advertisement": "Advertensie",
+            "Cancel": "Kanselleer",
+            "Comment": "Kommentaar",
+            "Comment *": "Kommentaar *",
+            "Comment should be maximum 300 characters in length": "Kommentaar mag hoogstens 300 karakters lank wees",
+            "Editorial": "Redaksioneel",
+            "Load more posts": "Laai meer plasings",
+            "Loading": "Laai tans",
+            "Name *": "Naam *",
+            "Name should be maximum 30 characters in length": "Naam mag hoogstens 30 karakters lank wees",
+            "Newest first": "Nuutste eerste",
+            "No posts for now": "Geen plasings op die oomblik nie",
+            "Oldest first": "Oudste eerste",
+            "One pinned post": "Een vasgespelde plasing",
+            "pinned posts": "vasgespelde plasings",
+            "Please fill in your Comment": "Vul asseblief jou kommentaar in",
+            "Please fill in your Name": "Vul asseblief jou naam in",
+            "Post a comment": "Lewer kommentaar",
+            "See one new update": "Sien een nuwe opdatering",
+            "See new updates": "Sien nuwe opdaterings",
+            "See latest updates": "Sien jongste opdaterings",
+            " new updates": " nuwe opdaterings",
+            "Send": "Stuur",
+            "Show all posts": "Wys alle plasings",
+            "Show highlighted post only": "Wys slegs hoogtepunte",
+            "Sort by:": "Sorteer volgens:",
+            "Updated": "Opgedateer",
+            "Your comment is being reviewed and will be published as soon as it's approved": "Jou kommentaar word hersien en sal gepubliseer word sodra dit goedgekeur is",
+            "credit:": "krediet:",
+            "Activate": "Aktiveer",
+            "Filter": "Filter"
         }
     }
 }

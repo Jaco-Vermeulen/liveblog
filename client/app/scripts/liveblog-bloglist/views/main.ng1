@@ -3,7 +3,7 @@
     Warning: You have used {{ bandwidthPercentage }}% of your allocated bandwidth. Please contact your admin.
 </p>
 
-<div class="subnav">
+<div class="subnav m-portal-chrome">
     <div class="subnav__sliding-toolbar" ng-show="bulkActions">
         <div class="sliding-toolbar__inner">
             <a class="btn" ng-click="bulkActionCancel()">Cancel</a>
@@ -38,23 +38,18 @@
     </div>
 </div>
 
-<section class="main-section bloglist">
-    <header ng-class="{'header-with-alert': bandwidthUsageAlert}">
-        <div sd-searchbar style="float: left"></div>
-        <div class="view-select pull-right">
-            <button title="{{ 'switch to grid view' | translate}}" ng-show="blogsView === 'list'" ng-click="setBlogsView('grid');">
-                <i class="icon-th"></i>
-            </button>
-            <button title="{{ 'switch to list view' | translate}}" ng-show="blogsView === 'grid'" ng-click="setBlogsView('list');">
-                <i class="icon-th-list"></i>
-            </button>
+<section class="main-section bloglist m-portal-page">
+    <header class="m-page-toolbar" ng-class="{'header-with-alert': bandwidthUsageAlert}">
+        <h1 class="m-page-toolbar__title" translate>Regstreekse blogs</h1>
+        <div sd-searchbar class="m-page-toolbar__search"></div>
+        <div class="view-select m-page-toolbar__actions">
             <button title="{{ 'blog list embed' | translate}}" ng-click="openEmbed()">
                 <i class="icon-link"></i>
             </button>
         </div>
-        <div sd-pagination data-items="blogs" data-limit="25" class="pull-right"></div>
+        <div sd-pagination data-items="blogs" data-limit="25" class="m-page-toolbar__pagination"></div>
     </header>
-    <div class="list-container">
+    <div class="list-container m-portal-content">
         <div ng-if="blogsLoading" class="loading-indicator" style="margin-top: 30px;"><span translate>Loading blogs...</span></div>
         <!-- empty state -->
         <div ng-if="blogs._meta.total === 0" class="empty-state">
@@ -89,54 +84,33 @@
                 </tr>
             </tbody>
         </table>
-        <!-- GRID VIEW -->
-        <ul class="card-list" ng-if="blogsView === 'grid'">
+        <!-- GRID VIEW — Maroela news-card layout -->
+        <ul class="card-list m-blog-grid" ng-if="blogsView === 'grid'">
             <li ng-repeat="blog in blogs._items track by blog._id"
                 title="{{ !isUserAllowedToOpenBlog(blog) ? requestAccessMessage: '' }}"
                 ng-click="isUserAllowedToOpenBlog(blog) ? edit(blog): openAccessRequest(blog)"
                 ng-class="{'can-access': isUserAllowedToOpenBlog(blog)}">
                 <sd-check ng-show="isUserAllowedToSelectblog(blog)" class="bulk-select" ng-model="blog.selected" ng-click="blogSelect($event, blog.selected)"></sd-check>
-                <figure class="media">
-                    <div ng-if="blog.picture_url" if-background-image="{{blog.picture_url}}"></div>
-                </figure>
-                <div class="content">
-                    <h3>{{ ::blog.title }}</h3>
-                    <div class="description">{{ ::blog.description | htmlToPlaintext }}</div>
-                </div>
-                <div class="footer">
-                    <dl>
-                        <dt>{{ ::'Blog owner' | translate }}:</dt>
-                        <dd>{{ ::blog.original_creator | username }}</dd>
-                        <dt ng-if="isAdmin()">{{ ::'Theme' | translate }}:</dt>
-                        <dd ng-if="isAdmin()">{{ ::blog.blog_preferences.theme }}</dd>
-                        <dt>{{ ::'Created' | translate}}:</dt>
-                        <dd><time datetime="{{ blog._created}}"><span ng-bind-html="blog._created | reldateAutoUpdate"></span></time></dd>
-                        <dt>{{ ::'No. of Posts' | translate }}:</dt>
-                        <dd>{{ ::blog.total_posts }}</dd>
-                        <dl>
-                        <dt> {{ :: 'Last updated' | translate }}:</dt>
-                        <dd><time datetime="{{ blog._updated}}"><span ng-bind-html="blog._updated | reldateAutoUpdate"></span></time></dd>
-                        <dt> {{ :: 'Last posted' | translate }}:</dt>
-                        <dd><time datetime="{{ blog.last_created_post._updated}}"><span ng-bind-html="blog.last_created_post._updated | reldateAutoUpdate"></span></time></dd>
-                        <dd ng-if="blog.posts_count == 0"> No posts yet</dd>
-                        <dt> {{ :: 'Syndication' | translate }}:</dt>
-                        <dd>
-                        <div ng-if="blog.syndication_enabled" class="state-label state-published state-label--no-float" translate>Syndicatable</div>
-                        <div ng-if="!blog.syndication_enabled" translate>OFF</div>
-                        </dd>
-                        <dt> {{ :: 'Market' | translate }}:</dt>
-                        <dd>
-                        <div ng-if="blog.market_enabled" class="state-label state-published state-label--no-float" translate>PUBLIC</div>
-                        <div ng-if="!blog.market_enabled" translate>PRIVATE</div>
-                        </dd>
-                        <dt ng-if="blog.blog_status == 'deleted'" class="text-red">
-                            {{ ::'To be deleted' | translate }}:
-                        </dt>
-                        <dd ng-if="blog.blog_status == 'deleted'" class="text-red">
-                            <span ng-html-bind="::blog.delete_not_before | reldateAutoUpdate"></span>
-                        </dd>
-                    </dl>
-                </div>
+                <article class="m-blog-card">
+                    <span class="m-blog-card__badge" ng-if="blog.blog_status == 'deleted'" translate>Verwyder</span>
+                    <div class="m-blog-card__media">
+                        <figure class="media">
+                            <div ng-if="blog.picture_url" if-background-image="{{blog.picture_url}}"></div>
+                        </figure>
+                    </div>
+                    <div class="m-blog-card__body">
+                        <h3 class="m-blog-card__title">{{ ::blog.title }}</h3>
+                        <p class="m-blog-card__dek">{{ ::blog.description | htmlToPlaintext }}</p>
+                        <dl class="m-blog-card__meta">
+                            <dt>{{ ::'Blog owner' | translate }}</dt>
+                            <dd>{{ ::blog.original_creator | username }}</dd>
+                            <dt>{{ ::'No. of Posts' | translate }}</dt>
+                            <dd>{{ ::blog.total_posts }}</dd>
+                            <dt>{{ ::'Last updated' | translate }}</dt>
+                            <dd><span ng-bind-html="blog._updated | reldateAutoUpdate"></span></dd>
+                        </dl>
+                    </div>
+                </article>
             </li>
         </ul>
     </div>

@@ -79,7 +79,7 @@
 
 .button-stack .navbtn.navbtn-active,
 .button-stack .navbtn.navbtn-active:hover {
-    background-color: #eaeaea;
+    background-color: #f0e9df;
 }
 
 .button-stack.active.right-stack {
@@ -150,12 +150,9 @@
     line-height: 1.4;
 }
 
-// Remove language option form users profile
-// https://dev.sourcefabric.org/browse/LBSD-2196
-.profile-info {
-	div.field__language {
-		display: none;
-	}
+// User profile language (Afrikaans / English for Maroela)
+.profile-info div.field__language {
+	display: block;
 }
 
 .btn--contact-support {

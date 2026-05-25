@@ -1,0 +1,499 @@
+// Maroela — dark mode overrides
+// Triggered by body[data-color-scheme="dark"] (JS) or OS prefers-color-scheme.
+// Same layered approach as nuwe-maroela embed theme.
+
+// ── Dark palette ──────────────────────────────────────────────────────────────
+$dk-page-bg:      #111210;
+$dk-surface:      #1a1714;
+$dk-card-bg:      #1e1b17;
+$dk-card-border:  #2e2b24;
+$dk-raised:       #252220;
+$dk-text:         #f0ebe2;
+$dk-text-muted:   #b8b2a8;
+$dk-meta:         #857f75;
+$dk-teal:         #1d9ea1;
+$dk-teal-dark:    #0d4f52;
+$dk-orange:       #e06030;
+$dk-orange-dark:  #c04820;
+$dk-accent:       #d95f45;
+$dk-shadow:       0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+$dk-shadow-lg:    0 12px 28px rgba(0, 0, 0, 0.5);
+
+// ── Shared dark-mode mixin ────────────────────────────────────────────────────
+@mixin mm-dark {
+  color: $dk-text;
+
+  // ── App shell ─────────────────────────────────────────────────────────────
+  #main-container,
+  .sd-workspace,
+  .main-section {
+    background: $dk-page-bg !important;
+  }
+
+  // ── Left nav rail ─────────────────────────────────────────────────────────
+  #main-menu {
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+
+    .content ul li a {
+      color: rgba(255, 255, 255, 0.85) !important;
+    }
+  }
+
+  // ── Top bar ───────────────────────────────────────────────────────────────
+  #top-menu {
+    background: $dk-card-bg !important;
+    border-bottom-color: $dk-card-border !important;
+
+    .sd-top-menu__header {
+      color: $dk-text !important;
+    }
+
+    .current-user .avatar img {
+      border-color: $dk-card-border !important;
+    }
+  }
+
+  // ── Portal chrome (subnav) ────────────────────────────────────────────────
+  .m-portal-chrome.subnav,
+  .subnav.m-portal-chrome {
+    background: $dk-card-bg !important;
+    box-shadow: 0 2px 0 $dk-teal, 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+
+    .page-nav-title { color: $dk-text !important; }
+
+    .nav-tabs {
+      background: $dk-raised !important;
+
+      li {
+        button { color: $dk-text-muted !important; }
+
+        &.active button,
+        button:hover {
+          background: $dk-card-bg !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          box-shadow: $dk-shadow !important;
+        }
+      }
+    }
+
+    .homebtn,
+    .navbtn.hover {
+      background: $dk-raised !important;
+      border-color: $dk-card-border !important;
+      color: $dk-text-muted !important;
+    }
+  }
+
+  // ── Blog list page ─────────────────────────────────────────────────────────
+  .m-portal-page.bloglist {
+    header,
+    .m-page-toolbar {
+      background: transparent !important;
+    }
+
+    .m-page-toolbar__title { color: $dk-text !important; }
+
+    .empty-state {
+      background: $dk-card-bg !important;
+      border-color: $dk-card-border !important;
+      color: $dk-text-muted !important;
+    }
+  }
+
+  // ── Blog cards ─────────────────────────────────────────────────────────────
+  .m-blog-card {
+    background: $dk-card-bg !important;
+    border-color: $dk-card-border !important;
+    box-shadow: $dk-shadow !important;
+
+    &:hover {
+      box-shadow: $dk-shadow-lg !important;
+    }
+
+    &__media {
+      background: $dk-raised !important;
+    }
+
+    &__title { color: $dk-text !important; }
+    &__dek   { color: $dk-text-muted !important; }
+
+    &__meta {
+      color: $dk-meta !important;
+      border-top-color: $dk-card-border !important;
+    }
+  }
+
+  // ── Editor shell ───────────────────────────────────────────────────────────
+  .m-portal-editor.blogedit {
+    .column--first {
+      border-right-color: $dk-card-border !important;
+      background: $dk-surface !important;
+    }
+
+    .column--timeline {
+      background: $dk-page-bg !important;
+    }
+
+    .column header {
+      background: $dk-card-bg !important;
+      border-bottom-color: $dk-card-border !important;
+    }
+
+    .header--timeline { color: $dk-text !important; }
+
+    .header--filters {
+      background: $dk-raised !important;
+
+      .btn.active {
+        background: $dk-card-bg !important;
+        color: $dk-orange !important;
+        box-shadow: $dk-shadow !important;
+      }
+    }
+
+    .panel--editor {
+      background: $dk-surface !important;
+
+      .actions {
+        background: $dk-card-bg !important;
+        border-top-color: $dk-card-border !important;
+      }
+
+      .editor-holder {
+        border-color: $dk-card-border !important;
+      }
+    }
+  }
+
+  // ── Modals ─────────────────────────────────────────────────────────────────
+  .modal__body {
+    background: $dk-card-bg !important;
+    color: $dk-text !important;
+  }
+
+  .modal__footer {
+    background: $dk-card-bg !important;
+    border-top-color: $dk-card-border !important;
+  }
+
+  .modal {
+    .form-control,
+    .sd-line-input__input,
+    input[type="text"],
+    input[type="search"],
+    input[type="email"],
+    textarea,
+    select {
+      background: $dk-raised !important;
+      border-color: $dk-card-border !important;
+      color: $dk-text !important;
+    }
+  }
+
+  // ── Buttons ────────────────────────────────────────────────────────────────
+  .btn-default,
+  .btn.btn-default {
+    background: $dk-raised !important;
+    color: $dk-text !important;
+    border-color: $dk-card-border !important;
+
+    &:hover:not(:disabled) {
+      background: darken($dk-raised, 3%) !important;
+    }
+  }
+
+  // ── Forms & inputs ─────────────────────────────────────────────────────────
+  .form-control,
+  .sd-line-input__input,
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    background: $dk-raised !important;
+    border-color: $dk-card-border !important;
+    color: $dk-text !important;
+
+    &:focus {
+      border-color: $dk-teal !important;
+      box-shadow: 0 0 0 3px rgba(29, 158, 161, 0.2) !important;
+    }
+
+    &::placeholder { color: $dk-meta !important; }
+  }
+
+  .sd-searchbar input,
+  [class*="searchbar"] input {
+    background: $dk-card-bg !important;
+    border-color: $dk-card-border !important;
+    color: $dk-text !important;
+  }
+
+  // ── Alerts ─────────────────────────────────────────────────────────────────
+  .alert-info {
+    background: rgba(29, 158, 161, 0.12) !important;
+    border-color: rgba(29, 158, 161, 0.3) !important;
+    color: lighten($dk-teal, 15%) !important;
+  }
+
+  // ── Timeline posts (editor) ────────────────────────────────────────────────
+  .lb-post {
+    &__holder {
+      background: $dk-card-bg !important;
+      border-color: $dk-card-border !important;
+      box-shadow: $dk-shadow !important;
+    }
+
+    &__header .name { color: $dk-text !important; }
+
+    &__actions li a:hover {
+      background: $dk-raised !important;
+    }
+  }
+
+  .column--timeline .posts .lb-post {
+    border-color: $dk-card-border !important;
+    background: $dk-card-bg !important;
+
+    &.active {
+      border-color: $dk-teal !important;
+      box-shadow: 0 0 0 2px rgba(29, 158, 161, 0.25), $dk-shadow !important;
+    }
+
+    &.highlight {
+      border-left-color: $dk-orange !important;
+    }
+  }
+
+  // ── Sir Trevor blocks ──────────────────────────────────────────────────────
+  .st-outer .st-block {
+    background: $dk-card-bg !important;
+    border-color: $dk-card-border !important;
+  }
+
+  // ── Tags / schedule selectors ──────────────────────────────────────────────
+  .tags-selector,
+  .schedule-selector {
+    background: $dk-raised !important;
+  }
+
+  // ── Pin drawer ─────────────────────────────────────────────────────────────
+  .pin-drawer {
+    background: $dk-raised !important;
+  }
+
+  // ── Editor panel chrome ────────────────────────────────────────────────────
+  .m-portal-editor.blogedit .panel--editor > div > header,
+  .m-portal-editor.blogedit .panel--editor header {
+    background: $dk-card-bg !important;
+    border-bottom-color: $dk-card-border !important;
+
+    h4 { color: $dk-text !important; }
+  }
+
+  .m-portal-editor.blogedit .panel--editor .content {
+    background: $dk-surface !important;
+  }
+
+  .m-portal-editor.blogedit .column--timeline .content--timeline {
+    background: $dk-page-bg !important;
+  }
+
+  // ── Contribution panel ─────────────────────────────────────────────────────
+  .panel--contribution__filters {
+    background: $dk-card-bg !important;
+  }
+
+  // ── Settings shell ─────────────────────────────────────────────────────────
+  .blog-settings-view {
+    background: $dk-page-bg !important;
+
+    .settings-page > .subnav {
+      background: $dk-raised !important;
+      border-bottom-color: $dk-card-border !important;
+
+      .page-nav-title { color: $dk-text !important; }
+    }
+
+    .tabbable.outer {
+      > .nav-tabs.nav-stacked {
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4) !important;
+
+        li a {
+          color: rgba(255, 255, 255, 0.85) !important;
+        }
+      }
+
+      .tab-content.outer {
+        background: $dk-card-bg !important;
+        border-color: $dk-card-border !important;
+
+        > .header {
+          background: $dk-raised !important;
+          border-bottom-color: $dk-card-border !important;
+
+          h2 { color: $dk-text !important; }
+        }
+
+        > .content .form-group {
+          border-bottom-color: $dk-card-border !important;
+
+          .control-label,
+          .sd-line-input__label {
+            color: $dk-text-muted !important;
+          }
+        }
+      }
+    }
+  }
+
+  // ── Theme manager ──────────────────────────────────────────────────────────
+  .themelist.m-portal-page {
+    .theme.card {
+      background: $dk-card-bg !important;
+      border-color: $dk-card-border !important;
+
+      .media { background: $dk-raised !important; }
+
+      .content h3 { color: $dk-text !important; }
+    }
+  }
+
+  // ── Analytics ──────────────────────────────────────────────────────────────
+  .content--analytics,
+  .analytics-list {
+    .analytics-list-table {
+      background: $dk-card-bg !important;
+      border-color: $dk-card-border !important;
+    }
+
+    .analytics-list-row {
+      border-bottom-color: $dk-card-border !important;
+
+      &--header {
+        background: $dk-raised !important;
+        color: $dk-text-muted !important;
+      }
+    }
+  }
+
+  .pagination {
+    .pagination__item button {
+      background: $dk-card-bg !important;
+      border-color: $dk-card-border !important;
+      color: $dk-text !important;
+    }
+
+    .pagination__item--active button {
+      background: $dk-teal !important;
+      border-color: $dk-teal-dark !important;
+    }
+  }
+
+  // ── Login screen ───────────────────────────────────────────────────────────
+  .maroela-login.login-screen {
+    .maroela-login__form-panel {
+      background: $dk-card-bg !important;
+    }
+
+    .maroela-login__heading { color: $dk-text !important; }
+    .maroela-login__subheading { color: $dk-text-muted !important; }
+
+    .maroela-login__label { color: $dk-text-muted !important; }
+
+    .maroela-login__input {
+      background: $dk-raised !important;
+      border-color: $dk-card-border !important;
+      color: $dk-text !important;
+
+      &:focus {
+        border-color: $dk-teal !important;
+        box-shadow: 0 0 0 3px rgba(29, 158, 161, 0.2) !important;
+      }
+
+      &::placeholder { color: $dk-meta !important; }
+    }
+
+    .maroela-login__link { color: $dk-text-muted !important; }
+
+    .maroela-login__network-error--amber {
+      background: rgba(224, 96, 48, 0.12) !important;
+      border-color: rgba(224, 96, 48, 0.3) !important;
+    }
+
+    .maroela-login__network-error--red {
+      background: rgba(185, 28, 28, 0.12) !important;
+      border-color: rgba(185, 28, 28, 0.3) !important;
+    }
+  }
+
+  // ── SD line input labels ───────────────────────────────────────────────────
+  .sd-line-input__label { color: $dk-text-muted !important; }
+
+  // ── Dropdown menus ─────────────────────────────────────────────────────────
+  .dropdown__menu,
+  .dropdown-menu {
+    background: $dk-card-bg !important;
+    border-color: $dk-card-border !important;
+    box-shadow: $dk-shadow-lg !important;
+
+    li a,
+    li button {
+      color: $dk-text !important;
+
+      &:hover {
+        background: $dk-raised !important;
+      }
+    }
+  }
+
+  // ── About modal ────────────────────────────────────────────────────────────
+  .about-modal .modal__body {
+    background: $dk-card-bg !important;
+    color: $dk-text !important;
+
+    .text-title,
+    .text-subtitle { color: $dk-text !important; }
+  }
+}
+
+// ── Layer 1: OS / browser dark mode ──────────────────────────────────────────
+@media (prefers-color-scheme: dark) {
+  html:not([data-color-scheme="light"]) body.maroela-portal {
+    @include mm-dark;
+  }
+}
+
+// ── Layer 2: Explicit dark (JS sets data-color-scheme="dark" on <html>) ──────
+html[data-color-scheme="dark"] body.maroela-portal {
+  @include mm-dark;
+}
+
+// ── Layer 3: Force light (overrides OS dark) ──────────────────────────────────
+@media (prefers-color-scheme: dark) {
+  html[data-color-scheme="light"] body.maroela-portal {
+    color: $maroela-text;
+
+    #main-container,
+    .sd-workspace,
+    .main-section {
+      background: $maroela-page-bg !important;
+    }
+
+    #top-menu {
+      background: $maroela-card-bg !important;
+      border-bottom-color: $maroela-card-border !important;
+    }
+
+    .m-portal-chrome.subnav,
+    .subnav.m-portal-chrome {
+      background: $maroela-card-bg !important;
+    }
+
+    .m-blog-card {
+      background: $maroela-card-bg !important;
+      border-color: $maroela-card-border !important;
+    }
+  }
+}

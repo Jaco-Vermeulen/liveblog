@@ -66,10 +66,16 @@ class CompiledThemeTemplateLoader(ChoiceLoader):
                 self.loaders.append(ModuleLoader(compiled))
 
                 if parent_name:
-                    parent_compiled = themes.get_theme_compiled_templates_path(
-                        parent_name
-                    )
-                    self.loaders.append(ModuleLoader(parent_compiled))
+                    # If the parent theme has DB-compiled templates, use DictLoader
+                    # so unprefixed includes (e.g. "template-embed-utils.html") resolve.
+                    # This covers child themes that have no compiled templates of their own.
+                    if parent and parent.get("files", {}).get("templates"):
+                        self.addDictonary(parent)
+                    else:
+                        parent_compiled = themes.get_theme_compiled_templates_path(
+                            parent_name
+                        )
+                        self.loaders.append(ModuleLoader(parent_compiled))
 
             # let's now add the parent theme prefix loader
             if parent_name:

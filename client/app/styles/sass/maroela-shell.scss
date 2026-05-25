@@ -1,0 +1,630 @@
+// Maroela web2 — Liveblog client portal shell (layout + components, not palette-only)
+
+// ── Animations ────────────────────────────────────────────────────────────────
+@keyframes mm-fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mm-slide-up  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mm-spin      { to { transform: rotate(360deg); } }
+
+// ─── App shell (layout offsets live in maroela-nav.scss) ────────────────────
+
+// ─── Portal chrome bar ────────────────────────────────────────────────────────
+.m-portal-chrome.subnav,
+.subnav.m-portal-chrome {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 56px !important;
+  height: auto !important;
+  padding: 0.5rem 1.25rem !important;
+  margin: 0 !important;
+  background: $maroela-card-bg !important;
+  border-bottom: none !important;
+  box-shadow: 0 2px 0 $maroela-teal, 0 4px 20px rgba(56, 25, 6, 0.06) !important;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.m-portal-chrome .button-stack {
+  display: flex !important;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 !important;
+  float: none !important;
+}
+
+.m-portal-chrome .nav-tabs {
+  display: inline-flex !important;
+  gap: 0.25rem;
+  background: $maroela-beige2;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  border: none !important;
+  margin: 0 !important;
+
+  li {
+    float: none !important;
+    margin: 0 !important;
+
+    button {
+      border: none !important;
+      background: transparent !important;
+      padding: 0.4rem 1rem !important;
+      border-radius: 9999px !important;
+      font-size: 0.8125rem !important;
+      font-weight: 600 !important;
+      color: $maroela-text-muted !important;
+      text-transform: none !important;
+      box-shadow: none !important;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    &.active button,
+    button:hover {
+      background: $maroela-card-bg !important;
+      color: $maroela-orange-dark !important;
+      box-shadow: $maroela-card-shadow !important;
+    }
+  }
+}
+
+.m-portal-chrome .page-nav-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 3ch;
+    height: 3px;
+    background: $maroela-accent;
+    margin-top: 0.25rem;
+    border-radius: 2px;
+  }
+}
+
+.m-portal-chrome .homebtn,
+.m-portal-chrome .navbtn.hover {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: $maroela-radius-sm !important;
+  border: 1px solid $maroela-card-border !important;
+  background: $maroela-page-bg !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+
+  &:hover {
+    background: $maroela-beige2 !important;
+  }
+}
+
+.m-portal-chrome .sd-create-btn {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: $maroela-orange !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(196, 87, 18, 0.35) !important;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
+
+  &:hover {
+    background: $maroela-orange-dark !important;
+    box-shadow: 0 6px 18px rgba(196, 87, 18, 0.45) !important;
+    transform: scale(1.05) !important;
+  }
+}
+
+// ─── Blog list page ───────────────────────────────────────────────────────────
+.m-portal-page.bloglist {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  min-height: #{"calc(100vh - 56px)"};
+
+  header,
+  .m-page-toolbar {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    height: auto !important;
+    min-height: 4rem;
+    padding: 1.25rem 1.5rem !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .m-page-toolbar__search {
+    flex: 1 1 240px;
+    min-width: 12rem;
+  }
+
+  .m-page-toolbar__actions,
+  .m-page-toolbar__pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .m-page-toolbar__title {
+    flex: 1 1 100%;
+    margin: 0 0 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $maroela-text;
+
+    &::after {
+      content: "";
+      display: block;
+      width: 3ch;
+      height: 3px;
+      background: $maroela-accent;
+      margin-top: 0.35rem;
+    }
+  }
+
+  .list-container,
+  .m-portal-content {
+    position: relative !important;
+    top: auto !important;
+    padding: 0 1.5rem 3rem !important;
+    overflow: visible !important;
+  }
+
+  // Hide legacy table — grid is the product UI
+  .row-list.table {
+    display: none !important;
+  }
+
+  .view-select button {
+    width: 40px;
+    height: 40px;
+    border-radius: $maroela-radius-sm;
+    border: 1px solid $maroela-card-border;
+    background: $maroela-card-bg;
+    margin-left: 0.35rem;
+    transition: background 0.15s ease, border-color 0.15s ease;
+
+    &:hover { background: $maroela-beige2; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem !important;
+    background: $maroela-card-bg;
+    border-radius: $maroela-radius;
+    border: 1px dashed $maroela-card-border;
+    max-width: 28rem;
+    margin: 2rem auto;
+    animation: mm-fade-in 0.35s ease;
+
+    p { color: $maroela-text-muted; }
+  }
+}
+
+// ── Blog card grid ─────────────────────────────────────────────────────────────
+.m-blog-grid.card-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  list-style: none;
+
+  > li {
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    display: flex !important;
+    flex-direction: column;
+    animation: mm-slide-up 0.3s ease both;
+
+    @for $i from 1 through 12 {
+      &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 0.04}s; }
+    }
+  }
+}
+
+// ── Blog card ──────────────────────────────────────────────────────────────────
+.m-blog-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $maroela-card-bg;
+  border: 1px solid $maroela-card-border;
+  border-radius: $maroela-radius;
+  box-shadow: $maroela-card-shadow;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(56, 25, 6, 0.14);
+  }
+
+  // Left accent by status
+  &[data-status="open"]::before,
+  &.status-open::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: $maroela-teal;
+    border-radius: $maroela-radius 0 0 $maroela-radius;
+  }
+
+  &[data-status="closed"]::before,
+  &.status-closed::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: $maroela-card-border;
+    border-radius: $maroela-radius 0 0 $maroela-radius;
+  }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: $maroela-beige2;
+    overflow: hidden;
+
+    .media,
+    div[if-background-image] {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100%;
+      background-size: cover !important;
+      background-position: center !important;
+      transition: transform 0.35s ease;
+    }
+  }
+
+  &:hover &__media .media,
+  &:hover &__media div[if-background-image] {
+    transform: scale(1.04);
+  }
+
+  &__body {
+    padding: 1rem 1.125rem 1.125rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: $maroela-text;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__dek {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: $maroela-text-muted;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    color: $maroela-meta;
+    padding-top: 0.5rem;
+    border-top: 1px solid $maroela-card-border;
+
+    dt {
+      font-weight: 600;
+      margin: 0;
+    }
+    dd {
+      margin: 0 0.5rem 0 0;
+    }
+  }
+
+  .bulk-select {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: $maroela-teal;
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 6px rgba(21, 117, 120, 0.4);
+  }
+
+  // LIVE badge
+  &__badge--live {
+    background: #dc2626 !important;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
+    animation: mm-live-pulse 2s infinite;
+  }
+}
+
+@keyframes mm-live-pulse {
+  0%, 100% { box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 2px 12px rgba(220, 38, 38, 0.7); }
+}
+
+// ─── Editor shell ─────────────────────────────────────────────────────────────
+.m-portal-editor.blogedit {
+  .columns-holder {
+    left: 72px !important;
+  }
+
+  .side-menu {
+    width: 72px !important;
+    background: linear-gradient(180deg, $maroela-teal 0%, $maroela-teal-dark 100%) !important;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    gap: 2px;
+
+    .navbtn {
+      width: 100% !important;
+      height: auto !important;
+      min-height: 56px;
+      padding: 0.5rem 0.25rem !important;
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      border: none !important;
+      border-radius: 0 !important;
+      transition: background 0.15s ease !important;
+
+      .m-rail-label {
+        font-size: 0.5625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.15;
+        color: rgba(255, 255, 255, 0.85);
+        max-width: 60px;
+        text-align: center;
+      }
+
+      &.active {
+        background: rgba(0, 0, 0, 0.2) !important;
+        box-shadow: inset 3px 0 0 $maroela-accent;
+      }
+
+      &:hover:not(.active) {
+        background: rgba(0, 0, 0, 0.1) !important;
+      }
+
+      strong {
+        font-size: 0.75rem;
+        font-weight: 800;
+      }
+    }
+  }
+
+  .column {
+    &--first {
+      width: 520px !important;
+      border-right: 1px solid $maroela-card-border;
+      background: $maroela-card-bg;
+      @media only screen and (max-width: 1200px) {
+        width: 42% !important;
+      }
+    }
+
+    &--timeline {
+      left: 520px !important;
+      @media only screen and (max-width: 1200px) {
+        left: 42% !important;
+      }
+    }
+
+    header {
+      display: flex !important;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem !important;
+      min-height: 56px !important;
+      height: auto !important;
+      background: $maroela-card-bg !important;
+      border-bottom: 1px solid $maroela-card-border !important;
+    }
+
+    .header--timeline {
+      font-weight: 700 !important;
+      font-size: 1rem !important;
+      color: $maroela-text !important;
+      padding: 0 !important;
+      float: none !important;
+    }
+
+    .header--filters {
+      float: none !important;
+      margin-left: auto;
+      display: flex;
+      gap: 0.35rem;
+      background: $maroela-beige2;
+      padding: 0.2rem;
+      border-radius: 9999px;
+
+      .btn {
+        border-radius: 9999px !important;
+        border: none !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        padding: 0.35rem 0.85rem !important;
+        height: auto !important;
+        margin: 0 !important;
+        transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+
+        &.active {
+          background: $maroela-card-bg !important;
+          color: $maroela-orange !important;
+          box-shadow: $maroela-card-shadow !important;
+        }
+      }
+    }
+  }
+
+  .panel header h4 {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $maroela-meta;
+    font-weight: 700;
+  }
+
+  .panel--editor {
+    .actions {
+      background: $maroela-card-bg;
+      border-top: 1px solid $maroela-card-border;
+      padding: 1rem !important;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      &__buttons {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+
+        .btn--primary {
+          order: -1;
+          flex: 1 1 auto;
+          min-width: 8rem;
+          padding: 0.65rem 1.25rem !important;
+          font-size: 0.9375rem !important;
+        }
+      }
+
+      &__options {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+
+        > div {
+          display: block !important;
+        }
+
+        .pull-right {
+          float: none !important;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.4rem 0.65rem;
+          border-radius: $maroela-radius-sm;
+          border: 1px solid $maroela-card-border;
+          background: $maroela-page-bg;
+          cursor: pointer;
+          transition: background 0.15s ease;
+          &:hover { background: $maroela-beige2; }
+        }
+      }
+    }
+
+    .editor-holder {
+      margin: 0.75rem;
+      border: 1px solid $maroela-card-border;
+      border-radius: $maroela-radius-sm;
+      overflow: hidden;
+    }
+  }
+}
+
+// ─── Modals ───────────────────────────────────────────────────────────────────
+.modal--large .modal__header,
+.modal__header {
+  background: linear-gradient(135deg, $maroela-teal 0%, $maroela-teal-dark 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 1rem 1.25rem !important;
+
+  .modal__heading,
+  h3 {
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .modal__close,
+  .close {
+    color: rgba(255, 255, 255, 0.85) !important;
+    opacity: 1;
+    transition: color 0.15s ease, opacity 0.15s ease;
+    &:hover { color: #fff !important; opacity: 1; }
+  }
+}
+
+.modal__body {
+  padding: 1.25rem !important;
+}
+
+.modal__footer {
+  padding: 1rem 1.25rem !important;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  border-top: 1px solid $maroela-card-border;
+}
+
+// ─── Login font family ────────────────────────────────────────────────────────
+body.maroela-portal {
+  .auth-screen,
+  [class*="login"],
+  .login-form {
+    font-family: $maroela-font !important;
+  }
+}

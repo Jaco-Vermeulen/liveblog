@@ -1,0 +1,37 @@
+{
+  "project": "liveblog",
+  "version": "3.93.1",
+  "updated": "2026-05-22",
+  "embeds": {
+    "editor": "Iframely oembed uses key= via setupIframelyPublicKeyProvider on angular.module('iframely') — see iframely-public-key.js (decorators on liveblog.edit do NOT work)",
+    "public_timeline": "template-item-embed.html + template-embed-utils.html; loadEmbeds() in default theme JS; GDPR via lb_consent--awaiting templates",
+    "child_themes": "maroela extends default (seoTheme); collect_theme_assets must inherit parent scripts (default-*.js) for embed JS to load",
+    "known_fixes": [
+      "Facebook branch had malformed </div (missing >) — breaks HTML after Facebook embeds",
+      "x.com consent template added for Twitter widgets.js",
+      "embeds.py: inherit parent theme assets for seoTheme children"
+    ]
+  },
+  "docker": {
+    "compose_file": "docker-compose.yml",
+    "default_command": "docker compose up -d",
+    "profiles": "none — all services start by default",
+    "automatic_steps": [
+      "infra healthchecks",
+      "pip install (image build)",
+      "app:initialize_data",
+      "users:create admin",
+      "register_local_themes",
+      "elasticsearch index + rebuild_elastic_index",
+      "honcho (gunicorn, wamp, celery, beat)",
+      "npm ci + grunt server"
+    ],
+    "init_marker": "data/.liveblog-initialized",
+    "urls": {
+      "ui": "http://localhost:9000",
+      "api": "http://localhost:5000/api",
+      "ws": "ws://localhost:5100"
+    }
+  },
+  "host_dev": "optional — see README-host-dev.md"
+}

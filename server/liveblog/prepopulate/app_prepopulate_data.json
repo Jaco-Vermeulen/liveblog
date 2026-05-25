@@ -9,6 +9,7 @@
         "password": "admin",
         "user_type": "administrator",
         "email": "a@a.com",
+        "language": "af",
 	    "sign_off": "abc"
     }
 },
@@ -30,14 +31,14 @@
     "resource": "global_preferences",
     "data": {
         "key": "language",
-        "value": "en"
+        "value": "af"
     }
 },
 {
     "resource": "global_preferences",
     "data": {
         "key": "theme",
-        "value": "classic"
+        "value": "maroela"
     }
 },
 {
@@ -91,6 +92,13 @@
     "data": {
         "language_code": "fr",
         "name": "Français"
+    }
+},
+{
+    "resource": "languages",
+    "data": {
+        "language_code": "af",
+        "name": "Afrikaans"
     }
 }
 ]

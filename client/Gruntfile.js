@@ -33,6 +33,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('server', [
         'clean',
+        'nggettext_compile',
         'copy:assets',
         'copy:locales',
         'copy:index',
@@ -59,6 +60,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build', [
         'clean',
+        'nggettext_compile',
         'copy:assets',
         'copy:locales',
         'copy:index',

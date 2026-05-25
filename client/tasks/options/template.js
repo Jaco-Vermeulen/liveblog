@@ -11,7 +11,7 @@ module.exports = function(grunt) {
             server: {url: server, ws: ws},
             debug: grunt.option('debug-mode') || false,
             iframely: {
-                key: grunt.option('iframely-key') || process.env.IFRAMELY_KEY || '',
+                key: grunt.option('iframely-key') || process.env.IFRAMELY_KEY || 'a5ee9a89addd13b7a2e3a48c23e74e8d',
             },
             facebookAppId: grunt.option('facebook-appid') || process.env.FACEBOOK_APP_ID || '',
             syndication: process.env.SYNDICATION || false,

@@ -3,6 +3,24 @@
 }
 
 @media(max-width: 800px) {
+    body.maroela-portal {
+        #top-menu button.collapse-nav {
+            position: relative !important;
+            left: auto !important;
+        }
+
+        #top-menu button.current-user {
+            position: relative !important;
+            right: auto !important;
+        }
+
+        .sd-top-menu__header,
+        .m-top-nav__title {
+            margin-left: 0 !important;
+            max-width: 40%;
+        }
+    }
+
     .blogedit .column {
         width: 100% !important;
     }
@@ -121,6 +139,20 @@
 
     .sd-top-menu__header {
         margin-left: 40px !important;
+    }
+
+    body.maroela-portal {
+        #top-menu button.collapse-nav,
+        #top-menu button.current-user {
+            position: relative !important;
+            left: auto !important;
+            right: auto !important;
+        }
+
+        .sd-top-menu__header,
+        .m-top-nav__title {
+            margin-left: 0 !important;
+        }
     }
 
     .modal {

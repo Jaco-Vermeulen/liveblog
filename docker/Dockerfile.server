@@ -1,0 +1,40 @@
+# Liveblog API + workers (Python 3.6, matches CI / pyenv target)
+FROM python:3.6-buster
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TZ=Europe/London \
+    C_FORCE_ROOT=true
+
+# Buster is EOL — use Debian archive mirrors
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list \
+    && sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list \
+    && sed -i '/buster-updates/d' /etc/apt/sources.list \
+    && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential git curl redis-tools \
+    libffi-dev libssl-dev \
+    libtiff5-dev libjpeg62-turbo-dev zlib1g-dev libmagic1 libmagic-dev \
+    libfreetype6-dev liblcms2-dev libwebp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/server
+
+# Pin pip/setuptools like CI — required for legacy dependency resolution
+COPY server/requirements.txt /tmp/requirements.txt
+RUN python -m pip install --upgrade 'pip<=20.2.3' 'setuptools<50' wheel \
+    && pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY server/ /opt/server/
+COPY docker/Procfile-dev /opt/docker/Procfile-dev
+COPY docker/scripts/server-entrypoint.sh /docker/scripts/server-entrypoint.sh
+COPY docker/scripts/init-data.sh /docker/scripts/init-data.sh
+COPY docker/scripts/wait-for-infra.sh /docker/scripts/wait-for-infra.sh
+
+RUN sed -i 's/\r$//' /docker/scripts/*.sh /opt/server/scripts/fig_wrapper.sh \
+    && chmod +x /docker/scripts/*.sh /opt/server/scripts/fig_wrapper.sh
+
+EXPOSE 5000 5100
+
+ENTRYPOINT ["/bin/bash", "/docker/scripts/server-entrypoint.sh"]

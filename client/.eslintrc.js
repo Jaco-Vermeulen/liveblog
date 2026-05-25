@@ -1,6 +1,10 @@
 const superdeskRules = require('superdesk-code-style');
 
 module.exports = Object.assign({}, superdeskRules, {
+    // Windows dev (CRLF) — linebreak-style floods webpack; not a runtime issue.
+    rules: Object.assign({}, superdeskRules.rules || {}, {
+        'linebreak-style': 0,
+    }),
     'overrides': [
         {
             files: ['*.ts', '*.tsx'],

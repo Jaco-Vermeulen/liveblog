@@ -1,7 +1,7 @@
 module.exports = {
     all: {
         files: {
-            '<%= appDir %>/scripts/translations.js': '<%= poDir %>/*.po'
+            '<%= distDir %>/locale.generated.js': '<%= poDir %>/*.po'
         }
     }
 };

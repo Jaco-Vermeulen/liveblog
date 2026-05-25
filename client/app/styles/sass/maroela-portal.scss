@@ -1,0 +1,157 @@
+// Portal surfaces — posts, panels, Sir Trevor, forms (works with maroela-shell layout)
+
+// ── Post list in editor timeline ───────────────────────────────────────────────
+.lb-post {
+  &__holder {
+    background: $maroela-card-bg !important;
+    border: 1px solid $maroela-card-border !important;
+    border-radius: $maroela-radius !important;
+    box-shadow: $maroela-card-shadow !important;
+    padding: 1rem 1.125rem !important;
+    transition: box-shadow 0.2s ease;
+
+    &:hover { box-shadow: 0 8px 20px rgba(56, 25, 6, 0.1) !important; }
+  }
+
+  &__header .name {
+    font-weight: 700;
+    color: $maroela-text;
+  }
+
+  &__actions li a:hover {
+    background: $maroela-beige2 !important;
+    border-radius: $maroela-radius-sm;
+  }
+}
+
+.column--timeline .posts .lb-post {
+  border: 1px solid $maroela-card-border !important;
+  border-radius: $maroela-radius !important;
+  overflow: hidden;
+  background: $maroela-card-bg;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &.active {
+    border-color: $maroela-teal !important;
+    box-shadow: 0 0 0 2px rgba(21, 117, 120, 0.2), $maroela-card-shadow !important;
+  }
+
+  &.highlight {
+    border-left: 4px solid $maroela-orange !important;
+  }
+
+  &.lb-post--sticky {
+    border-left: 4px solid $maroela-teal !important;
+  }
+}
+
+// ── Sir Trevor blocks ─────────────────────────────────────────────────────────
+.st-outer .st-block {
+  border-radius: $maroela-radius-sm;
+  border: 1px solid $maroela-card-border !important;
+  margin-bottom: 0.75rem;
+  background: $maroela-card-bg;
+  transition: border-color 0.15s ease;
+
+  &:focus-within {
+    border-color: $maroela-teal !important;
+    box-shadow: 0 0 0 2px rgba(21, 117, 120, 0.12);
+  }
+}
+
+// ── Form labels ───────────────────────────────────────────────────────────────
+.sd-line-input__label {
+  font-weight: 700 !important;
+  color: $maroela-text-muted !important;
+  text-transform: uppercase;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.05em;
+}
+
+// ── Tag / schedule selectors ───────────────────────────────────────────────────
+.tags-selector,
+.schedule-selector {
+  background: $maroela-page-bg;
+  border-radius: $maroela-radius-sm;
+  border: 1px solid $maroela-card-border;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+// ── Contribution panel ────────────────────────────────────────────────────────
+.panel--contribution__filters {
+  background: $maroela-card-bg !important;
+  border-bottom: 1px solid $maroela-card-border;
+}
+
+// ── Pin drawer ────────────────────────────────────────────────────────────────
+.pin-drawer {
+  background: $maroela-beige2;
+  border-radius: $maroela-radius-sm;
+  margin: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid $maroela-card-border;
+  font-size: 0.8125rem;
+}
+
+// ── Timeline column (right panel) ─────────────────────────────────────────────
+.m-portal-editor.blogedit .column--timeline {
+  background: $maroela-page-bg !important;
+
+  .content--timeline {
+    padding: 0.75rem 1rem;
+  }
+}
+
+// ── Editor panel chrome ────────────────────────────────────────────────────────
+.m-portal-editor.blogedit .panel--editor {
+  background: $maroela-page-bg;
+
+  > div > header,
+  header {
+    background: $maroela-card-bg !important;
+    border-bottom: 1px solid $maroela-card-border;
+    box-shadow: none !important;
+
+    h4 {
+      font-weight: 700 !important;
+      color: $maroela-text !important;
+      font-size: 1rem !important;
+    }
+  }
+
+  .content {
+    background: $maroela-page-bg;
+  }
+}
+
+.m-portal-editor.blogedit .panel header h4 {
+  border-bottom: 2px solid $maroela-accent;
+  display: inline-block;
+  padding-bottom: 0.25rem;
+}
+
+// ── New updates chip ──────────────────────────────────────────────────────────
+.timeline-new-updates,
+[class*="new-updates"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: $maroela-teal;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(21, 117, 120, 0.35);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: $maroela-teal-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(21, 117, 120, 0.45);
+  }
+}

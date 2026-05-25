@@ -57,12 +57,14 @@ export const ItemEmbedFacebook: React.FunctionComponent<IProps> = (props) => {
         if (!isLoading && window?.FB) {
             window.FB.XFBML.parse();
         }
-    }, [isLoading, props.url]);
+    }, [isLoading, props.url, props.original_url]);
+
+    const postUrl = props.url || props.original_url;
 
     return (
         <div>
-            <div className="fb-post" data-href={props.url} data-width="500" style={props.style}>
-                {isLoading && <RenderPlaceHolder url={props.url} />}
+            <div className="fb-post" data-href={postUrl} data-width="500" style={props.style}>
+                {isLoading && <RenderPlaceHolder url={postUrl} />}
             </div>
         </div>
     );

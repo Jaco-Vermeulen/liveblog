@@ -27,6 +27,7 @@ const LiveblogSettingsController = ($scope, api, $location, notify, gettext, $q)
     ];
 
     $scope.quotationMarksOptions = [
+        { value: 'af', label: 'Afrikaans' },
         { value: 'en', label: 'English' },
         { value: 'de', label: 'Deutsch' },
     ];

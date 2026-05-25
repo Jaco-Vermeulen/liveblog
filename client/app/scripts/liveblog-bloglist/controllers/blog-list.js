@@ -435,15 +435,9 @@ export default function BlogListController(
 
     // Set grid or list view
     $scope.setBlogsView = function(blogsView) {
-        if (typeof blogsView !== 'undefined') {
-            $scope.blogsView = blogsView;
-            localStorage.setItem('blogsView', blogsView);
-        } else if (typeof localStorage.getItem('blogsView') === 'undefined'
-            || localStorage.getItem('blogsView') === null) {
-            $scope.blogsView = 'grid';
-        } else {
-            $scope.blogsView = localStorage.getItem('blogsView');
-        }
+        // Maroela portal: card grid is the only supported blogs UX
+        $scope.blogsView = 'grid';
+        localStorage.setItem('blogsView', 'grid');
     };
     $scope.setBlogsView();
 

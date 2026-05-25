@@ -216,17 +216,12 @@ export default function embedBlockFactory(SirTrevor, config) {
                 if (isURI(input)) {
                     input = cleanupURL(input);
 
-                    var originalUrl = input;
+                    const originalUrl = input;
 
-                    // very simple test to check if it was encoded already
-                    if (decodeURIComponent(input) === input) {
-                        input = encodeURIComponent(input);
-                    }
-
-                    // request the embedService with the provided url
+                    // request the embedService with the provided url (handlers encode for APIs)
                     const {embedService, coverMaxWidth} = self.getOptions();
 
-                    embedService.get(input, coverMaxWidth).then(
+                    embedService.get(originalUrl, coverMaxWidth).then(
                         function successCallback(data) {
                             data.original_url = originalUrl;
 

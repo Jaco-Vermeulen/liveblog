@@ -1,0 +1,146 @@
+# Liveblog — one command runs everything:
+#
+#   docker compose up -d
+#
+# Then open http://localhost:9000 (admin / admin)
+#
+# Re-seed data: docker compose run --rm -e LIVEBLOG_FORCE_INIT=1 init
+
+name: liveblog
+
+x-liveblog-env: &liveblog-env
+  MONGO_URI: mongodb://mongodb:27017/liveblog
+  PUBLICAPI_MONGO_URI: mongodb://mongodb:27017/liveblog
+  LEGAL_ARCHIVE_URI: mongodb://mongodb:27017/liveblog
+  MONGO_DBNAME: liveblog
+  ELASTICSEARCH_URL: http://elasticsearch:9200
+  ELASTICSEARCH_INDEX: liveblog
+  CELERY_BROKER_URL: redis://redis:6379/1
+  REDIS_URL: redis://redis:6379/1
+  SUPERDESK_URL: ${SUPERDESK_URL:-http://localhost:5000/api}
+  SUPERDESK_WS_URL: ${SUPERDESK_WS_URL:-ws://localhost:5100}
+  SUPERDESK_CLIENT_URL: ${SUPERDESK_CLIENT_URL:-http://localhost:9000}
+  SUPERDESK_TESTING: ${SUPERDESK_TESTING:-True}
+  # Single worker in Docker dev — reload + Windows volume mounts otherwise spawn dozens of stale gunicorn workers (auth 404 / instant "session expired").
+  SUPERDESK_RELOAD: ${SUPERDESK_RELOAD:-False}
+  WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+  SYNDICATION: ${SYNDICATION:-True}
+  LIVEBLOG_DEBUG: ${LIVEBLOG_DEBUG:-True}
+  C_FORCE_ROOT: "true"
+  # Public Iframely key (MD5); editor uses key= on iframe.ly/api/oembed
+  IFRAMELY_KEY: ${IFRAMELY_KEY:-a5ee9a89addd13b7a2e3a48c23e74e8d}
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: liveblog-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:3.4.23
+    container_name: liveblog-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongodb:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+
+  elasticsearch:
+    image: liveblog3/elasticsearch:1.7.2
+    container_name: liveblog-elasticsearch
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./data/elastic:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  init:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: liveblog-init
+    environment: *liveblog-env
+    volumes:
+      - ./data:/data
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/docker/scripts/init-data.sh"]
+    restart: "no"
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: liveblog-server
+    environment: *liveblog-env
+    volumes:
+      - ./server/liveblog/themes/themes_assets:/opt/server/liveblog/themes/themes_assets:ro
+      - ./server/wsgi.py:/opt/server/wsgi.py:ro
+      - ./server/gunicorn_config.py:/opt/server/gunicorn_config.py:ro
+      - ./docker:/opt/docker:ro
+    ports:
+      - "5000:5000"
+      - "5100:5100"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:5000/ >/dev/null 2>&1 || curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5000/ | grep -qE '^[0-9]'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client
+    container_name: liveblog-client
+    environment: *liveblog-env
+    ports:
+      - "9000:9000"
+      - "35729:35729"
+    volumes:
+      - ./client:/opt/client
+      - client-node-modules:/opt/client/node_modules
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  client-node-modules:

@@ -1,0 +1,91 @@
+<div class="login-screen maroela-login" ng-show="active">
+    <div class="maroela-login__split">
+
+        <!-- ── Left brand panel ──────────────────────────────────────────── -->
+        <div class="maroela-login__brand-panel" aria-hidden="true">
+            <div class="maroela-login__brand-inner">
+                <div class="maroela-login__brand-logo"></div>
+                <h1 class="maroela-login__brand-title">Maroela Media</h1>
+                <p class="maroela-login__brand-tagline">Regstreekse blog — betroubaar, vinnig, Afrikaans</p>
+                <div class="maroela-login__brand-ornament">
+                    <span></span><span></span><span></span>
+                </div>
+                <p class="maroela-login__brand-copy">Die redaksiestelsel vir jou regstreekse verslaggewing</p>
+            </div>
+        </div>
+
+        <!-- ── Right form panel ──────────────────────────────────────────── -->
+        <div class="maroela-login__form-panel">
+            <div class="maroela-login__form-inner">
+
+                <div class="maroela-login__form-header">
+                    <h2 class="maroela-login__heading">Welkom terug</h2>
+                    <p class="maroela-login__subheading">Meld aan by jou werkspasie</p>
+                </div>
+
+                <form name="loginForm" ng-submit="authenticate()" novalidate>
+
+                    <div class="maroela-login__field">
+                        <label class="maroela-login__label" for="login-username">Gebruikersnaam</label>
+                        <input
+                            type="text"
+                            id="login-username"
+                            ng-model="username"
+                            class="maroela-login__input fullwidth-input"
+                            placeholder="jou.naam"
+                            required
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                        />
+                    </div>
+
+                    <div class="maroela-login__field">
+                        <label class="maroela-login__label" for="login-password">Wagwoord</label>
+                        <input
+                            type="password"
+                            id="login-password"
+                            ng-model="password"
+                            class="maroela-login__input fullwidth-input login-pass"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="current-password"
+                        />
+                    </div>
+
+                    <button
+                        ng-disabled="isLoading"
+                        id="login-btn"
+                        type="submit"
+                        class="maroela-login__submit btn btn--primary"
+                    >
+                        <span ng-hide="isLoading" translate>Meld aan</span>
+                        <span ng-show="isLoading" class="maroela-login__spinner">
+                            <span class="dot1"></span><span class="dot2"></span>
+                        </span>
+                    </button>
+
+                </form>
+
+                <div class="error-handler" ng-switch on="loginError">
+                    <p class="maroela-login__error" ng-switch-when="401" translate>Ongeldige gebruikersnaam of wagwoord.</p>
+                    <p class="maroela-login__error" ng-switch-when="403" translate>Rekening gesuspendeer.</p>
+                    <p class="maroela-login__error" ng-switch-when="404" translate>Gebruiker nie gevind nie.</p>
+                    <p class="maroela-login__error" ng-show="loginError" ng-switch-default translate>Kan nie die bediener bereik nie.</p>
+                    <div class="maroela-login__network-error maroela-login__network-error--red" ng-show="serverStatus == 1">
+                        <p translate>Geen bediener respons.<br/>Probeer asseblief weer.</p>
+                    </div>
+                    <div class="maroela-login__network-error maroela-login__network-error--amber" ng-show="serverStatus > 1">
+                        <p translate>Herverbinding... Bly asseblief.</p>
+                    </div>
+                </div>
+
+                <div class="maroela-login__links">
+                    <a href="/#/reset-password/" class="maroela-login__link" ng-show="features.reset_user_password" translate>Wagwoord vergeet?</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

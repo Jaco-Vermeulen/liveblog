@@ -1,4 +1,4 @@
-<div class="subnav">
+<div class="subnav m-portal-chrome">
     <div class="button-stack left-stack" >
         <a class="navbtn homebtn" href="/#/liveblog">
             <i class="icon-th-large"></i>
@@ -15,9 +15,9 @@
     </div>
 </div>
 
-<div class="blog-settings-view">
+<div class="blog-settings-view m-portal-settings">
     <div class="settings-page">
-        <div class="subnav">
+        <div class="subnav m-settings-toolbar">
             <h3 class="page-nav-title">Analytics</h3>
             <button ng-click="analytics.close()" class="btn btn-default pull-right" type="button" translate>Done</button>
         </div>

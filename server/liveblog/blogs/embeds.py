@@ -62,21 +62,32 @@ def collect_theme_assets(theme, assets=None, template=None, parents=[]):
         else:
             template = theme.get("template")
 
-    # Add assets from parent theme.
+    # Inherit from parent theme (template always; assets unless child is a full seo fork).
     if (
         theme.get("extends")
-        and not theme.get("seoTheme")
         and (theme.get("name") != theme.get("extends"))
         and (theme.get("extends") not in parents)
     ):
+        # Child themes that extend another theme need parent JS/CSS even when
+        # they are seoTheme forks with their own template (e.g. maroela).
+        inherit_assets = (
+            not theme.get("seoTheme")
+            or not template
+            or bool(theme.get("extends"))
+        )
         parent_theme = get_resource_service("themes").find_one(
             req=None, name=theme.get("extends")
         )
         if parent_theme:
             parents.append(theme.get("extends"))
-            assets, template = collect_theme_assets(
-                parent_theme, assets=assets, template=template, parents=parents
+            parent_assets, parent_template = collect_theme_assets(
+                parent_theme, assets=None, template=None, parents=parents
             )
+            if not template:
+                template = parent_template
+            if inherit_assets:
+                for asset_type in ("scripts", "styles", "devScripts", "devStyles"):
+                    assets[asset_type] = parent_assets[asset_type] + assets[asset_type]
         else:
             error_message = (
                 'Embed: "%s" theme depends on "%s" but this theme is not registered.'
@@ -199,13 +210,12 @@ def embed(blog_id, theme=None, output=None, api_host=None):
         )
         return "Template file not found", 500
 
-    # Compute the assets root.
-    if theme.get("public_url", False):
-        assets_root = theme.get("public_url")
-    else:
-        assets_root = theme_service.get_theme_assets_url(theme_name)
+    # Static assets (images/icons): child themes inherit parent when they have no images/.
+    assets_root = theme_service.get_theme_assets_root(theme)
 
-    theme_settings = theme_service.get_default_settings(theme)
+    theme_settings = theme_service.get_embed_theme_settings(
+        theme, blog, blog_preferences
+    )
     i18n = theme.get("i18n", {})
 
     # the blog level setting overrides the one in theme level

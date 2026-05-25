@@ -4,6 +4,7 @@ export interface IItemMeta {
     title: string;
     description: string;
     url: string;
+    html?: string;
     credit: string;
     original_url: string; // eslint-disable-line camelcase
     provider_name: string; // eslint-disable-line camelcase

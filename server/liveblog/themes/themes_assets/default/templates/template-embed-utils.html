@@ -9,7 +9,7 @@
     function processTwitter() {
         try{
             twttr.widgets.load();
-            console.log('processing twitter embeds');
+            console.log('processing X embeds');
         } catch(err) {console.log('twttr script not loaded')}
     }
 
@@ -36,6 +36,9 @@
 </template>
 
 <template class="lb_consent--awaiting" data-provider-url="http://twitter.com" data-no-placeholder>
+<script async defer src="https://platform.twitter.com/widgets.js" onload="processTwitter()"></script>
+</template>
+<template class="lb_consent--awaiting" data-provider-url="http://x.com" data-no-placeholder>
 <script async defer src="https://platform.twitter.com/widgets.js" onload="processTwitter()"></script>
 </template>
 

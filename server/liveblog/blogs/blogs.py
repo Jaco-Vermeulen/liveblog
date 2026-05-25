@@ -111,12 +111,14 @@ class BlogService(BaseService):
     def _update_theme_settings(self, doc, theme_name):
         theme = get_resource_service("themes").find_one(req=None, name=theme_name)
         if theme:
-            # retrieve the default settings of the theme
-            default_theme_settings = get_resource_service(
-                "themes"
-            ).get_default_settings(theme)
-            # save the theme settings on the blog level
-            doc["theme_settings"] = default_theme_settings
+            # Only inherited options are stored per blog; child-theme options
+            # (logo, language, etc.) come from the theme document / Theme Manager.
+            themes_service = get_resource_service("themes")
+            all_settings = themes_service.get_default_settings(theme)
+            child_keys = themes_service.get_child_theme_option_keys(theme)
+            doc["theme_settings"] = {
+                k: v for k, v in all_settings.items() if k not in child_keys
+            }
 
     def on_create(self, docs):
         self._check_max_active(len(docs))

@@ -1,7 +1,15 @@
 data
 .git*
-Dockerfile
 .DS_Store
+**/__pycache__
+**/.pytest_cache
+client/node_modules
+**/themes_assets/**/node_modules
+client/dist
+client/.tmp
+server/.coverage
+*.md
+!docker/README.md
 **/*.pyc
 __pycache__
 *.pyo

@@ -29,18 +29,24 @@
             </div>
         </template>
     </div>
-{% elif provider_name == 'facebook' and meta.url %}
+{% elif provider_name == 'facebook' and (meta.html or meta.original_url or meta.url) %}
     <div class="item--embed__consent-wrapper">
         <template class="lb_consent--awaiting" data-provider-url="{{ meta.provider_url }}">
-            <div class="fb-post" data-href="{{ meta.url }}" data-show-text="true">
-                <blockquote cite="{{ meta.url }}" class="fb-xfbml-parse-ignore">
-                    <h4><a href="{{ meta.url|decode_uri }}">{{ meta.credit }}</a></h4>
+            {% if meta.html %}
+            {# Same Iframely markup as editor preview — fb-post/XFBML often fails on third-party sites #}
+            <div class="item--embed__element item--embed__generic {{ meta.provider_url }}">{{ meta.html | safe }}</div>
+            {% else %}
+            {% set fb_href = meta.original_url or meta.url %}
+            <div class="fb-post" data-href="{{ fb_href|decode_uri }}" data-show-text="true">
+                <blockquote cite="{{ fb_href|decode_uri }}" class="fb-xfbml-parse-ignore">
+                    <h4><a href="{{ fb_href|decode_uri }}">{{ meta.credit }}</a></h4>
                     <p>{{ meta.title }}</p>
                     <div class="item--embed__description">{{ meta.description }}</div>
                 </blockquote>
             </div>
+            {% endif %}
         </template>
-    </div
+    </div>
 {% elif provider_name == 'instagram' and ref.item.meta.original_url %}
     <div class="item--embed__consent-wrapper">
         <template class="lb_consent--awaiting" data-provider-url="{{ ref.item.meta.provider_url }}">

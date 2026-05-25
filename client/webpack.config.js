@@ -5,6 +5,9 @@ const webpack = require('webpack');
 const lodash = require('lodash');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
+/** Public Iframely key (MD5); same as default theme embed.js — use as key=, not api_key=. */
+const IFRAMELY_PUBLIC_KEY = 'a5ee9a89addd13b7a2e3a48c23e74e8d';
+
 // makeConfig creates a new configuration file based on the passed options.
 module.exports = function makeConfig(grunt) {
     let appConfigPath = path.join(process.cwd(), 'superdesk.config.js');
@@ -67,6 +70,12 @@ module.exports = function makeConfig(grunt) {
                 __SUPERDESK_CONFIG__: JSON.stringify(sdConfig)
             }),
 
+            // Replace the superdesk-core login modal with our Maroela-branded template
+            new webpack.NormalModuleReplacementPlugin(
+                /superdesk-core\/scripts\/core\/auth\/login-modal\.html$/,
+                path.resolve(__dirname, 'app/template/core/auth/login-modal.html')
+            ),
+
             // Using TS transpileOnly mode to speed up things and using this plugin
             // for type checking. https://github.com/Realytics/fork-ts-checker-webpack-plugin
             new ForkTsCheckerWebpackPlugin({
@@ -109,17 +118,22 @@ module.exports = function makeConfig(grunt) {
                         transpileOnly: true,
                     }
                 },
-                {
-                    enforce: 'pre',
-                    test: /\.(ts|tsx|js|jsx)$/,
-                    loader: 'eslint-loader',
-                    exclude: /node_modules/,
-                    options: {
-                        configFile: './.eslintrc.js',
-                        ignorePath: './.eslintignore',
-                        formatter: require('eslint/lib/cli-engine/formatters/stylish')
-                    }
-                },
+                // Skip eslint-loader in Docker/local dev (CRLF on Windows floods the console and blocks WDS).
+                ...(process.env.SUPERDESK_TESTING === 'True' || process.env.SKIP_ESLINT === '1'
+                    ? []
+                    : [{
+                        enforce: 'pre',
+                        test: /\.(ts|tsx|js|jsx)$/,
+                        loader: 'eslint-loader',
+                        exclude: /node_modules/,
+                        options: {
+                            configFile: './.eslintrc.js',
+                            ignorePath: './.eslintignore',
+                            formatter: require('eslint/lib/cli-engine/formatters/stylish'),
+                            emitWarning: true,
+                            failOnError: false,
+                        }
+                    }]),
                 {
                     test: /\.html$/,
                     loader: 'html-loader',
@@ -179,9 +193,9 @@ function getDefaults(grunt) {
             // application version
             version: version || grunt.file.readJSON(path.join(__dirname, 'package.json')).version,
 
-            // iframely settings
+            // iframely settings (public key= param; override with IFRAMELY_KEY env)
             iframely: {
-                key: process.env.IFRAMELY_KEY || ''
+                key: process.env.IFRAMELY_KEY || IFRAMELY_PUBLIC_KEY
             },
 
             // google settings
@@ -214,7 +228,7 @@ const configServer = (grunt) => ({
     // backend server URLs configuration
     server: {
         url: grunt.option('server') || process.env.SUPERDESK_URL || 'http://localhost:5000/api',
-        ws: grunt.option('ws') || process.env.SUPERDESK_WS_URL || 'ws://0.0.0.0:5100'
+        ws: grunt.option('ws') || process.env.SUPERDESK_WS_URL || 'ws://localhost:5100'
     },
 });
 
@@ -241,9 +255,10 @@ const configApp = (grunt) => ({
     // if environment name is not set
     isTestEnvironment: !!grunt.option('environmentName') || !!process.env.SUPERDESK_ENVIRONMENT,
 
-    debug: grunt.option('debug-mode') || false,
+    debug: grunt.option('debug-mode') || !!process.env.SUPERDESK_TESTING,
 
-    embed_protocol: process.env.EMBED_PROTOCOL || "https://",
+    embed_protocol: process.env.EMBED_PROTOCOL
+        || (process.env.SUPERDESK_TESTING ? 'http://' : 'https://'),
 
     // override language translations
     langOverride: {},
@@ -288,7 +303,7 @@ const configLiveblog = (grunt) => ({
         dateTimeTZ: 'YYYY-MM-DD[T]HH:mm:ssZ'
     },
     iframely: {
-        key: grunt.option('iframely-key') || process.env.IFRAMELY_KEY || ''
+        key: grunt.option('iframely-key') || process.env.IFRAMELY_KEY || IFRAMELY_PUBLIC_KEY
     },
     facebookAppId: grunt.option('facebook-appid') || process.env.FACEBOOK_APP_ID || '',
     syndication: process.env.SYNDICATION || false,

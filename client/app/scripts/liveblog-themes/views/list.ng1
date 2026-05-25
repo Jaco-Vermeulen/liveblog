@@ -1,4 +1,4 @@
-<div class="subnav ng-scope themes-manager">
+<div class="subnav m-portal-chrome ng-scope themes-manager">
     <h3 class="subnav__page-title" translate>Theme Manager</h3>
     <div class="subnav__button-stack--square-buttons">
         <form
@@ -27,7 +27,7 @@
     </div>
 </div>
 
-<section class="main-section themelist">
+<section class="main-section themelist m-portal-page">
     <div class="loading-indicator" ng-show="self.loading"><span translate>loading</span></div>
     <div class="list-container">
         <div ng-if="!self.getNotificationCookie('notification1')">

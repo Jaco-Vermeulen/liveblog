@@ -19,6 +19,7 @@ import 'rangy';
 import 'rangy-saverestore';
 import 'ment.io';
 import 'angular-embed/dist/angular-embed';
+import {setupIframelyPublicKeyProvider} from './liveblog-edit/embed/iframely-public-key';
 import 'angular-contenteditable';
 import 'angular-messages';
 import 'lr-infinite-scroll';
@@ -93,6 +94,20 @@ import 'liveblog-common/notify';
 import {EventNames} from './liveblog-common/constants';
 import 'liveblog-features.service';
 
+// Drop stale Superdesk session: token gone but identity left in localStorage shows
+// "Your session has expired" on the login screen before you even submit credentials.
+(function clearStaleSuperdeskSession() {
+    try {
+        if (!localStorage.getItem('sess:token') && localStorage.getItem('sess:user')) {
+            ['sess:token', 'sess:href', 'sess:user', 'sess:id'].forEach((key) => {
+                localStorage.removeItem(key);
+            });
+        }
+    } catch (e) {
+        // ignore private mode / blocked storage
+    }
+})();
+
 // eslint-disable-next-line
 const config = __SUPERDESK_CONFIG__;
 
@@ -158,6 +173,9 @@ angular.module('superdesk.apps', [
 
 angular.module('superdesk.config').constant('config', config);
 
+// iframelyService lives on module "iframely"; decorators on liveblog.edit do not apply.
+angular.module('iframely').config(['iframelyServiceProvider', 'config', setupIframelyPublicKeyProvider]);
+
 const liveblogModules = [
     'liveblog.analytics',
     'liveblog.bloglist',
@@ -193,6 +211,18 @@ liveblog.config(['$routeProvider', '$locationProvider', ($routeProvider, $locati
     $routeProvider.when('/', {redirectTo: '/liveblog'});
     $routeProvider.when('/settings', {redirectTo: '/settings/general'});
 }]);
+
+liveblog.run(['$rootScope', 'session', 'SESSION_EVENTS',
+    function($rootScope, session, SESSION_EVENTS) {
+        $rootScope.$on(SESSION_EVENTS.LOGOUT, () => {
+            session.identity = null;
+            try {
+                localStorage.removeItem('sess:user');
+            } catch (e) {
+                // ignore
+            }
+        });
+    }]);
 
 liveblog.run(['$rootScope', '$timeout', 'notify', 'gettext', 'session',
     function($rootScope, $timeout, notify, gettext, session) {

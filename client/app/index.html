@@ -1,27 +1,30 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="af">
   <head>
     <base href="/">
     <meta charset="utf-8">
-    <title>Liveblog</title>
-    <meta name="description" content="">
+    <title>Maroela Media — Regstreekse blog</title>
+    <meta name="description" content="Maroela Media regstreekse blog redaksie">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="color-scheme" content="light">
     <link rel="icon" href="favicon.ico">
     <style type="text/css">
-    [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-      display: none !important;
-    }
+      html, body {
+        background-color: #f5efe7;
+        color: #1c1917;
+        font-family: "Lato", "Segoe UI", Roboto, sans-serif;
+      }
+      .maroela-portal #main-menu {
+        background: linear-gradient(180deg, #157578 0%, #0d4f52 100%);
+      }
+      [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+        display: none !important;
+      }
     </style>
   </head>
-  <body class="ng-cloak">
-
+  <body class="ng-cloak maroela-portal">
     <div sd-superdesk-view></div>
-
-    <a class="btn btn--primary btn--contact-support" target="_blank" href="https://sourcefabricberlin.zendesk.com/hc/en-us/requests/new">
-        <span>Contact</span> Support
-    </a>
-
     <div class="dropdown help-link liveblog-help" dropdown style="visibility: hidden">
         <div class="dropdown__toggle" dropdown__toggle style="cursor:pointer">Help <b class="caret"></b></div>
         <ul class="dropdown__menu" style="min-width: 90px;">
@@ -38,51 +41,29 @@
         <div class="modal__body">
             <div>
                 <div style="display:inline-block">
-                    <div translate class="text-title">
-                        Sourcefabric Live Blog
-                    </div>
-                    <div translate class="text-subtitle">
-                        Deliver Real News in Real Time
-                    </div>
+                    <div class="text-title">Maroela Media — Regstreekse blog</div>
+                    <div class="text-subtitle">Betroubare nuus in Afrikaans, regstreeks</div>
                 </div>
                 <div style="display:inline-block" class="pull-right">
-                    <img src="images/lb-logo-about.png" alt="Superdesk Logo" class="pull-right">
+                    <img src="images/lb-logo-about.png" alt="Maroela Media" class="pull-right">
                 </div>
             </div>
             <div class="about-page-text">
                 <p>
-                    <div style="font-weight: 700" translate>
-                        Live Blog 3.93.0
-                    </div>
-                    <div translate>
-                        Released on April 10, 2026
-                    </div>
+                    <div style="font-weight: 700" translate>Live Blog 3.93.0</div>
+                    <div translate>Released on April 10, 2026</div>
                 </p>
-                <p translate>
-                    Sourcefabric's <a href="https://www.sourcefabric.org/en/liveblog/" target="_blank">Live Blog</a> is an open source web app that enables journalists to provide immediate and ongoing coverage on rapidly evolving news events. Live Blog is powered by the <a href="http://www.superdesk.org/" target="_blank">Superdesk platform</a> and developed with love.
-                </p>
-                <p translate>
-                    Copyright (c) 2014 - 2026 Sourcefabric z.u. and <a href="https://github.com/liveblog/liveblog/graphs/contributors" target="_blank">contributors</a>.<br/>
-                    Live Blog is released under the <a href="https://github.com/liveblog/liveblog/blob/master/LICENSE" target="_blank">open source license AGPLv3</a>.
-                </p>
-                <p>
-                    <div translate>Looking for help or support?</div>
-                    <div><a href="https://sourcefabricberlin.zendesk.com/hc/en-us/categories/200381349-Live-Blog" target="_blank">User Manual</a></div>
-                </p>
-                <p translate>
-                    Get in touch with us via direct email <a href="mailto:liveblog@sourcefabric.org" target="_top">liveblog@sourcefabric.org</a>
-                </p>
+                <p translate>Sourcefabric Live Blog — open source live blogging.</p>
+                <p translate>Copyright (c) 2014 - 2026 Sourcefabric z.u. Released under <a href="https://github.com/liveblog/liveblog/blob/master/LICENSE" target="_blank">AGPLv3</a>.</p>
             </div>
         </div>
         <div class="modal__footer">
             <button type="button" class="btn btn--primary" translate ng-click="$root.aboutModal = false">CLOSE</button>
         </div>
     </div>
-
     <script src="config.js"></script>
     <script src="sir-trevor.js"></script>
     <script src="app.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.33.1/ace.js" integrity="sha512-WN1CEDE9Js0mEqvtRrNS7GHS+arRJxWVO03zttkQQXEQjwGVcHQ2kMja415m0bNeB3AtYsyjUWJ1BS4wGLta/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
   </body>
 </html>

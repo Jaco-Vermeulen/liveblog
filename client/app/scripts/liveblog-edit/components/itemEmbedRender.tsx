@@ -23,15 +23,24 @@ export const ItemEmbedRender: React.FunctionComponent<IProps> = (props) => {
             </div>
         );
     case 'Facebook':
+        if (props.html) {
+            return (
+                <>
+                    <ItemEmbedGeneric htmlContent={props.html} />
+                    <ItemEmbedInfo {...props} original_url={props.original_url || props.url} />
+                </>
+            );
+        }
+
         return (
             <>
                 <ItemEmbedFacebook
                     {...props}
+                    url={props.original_url || props.url}
                     style={{ maxWidth: 550, width: '100%' }}
                 />
-                <ItemEmbedInfo {...props} original_url={props.url} />
+                <ItemEmbedInfo {...props} original_url={props.original_url || props.url} />
             </>
-
         );
     case 'Twitter':
         return (

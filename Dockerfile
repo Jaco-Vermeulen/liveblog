@@ -1,3 +1,6 @@
+# DEPRECATED — not used by docker compose. Use: docker compose up -d
+# (builds docker/Dockerfile.server + docker/Dockerfile.client instead)
+# nginx configs exist under docker/ but this image paths (/opt/superdesk) do not match WORKDIR (/opt/server)
 # import base image
 FROM ubuntu:bionic
 

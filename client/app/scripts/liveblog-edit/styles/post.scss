@@ -24,7 +24,7 @@
         display:block;
         padding: 20px 20px 8px 20px;
         background-color: white;
-        @include border-radius(3px);
+        @include border-radius(8px);
     }
     &__content {margin-left: 45px;}
     &__header {

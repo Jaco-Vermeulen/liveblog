@@ -1,4 +1,4 @@
-<div class="subnav">
+<div class="subnav m-portal-chrome">
     <div class="button-stack left-stack" >
         <a class="navbtn homebtn" href="/#/liveblog">
             <i class="icon-th-large"></i>
@@ -15,9 +15,9 @@
     </div>
 </div>
 
-<div class="blog-settings-view">
+<div class="blog-settings-view m-portal-settings">
     <div class="settings-page">
-        <div class="subnav">
+        <div class="subnav m-settings-toolbar">
             <h3 class="page-nav-title">Settings</h3>
             <button ng-click="settings.saveAndClose()" class="btn btn--primary pull-right" type="button" translate ng-disabled="!(settings.forms.dirty || settings.forms[settings.tab].$dirty)">Done</button>
             <button ng-click="settings.save()"  class="btn btn--primary pull-right" type="button" translate ng-disabled="!(settings.forms.dirty || settings.forms[settings.tab].$dirty)">Save</button>

@@ -1,6 +1,6 @@
-<div class="subnav">
+<div class="subnav m-portal-chrome m-editor-chrome">
     <div class="button-stack left-stack">
-        <a class="navbtn homebtn" ng-click="backToBlogsList()">
+        <a class="navbtn homebtn" ng-click="backToBlogsList()" title="{{ 'Back to blogs' | translate }}">
             <i class="icon-th-large"></i>
         </a>
     </div>
@@ -17,48 +17,53 @@
     </div>
 </div>
 
-<section class="main-section blogedit">
-    <!-- left sidebar -->
-    <div class="side-menu">
+<section class="main-section blogedit m-portal-editor">
+    <nav class="side-menu m-editor-rail" aria-label="{{ 'Editor navigation' | translate }}">
         <button class="navbtn" ng-click="openPanel('editor')" ng-class="{'active': panelState === 'editor'}"
-            sd-tooltip="{{ 'Editor' | translate }}" flow="right" title="{{ 'Editor' | translate }}">
-            <i class="lb-big-icon-editor" alt="editor"></i>
+            title="{{ 'Editor' | translate }}">
+            <i class="lb-big-icon-editor" alt=""></i>
+            <span class="m-rail-label" translate>Redigeer</span>
         </button>
         <button class="navbtn timeline" ng-click="showTimelineMobile()" ng-class="{'active': panelState === 'timeline'}"
-            sd-tooltip="{{ 'Timeline' | translate }}" flow="right" title="{{ 'Timeline' | translate }}">
+            title="{{ 'Timeline' | translate }}">
             <strong>TL</strong>
+            <span class="m-rail-label" translate>Tydlyn</span>
         </button>
         <button class="navbtn" ng-click="openPanel('contributions')"
-            ng-class="{'active': panelState === 'contributions'}" sd-tooltip="{{ 'Contributions' | translate }}"
-            flow="right" title="{{ 'Contributions' | translate }}">
+            ng-class="{'active': panelState === 'contributions'}" title="{{ 'Contributions' | translate }}">
             <span class="label label-info circle small notification-counter"
                 ng-if="unreadPostsService.countContributions() > 0">
                 {{ unreadPostsService.countContributions() }}
             </span>
-            <i class="lb-big-icon-contributions" alt="contributions"></i>
+            <i class="lb-big-icon-contributions" alt=""></i>
+            <span class="m-rail-label" translate>Bydraes</span>
         </button>
         <button class="navbtn" ng-click="openPanel('scheduled')" ng-class="{'active': panelState === 'scheduled'}"
-            sd-tooltip="{{ 'Scheduled' | translate }}" flow="right" title="{{ 'Scheduled' | translate }}">
+            title="{{ 'Scheduled' | translate }}">
             <span class="label label-info circle small notification-counter"
                 ng-if="unreadPostsService.countScheduled() > 0">{{ unreadPostsService.countScheduled() }}</span>
-            <i class="lb-big-icon-scheduled-posts" alt="scheduled posts"></i>
+            <i class="lb-big-icon-scheduled-posts" alt=""></i>
+            <span class="m-rail-label" translate>Skedule</span>
         </button>
         <button class="navbtn" ng-click="openPanel('drafts')" ng-class="{'active': panelState === 'drafts'}"
-            sd-tooltip="{{ 'Drafts' | translate }}" flow="right" title="{{ 'Drafts' | translate }}">
-            <i class="lb-big-icon-archive" alt="draft posts"></i>
+            title="{{ 'Drafts' | translate }}">
+            <i class="lb-big-icon-archive" alt=""></i>
+            <span class="m-rail-label" translate>Konsepte</span>
         </button>
-        <button class="navbtn" sd-tooltip="{{ 'Ingest' | translate }}" flow="right" title="{{ 'Ingest' | translate }}"
+        <button class="navbtn" title="{{ 'Ingest' | translate }}"
             ng-if="syndicationEnabled" lb-notifications-count ng-click="openPanel('ingest')"
             ng-class="{'active': panelState === 'ingest' || panelState === 'incoming-syndication'}">
+            <span class="m-rail-label" translate>Inname</span>
         </button>
         <button ng-if="blog.blog_preferences.theme.settings.canComment || blog.users_can_comment === 'enabled'"
             class="navbtn ng-cloak" ng-click="openPanel('comments')" ng-class="{'active': panelState === 'comments'}"
-            sd-tooltip="{{ 'Comments' | translate }}" flow="right" title="{{ 'Comments' | translate }}">
+            title="{{ 'Comments' | translate }}">
             <span class="label label-info circle small notification-counter"
                 ng-if="unreadPostsService.countComments() > 0">{{ unreadPostsService.countComments() }}</span>
-            <i class="lb-big-icon-comments" alt="comments posts"></i>
+            <i class="lb-big-icon-comments" alt=""></i>
+            <span class="m-rail-label" translate>Kommentaar</span>
         </button>
-    </div>
+    </nav>
 
     <div class="columns-holder">
         <div class="column column--first">

@@ -23,6 +23,7 @@ import './embed/handlers/instagram';
 import './embed/handlers/facebook';
 import './embed/handlers/pictures';
 import './embed/handlers/twitter';
+import {setupIframelyPublicKeyProvider} from './embed/iframely-public-key';
 
 /**
  * Resolve a blog by route id and redirect to /liveblog if such blog does not exist
@@ -261,8 +262,7 @@ const app = angular.module('liveblog.edit',
     }])
     .config(['embedServiceProvider', 'iframelyServiceProvider', 'config',
         function(embedServiceProvider, iframelyServiceProvider, config) {
-            iframelyServiceProvider.setKey(config.iframely.key);
-            iframelyServiceProvider.useOembed();
+            setupIframelyPublicKeyProvider(iframelyServiceProvider, config);
 
             // don't use noembed as first choice
             embedServiceProvider.setConfig('useOnlyFallback', true);

@@ -1,5 +1,9 @@
 @import '~superdesk-core/styles/sass/variables';
 
+// Maroela web2 — override Superdesk defaults before component SCSS compiles
+$sd-blue: #157578;
+$orange: #c45712;
+
 // Sprite icons path
 // -------------------------
 $iconSpritePath:          "/images/glyphicons-halflings.png";

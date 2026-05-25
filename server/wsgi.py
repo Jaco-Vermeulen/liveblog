@@ -8,7 +8,23 @@
 # AUTHORS and LICENSE files distributed with this source code, or
 # at https://www.sourcefabric.org/superdesk/license
 
-
 from app import get_app
 
-application = get_app()
+_application = None
+
+
+def _load_application():
+    global _application
+    if _application is None:
+        _application = get_app()
+    return _application
+
+
+class LazyWSGIApp(object):
+    """Defer app creation until first request (gunicorn worker is ready)."""
+
+    def __call__(self, environ, start_response):
+        return _load_application()(environ, start_response)
+
+
+application = LazyWSGIApp()

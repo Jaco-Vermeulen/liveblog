@@ -25,5 +25,6 @@ MAIL_USE_SSL=false
 MAIL_USERNAME=user
 MAIL_PASSWORD=pwd
 SENTRY_DSN=
-IFRAMELY_KEY=
+# Public key (same as theme embed.js); use as Iframely key= param, not raw api_key
+IFRAMELY_KEY=a5ee9a89addd13b7a2e3a48c23e74e8d
 

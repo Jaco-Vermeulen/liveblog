@@ -1,0 +1,440 @@
+// Maroela portal — app chrome navigation (hamburger, drawer, layout offsets)
+
+$mm-nav-width: 260px;
+$mm-topbar-height: 56px;
+$mm-nav-breakpoint: 1024px;
+
+body.maroela-portal {
+  overflow: hidden;
+
+  // ── Hide legacy Superdesk chrome noise ─────────────────────────────────────
+  .beta-switch,
+  #main-menu .footer .icon-superdesk,
+  #main-menu .footer .powered {
+    display: none !important;
+  }
+
+  // ── Top bar ────────────────────────────────────────────────────────────────
+  #top-menu {
+    height: $mm-topbar-height !important;
+    min-height: $mm-topbar-height !important;
+    padding: 0 0.75rem 0 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between;
+    background: $maroela-card-bg !important;
+    border-bottom: 1px solid $maroela-card-border;
+    box-shadow: 0 1px 0 rgba(21, 117, 120, 0.12);
+    transition: left 0.28s ease, right 0.28s ease;
+
+    .nav {
+      display: flex;
+      align-items: center;
+      float: none !important;
+      height: $mm-topbar-height;
+    }
+
+    a, button {
+      height: auto !important;
+      line-height: normal !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+
+      &:hover {
+        background: transparent !important;
+      }
+    }
+
+    .sd-top-menu__header,
+    .m-top-nav__title {
+      font-family: $maroela-font !important;
+      font-weight: 700 !important;
+      font-size: 1.0625rem !important;
+      letter-spacing: -0.02em !important;
+      color: $maroela-teal-dark !important;
+      margin: 0 0 0 0.5rem !important;
+      padding: 0 !important;
+      line-height: 1.2 !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 420px;
+    }
+
+    .current-user {
+      width: 44px !important;
+      height: 44px !important;
+      padding: 0 !important;
+      margin: 0 0.25rem !important;
+      border-radius: 50% !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: $maroela-beige2 !important;
+      }
+
+      .avatar img {
+        width: 32px;
+        height: 32px;
+        border: 2px solid $maroela-card-border;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .m-top-nav__start {
+    flex: 1;
+    min-width: 0;
+    gap: 0.25rem;
+  }
+
+  .m-top-nav__end {
+    flex-shrink: 0;
+  }
+
+  .m-top-nav__brand {
+    display: none;
+    align-items: center;
+    margin-left: 0.35rem;
+    flex-shrink: 0;
+
+    img {
+      display: block;
+      height: 28px;
+      width: auto;
+    }
+  }
+
+  // ── Hamburger ──────────────────────────────────────────────────────────────
+  .m-hamburger.collapse-nav {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 0.15rem 0 0.35rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: $maroela-radius-sm !important;
+    background: transparent !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transition: background 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: $maroela-beige2 !important;
+      outline: none;
+    }
+  }
+
+  .m-hamburger__box {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 20px;
+    height: 16px;
+  }
+
+  .m-hamburger__bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 9999px;
+    background: $maroela-teal-dark;
+    transition: transform 0.22s ease, opacity 0.22s ease, width 0.22s ease;
+  }
+
+  #top-menu.menu-open .m-hamburger__bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  #top-menu.menu-open .m-hamburger__bar:nth-child(2) {
+    opacity: 0;
+    width: 0;
+  }
+
+  #top-menu.menu-open .m-hamburger__bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  // ── Drawer backdrop ────────────────────────────────────────────────────────
+  .m-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(28, 25, 23, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+
+    &.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  // ── Side drawer ────────────────────────────────────────────────────────────
+  #main-menu {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: $mm-nav-width !important;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, $maroela-teal 0%, $maroela-teal-dark 100%) !important;
+    box-shadow: 4px 0 32px rgba(13, 79, 82, 0.22);
+    transition: transform 0.28s ease;
+    overflow: hidden;
+
+    .header.m-menu-brand {
+      min-height: $mm-topbar-height;
+      height: auto;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: none !important;
+      flex-shrink: 0;
+
+      .m-menu-brand__logo {
+        max-width: 132px;
+        height: auto;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .m-menu-close {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: $maroela-radius-sm;
+      background: rgba(0, 0, 0, 0.12);
+      color: #fff;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.22);
+      }
+    }
+
+    .content {
+      position: relative !important;
+      top: auto !important;
+      bottom: auto !important;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+
+      > ul {
+        list-style: none;
+        margin: 0;
+        padding: 0.5rem 0 1rem;
+      }
+
+      ul li > a {
+        display: flex !important;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.72rem 1.15rem !important;
+        height: auto !important;
+        line-height: 1.35 !important;
+        font-size: 0.9375rem !important;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9) !important;
+        text-transform: none !important;
+        border-left: 3px solid transparent;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.14) !important;
+          border-top-color: transparent !important;
+          color: #fff !important;
+        }
+      }
+
+      ul li.active > a {
+        background: rgba(0, 0, 0, 0.18) !important;
+        border-left-color: $maroela-accent !important;
+        color: #fff !important;
+      }
+
+      .main-menu_group-header {
+        font-size: 0.6875rem !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.45) !important;
+        padding: 1rem 1.15rem 0.35rem !important;
+        line-height: 1.2 !important;
+      }
+    }
+
+    .footer {
+      position: relative !important;
+      height: auto !important;
+      min-height: auto !important;
+      padding: 1rem 0.75rem !important;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: none !important;
+      flex-shrink: 0;
+
+      &::before {
+        content: "Maroela Media";
+        display: block;
+        font-weight: 700;
+        font-size: 0.8125rem;
+        color: #fff;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.35rem;
+      }
+
+      .about a {
+        color: rgba(255, 255, 255, 0.75) !important;
+        font-size: 0.75rem;
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover {
+          color: #fff !important;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  // ── Main content offsets ───────────────────────────────────────────────────
+  #main-container,
+  .sd-workspace,
+  .main-section {
+    background: $maroela-page-bg !important;
+  }
+
+  #main-container {
+    padding-top: $mm-topbar-height !important;
+    transition: left 0.28s ease, right 0.28s ease;
+  }
+
+  .main-section {
+    top: 104px !important; // 56px top bar + 48px subnav
+  }
+
+  .main-section.search {
+    top: $mm-topbar-height !important;
+  }
+
+  #side-menu {
+    top: $mm-topbar-height !important;
+  }
+
+  // Desktop — persistent sidebar
+  @media (min-width: $mm-nav-breakpoint) {
+    .m-nav-backdrop {
+      display: none !important;
+    }
+
+    #main-menu {
+      transform: none !important;
+    }
+
+    #main-menu .m-menu-close {
+      display: none !important;
+    }
+
+    #top-menu {
+      left: $mm-nav-width !important;
+      right: 0 !important;
+
+      &.menu-open {
+        left: $mm-nav-width !important;
+        right: 0 !important;
+      }
+
+      .m-hamburger.collapse-nav {
+        display: none !important;
+      }
+
+      .m-top-nav__brand {
+        display: none !important;
+      }
+    }
+
+    #main-container {
+      left: $mm-nav-width !important;
+
+      &.menu {
+        left: $mm-nav-width !important;
+      }
+    }
+
+    #side-menu.menu-open {
+      left: $mm-nav-width !important;
+    }
+  }
+
+  // Mobile / tablet — off-canvas drawer
+  @media (max-width: 1023px) {
+    #main-menu {
+      transform: translateX(-100%);
+
+      &.menu-open {
+        transform: translateX(0);
+      }
+    }
+
+    #main-menu .m-menu-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .m-top-nav__brand {
+      display: inline-flex;
+    }
+
+    #top-menu {
+      left: 0 !important;
+      right: 0 !important;
+
+      &.menu-open {
+        left: 0 !important;
+        right: 0 !important;
+      }
+    }
+
+    #main-container {
+      left: 0 !important;
+
+      &.menu {
+        left: $mm-nav-width !important;
+        right: -$mm-nav-width !important;
+      }
+    }
+
+    #side-menu.menu-open {
+      left: $mm-nav-width !important;
+    }
+  }
+}

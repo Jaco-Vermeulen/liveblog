@@ -217,6 +217,46 @@ class ThemesService(BaseService):
 
         return settings
 
+    def get_child_theme_option_keys(self, theme):
+        """Option keys declared on this theme (not inherited from ``extends``)."""
+        return {
+            o.get("name")
+            for o in theme.get("options", [])
+            if o.get("name") and o.get("type") != "groupheading"
+        }
+
+    def get_embed_theme_settings(self, theme, blog, blog_preferences=None):
+        """
+        Resolve settings for embed rendering.
+
+        - Theme document settings (Theme Manager) apply for options owned by the
+          child theme (e.g. Maroela logo / language toggles).
+        - Blog ``theme_settings`` apply for inherited/default options only
+          (posts per page, sort order, etc.).
+        """
+        theme_settings = self.get_default_settings(theme)
+        blog_settings = blog.get("theme_settings") or {}
+        blog_preferences = blog_preferences or blog.get("blog_preferences") or {}
+
+        valid_keys = {
+            o.get("name")
+            for o in self.get_options(theme)
+            if o.get("name") and o.get("type") != "groupheading"
+        }
+        child_keys = self.get_child_theme_option_keys(theme)
+
+        for key in valid_keys:
+            if key in child_keys:
+                continue
+            if key in blog_settings:
+                theme_settings[key] = blog_settings[key]
+
+        pref_language = blog_preferences.get("language")
+        if pref_language:
+            theme_settings["language"] = pref_language
+
+        return theme_settings
+
     def get_default_style_settings(self, theme):
         """
         Get default theme style settings
@@ -335,6 +375,32 @@ class ThemesService(BaseService):
         else:
             base_assets_dir = THEMES_UPLOADS_DIR
         return "/{}/".format("/".join([base_assets_dir, theme_name]))
+
+    def get_theme_assets_root(self, theme):
+        """
+        URL prefix for theme static assets (images, etc.) used in templates.
+
+        Child themes that extend another theme usually reuse the parent ``images``
+        folder; use the parent assets root when the child has no local images.
+        """
+        if theme.get("public_url"):
+            return theme.get("public_url")
+
+        theme_name = theme.get("name")
+        if not theme_name:
+            return self.get_theme_assets_url("default")
+
+        theme_path = self.get_theme_path(theme_name)
+        if os.path.isdir(os.path.join(theme_path, "images")):
+            return self.get_theme_assets_url(theme_name)
+
+        parent_name = theme.get("extends")
+        if parent_name and parent_name != theme_name:
+            parent_theme = self.find_one(req=None, name=parent_name)
+            if parent_theme:
+                return self.get_theme_assets_root(parent_theme)
+
+        return self.get_theme_assets_url(theme_name)
 
     def get_local_themes_packages(self):
         """
@@ -549,9 +615,19 @@ class ThemesService(BaseService):
 
         is_local_theme = self.is_local_theme(theme_name)
         previous_theme = self.find_one(req=None, name=theme_name)
+        # Defaults shipped in theme.json (local themes only).
+        package_settings = (
+            dict(theme.get("settings") or {}) if is_local_theme else {}
+        )
 
         if previous_theme:
             self._save_theme_settings(theme, previous_theme)
+            if package_settings:
+                merged = self.get_default_settings(theme)
+                for key, value in package_settings.items():
+                    if value is not None:
+                        merged[key] = value
+                theme["settings"] = merged
             self._set_style_settings(theme, previous_theme)
             self.replace(previous_theme["_id"], theme, previous_theme)
 
@@ -566,6 +642,12 @@ class ThemesService(BaseService):
             if not is_local_theme:
                 self.check_themes_limit()
 
+            if package_settings:
+                merged = self.get_default_settings(theme)
+                for key, value in package_settings.items():
+                    if value is not None:
+                        merged[key] = value
+                theme["settings"] = merged
             self.create([theme])
             response = dict(status="created", theme=theme)
 
