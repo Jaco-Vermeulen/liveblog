@@ -12,5 +12,11 @@ if [[ ! -f node_modules/.docker-ready ]]; then
   touch node_modules/.docker-ready
 fi
 
+# Fail fast if HTTPS site is configured with HTTP API (mixed content / wrong protocol)
+if [[ "${SUPERDESK_CLIENT_URL:-}" == https://* && "${API_URL}" == http://* ]]; then
+  echo "ERROR: SUPERDESK_CLIENT_URL is https but SUPERDESK_URL is http — fix /opt/liveblog/.env" >&2
+  exit 1
+fi
+
 echo "Starting Liveblog client on :9000 (API=${API_URL}, WS=${WS_URL})..."
 exec grunt --force server --server="${API_URL}" --ws="${WS_URL}"

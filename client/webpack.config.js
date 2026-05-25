@@ -257,8 +257,16 @@ const configApp = (grunt) => ({
 
     debug: grunt.option('debug-mode') || !!process.env.SUPERDESK_TESTING,
 
-    embed_protocol: process.env.EMBED_PROTOCOL
-        || (process.env.SUPERDESK_TESTING ? 'http://' : 'https://'),
+    embed_protocol: (() => {
+        if (process.env.EMBED_PROTOCOL) {
+            return process.env.EMBED_PROTOCOL;
+        }
+        const apiUrl = grunt.option('server') || process.env.SUPERDESK_URL || '';
+        if (apiUrl.startsWith('https')) {
+            return 'https://';
+        }
+        return process.env.SUPERDESK_TESTING ? 'http://' : 'https://';
+    })(),
 
     // override language translations
     langOverride: {},

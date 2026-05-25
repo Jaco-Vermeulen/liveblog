@@ -26,6 +26,7 @@ x-liveblog-env: &liveblog-env
   WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
   SYNDICATION: ${SYNDICATION:-True}
   LIVEBLOG_DEBUG: ${LIVEBLOG_DEBUG:-True}
+  EMBED_PROTOCOL: ${EMBED_PROTOCOL:-}
   C_FORCE_ROOT: "true"
   # Public Iframely key (MD5); editor uses key= on iframe.ly/api/oembed
   IFRAMELY_KEY: ${IFRAMELY_KEY:-a5ee9a89addd13b7a2e3a48c23e74e8d}
