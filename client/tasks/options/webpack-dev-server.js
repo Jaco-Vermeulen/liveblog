@@ -11,6 +11,8 @@ module.exports = function(grunt) {
             webpack: webpackConfig,
             port: 9000,
             host: '0.0.0.0',
+            // Allow nginx/reverse proxy (e.g. maroelablog.jnb1.cloudlet.cloud)
+            disableHostCheck: true,
             contentBase: './dist',
             hot: false,
             headers: {
