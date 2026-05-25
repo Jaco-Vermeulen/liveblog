@@ -1,0 +1,70 @@
+# Liveblog staging — host nginx (not Docker)
+#
+# 1. Copy to nginx:
+#    sudo cp nginx-staging-host.conf.example /etc/nginx/sites-available/liveblog
+#    sudo ln -sf /etc/nginx/sites-available/liveblog /etc/nginx/sites-enabled/
+#    sudo nginx -t && sudo systemctl reload nginx
+#
+# 2. TLS: sudo certbot --nginx -d liveblog.staging.example.com
+#
+# 3. Set deploy-liveblog.sh (or /opt/liveblog/.env):
+#    PUBLIC_HOST="liveblog.staging.example.com"
+#    USE_HTTPS="true"
+#    SUPERDESK_URL="https://liveblog.staging.example.com/api"
+#    SUPERDESK_WS_URL="wss://liveblog.staging.example.com/ws"
+#    SUPERDESK_CLIENT_URL="https://liveblog.staging.example.com"
+#    Then: cd /opt/liveblog && docker compose up -d
+
+upstream liveblog_api {
+    server 127.0.0.1:5000;
+}
+
+upstream liveblog_ws {
+    server 127.0.0.1:5100;
+}
+
+upstream liveblog_ui {
+    server 127.0.0.1:9000;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name liveblog.staging.example.com;
+
+    # certbot will add listen 443 ssl; keep this block for HTTP→HTTPS redirect
+
+    client_max_body_size 50m;
+
+    location /api {
+        proxy_pass http://liveblog_api;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /ws {
+        proxy_pass http://liveblog_ws;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://liveblog_ui;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
