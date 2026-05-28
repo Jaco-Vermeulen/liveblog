@@ -145,6 +145,58 @@
 </script>
 <script async defer src="https://cdn.embed.ly/player-0.1.0.min.js" onload="onPlayerJSReady()"></script>
 
+<script>
+    // Cross-origin safe height sync for responsive embeds.
+    (function () {
+        if (window.top === window.self) return;
+
+        var lastHeight = 0;
+        var rafId = 0;
+        var MIN_HEIGHT = 240;
+
+        function measure() {
+            var docEl = document.documentElement;
+            var body = document.body;
+            var h = Math.max(
+                docEl ? docEl.scrollHeight : 0,
+                docEl ? docEl.offsetHeight : 0,
+                body ? body.scrollHeight : 0,
+                body ? body.offsetHeight : 0
+            );
+            return Math.max(h, MIN_HEIGHT);
+        }
+
+        function postHeight() {
+            rafId = 0;
+            var next = measure();
+            if (next === lastHeight) return;
+            lastHeight = next;
+            try {
+                window.parent.postMessage(
+                    { type: 'liveblog:height', height: next, href: window.location.href },
+                    '*'
+                );
+            } catch (err) {}
+        }
+
+        function schedule() {
+            if (rafId) return;
+            rafId = window.requestAnimationFrame(postHeight);
+        }
+
+        window.addEventListener('load', schedule);
+        window.addEventListener('resize', schedule);
+        window.setInterval(schedule, 1000);
+
+        if (window.MutationObserver && document.body) {
+            var observer = new MutationObserver(schedule);
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        }
+
+        schedule();
+    })();
+</script>
+
 <style class="embedly-css">
     .card .hdr{
       display: none;
