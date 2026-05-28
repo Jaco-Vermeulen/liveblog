@@ -1,0 +1,77 @@
+import { useCallback } from 'react';
+import {
+  markPostDeleted,
+  savePostWithItems,
+  updatePostFlags,
+  updatePostStatus,
+  type Post,
+  type PostItem,
+} from '@/mechanisms/liveblog-api';
+
+export function usePosts(blogId: string) {
+  const savePost = useCallback(
+    async (
+      items: PostItem[],
+      params: {
+        post?: Post | null;
+        post_status?: string;
+        sticky?: boolean;
+        lb_highlight?: boolean;
+        published_date?: string;
+        scheduled?: boolean;
+      } = {},
+    ) => {
+      const existing = params.post ?? undefined;
+      return savePostWithItems(
+        blogId,
+        items,
+        {
+          post_status: params.post_status ?? existing?.post_status ?? 'open',
+          sticky: params.sticky ?? existing?.sticky ?? false,
+          lb_highlight: params.lb_highlight ?? existing?.lb_highlight ?? false,
+          published_date: params.published_date,
+          scheduled: params.scheduled,
+        },
+        existing,
+      );
+    },
+    [blogId],
+  );
+
+  const saveDraft = useCallback(
+    (post: Post | null, items: PostItem[], sticky: boolean, highlight: boolean) =>
+      savePost(items, {
+        post,
+        post_status: 'draft',
+        sticky,
+        lb_highlight: highlight,
+      }),
+    [savePost],
+  );
+
+  const publishPost = useCallback((post: Post) => updatePostStatus(post, 'open'), []);
+
+  const unpublishPost = useCallback((post: Post) => updatePostStatus(post, 'draft'), []);
+
+  const deletePost = useCallback((post: Post) => markPostDeleted(post), []);
+
+  const togglePostPin = useCallback(
+    (post: Post) => updatePostFlags(post, { sticky: !post.sticky }),
+    [],
+  );
+
+  const togglePostHighlight = useCallback(
+    (post: Post) => updatePostFlags(post, { lb_highlight: !post.lb_highlight }),
+    [],
+  );
+
+  return {
+    savePost,
+    saveDraft,
+    publishPost,
+    unpublishPost,
+    deletePost,
+    togglePostPin,
+    togglePostHighlight,
+  };
+}

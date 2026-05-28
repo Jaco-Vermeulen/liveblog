@@ -12,7 +12,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-src/
+/src/
 env/
 .env
 scripts/deploy-liveblog-staging.sh
