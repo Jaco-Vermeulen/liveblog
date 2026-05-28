@@ -1,0 +1,15 @@
+{
+  "name": "liveblog-tribute-light-theme",
+  "version": "1.0.0",
+  "description": "Tribute Light — airy editorial Liveblog embed theme",
+  "private": true,
+  "scripts": {
+    "build:css": "lessc less/tribute-light.less dist/tribute-light.css"
+  },
+  "dependencies": {
+    "liveblog-default-theme": "file:../default"
+  },
+  "devDependencies": {
+    "less": "^4.6.4"
+  }
+}

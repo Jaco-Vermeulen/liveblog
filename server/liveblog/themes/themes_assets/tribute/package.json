@@ -1,0 +1,15 @@
+{
+  "name": "liveblog-tribute-theme",
+  "version": "1.0.0",
+  "description": "Tribute — premium editorial Liveblog embed theme",
+  "private": true,
+  "scripts": {
+    "build:css": "lessc less/tribute.less dist/tribute.css"
+  },
+  "dependencies": {
+    "liveblog-default-theme": "file:../default"
+  },
+  "devDependencies": {
+    "less": "^4.6.4"
+  }
+}

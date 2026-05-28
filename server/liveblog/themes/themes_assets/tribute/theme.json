@@ -1,0 +1,175 @@
+{
+    "label": "Tribute",
+    "name": "tribute",
+    "version": "1.0.0",
+    "asyncTheme": true,
+    "seoTheme": true,
+    "extends": "default",
+    "author": "Liveblog",
+    "license": "AGPL-3.0",
+    "devStyles": ["dist/tribute.css"],
+    "devScripts": [],
+    "styles": ["dist/tribute.css"],
+    "scripts": [],
+    "settings": {
+        "language": "en",
+        "showLiveblogLogo": false,
+        "showTitle": true,
+        "showDescription": true,
+        "showImage": true,
+        "hidePostOrder": false,
+        "hasHighlights": true,
+        "canComment": false,
+        "showTagsDropdown": true,
+        "datetimeFormat": "D MMM YYYY · HH:mm",
+        "showRelativeDate": true,
+        "showUpdateDatetime": true,
+        "showAuthor": true,
+        "showAuthorAvatar": true,
+        "showSharingButtons": true,
+        "showPermalinkButton": true,
+        "postsPerPage": 25,
+        "postOrder": "editorial",
+        "autoApplyUpdates": true,
+        "stickyPosition": "bottom"
+    },
+    "options": [
+        {
+            "name": "language",
+            "label": "Language",
+            "type": "select",
+            "options": [
+                {"value": "af", "label": "Afrikaans"},
+                {"value": "en", "label": "English"}
+            ],
+            "default": "en"
+        },
+        {
+            "name": "showLiveblogLogo",
+            "label": "Show Liveblog logo",
+            "type": "checkbox",
+            "default": false
+        },
+        {
+            "name": "showTitle",
+            "label": "Show blog title",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "showDescription",
+            "label": "Show blog description",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "hasHighlights",
+            "label": "Show highlight filter",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "postsPerPage",
+            "label": "Posts per page",
+            "type": "number",
+            "default": 25
+        },
+        {
+            "name": "postOrder",
+            "label": "Default post order",
+            "type": "select",
+            "options": [
+                {"value": "editorial", "label": "Editorial"},
+                {"value": "newest_first", "label": "Newest first"},
+                {"value": "oldest_first", "label": "Oldest first"}
+            ],
+            "default": "editorial"
+        },
+        {
+            "name": "datetimeFormat",
+            "label": "Date format",
+            "type": "datetimeformat",
+            "default": "D MMM YYYY · HH:mm"
+        }
+    ],
+    "supportStylesSettings": true,
+    "styleOptions": [
+        {
+            "label": "General",
+            "name": "general",
+            "cssSelector": "div.lb-timeline",
+            "columns": 3,
+            "options": [
+                {
+                    "label": "Page background",
+                    "property": "background",
+                    "type": "colorpicker",
+                    "default": "#f6f2ea"
+                },
+                {
+                    "label": "Link colour",
+                    "property": "color",
+                    "type": "colorpicker",
+                    "tagName": "a",
+                    "default": "#9a7224"
+                }
+            ]
+        },
+        {
+            "label": "Buttons",
+            "name": "lb-buttons",
+            "cssSelector": "div.lb-timeline .lb-button",
+            "columns": 4,
+            "options": [
+                {
+                    "label": "Button background",
+                    "property": "background-color",
+                    "type": "colorpicker",
+                    "default": "#12141a"
+                },
+                {
+                    "label": "Button text",
+                    "property": "color",
+                    "type": "colorpicker",
+                    "default": "#f6f2ea"
+                }
+            ]
+        }
+    ],
+    "i18n": {
+        "af": {
+            "Highlights": "Hoogtepunte",
+            "Editorial": "Redaksioneel",
+            "Newest first": "Nuutste eerste",
+            "Oldest first": "Oudste eerste",
+            "Load more posts": "Laai meer plasings",
+            "No posts for now": "Geen plasings op die oomblik nie",
+            "See latest updates": "Sien jongste opdaterings",
+            "See one new update": "Sien een nuwe opdatering",
+            "See new updates": "Sien nuwe opdaterings",
+            " new updates": " nuwe opdaterings",
+            "Filter": "Filter",
+            "Powered by": "Aangedryf deur",
+            "Advertisement": "Advertensie",
+            "Comment": "Kommentaar",
+            "Updated": "Opgedateer"
+        },
+        "en": {
+            "Highlights": "Highlights",
+            "Editorial": "Editorial",
+            "Newest first": "Newest first",
+            "Oldest first": "Oldest first",
+            "Load more posts": "Load more posts",
+            "No posts for now": "No posts for now",
+            "See latest updates": "See latest updates",
+            "See one new update": "See one new update",
+            "See new updates": "See new updates",
+            " new updates": " new updates",
+            "Filter": "Filter",
+            "Powered by": "Powered by",
+            "Advertisement": "Advertisement",
+            "Comment": "Comment",
+            "Updated": "Updated"
+        }
+    }
+}

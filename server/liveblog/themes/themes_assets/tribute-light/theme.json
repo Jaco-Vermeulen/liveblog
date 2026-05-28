@@ -1,0 +1,326 @@
+{
+    "label": "Tribute Light",
+    "name": "tribute-light",
+    "version": "1.0.0",
+    "asyncTheme": true,
+    "seoTheme": true,
+    "extends": "default",
+    "author": "Liveblog",
+    "license": "AGPL-3.0",
+    "devStyles": ["dist/tribute-light.css"],
+    "devScripts": [],
+    "styles": ["dist/tribute-light.css"],
+    "scripts": [],
+    "settings": {
+        "language": "en",
+        "showLiveblogLogo": false,
+        "showTitle": true,
+        "showDescription": true,
+        "showImage": true,
+        "hidePostOrder": false,
+        "hasHighlights": true,
+        "canComment": false,
+        "showTagsDropdown": true,
+        "datetimeFormat": "D MMM YYYY · HH:mm",
+        "showRelativeDate": true,
+        "showUpdateDatetime": true,
+        "showAuthor": true,
+        "showAuthorAvatar": true,
+        "showSharingButtons": true,
+        "showPermalinkButton": true,
+        "showGallery": false,
+        "hidePinnedPostDatetime": false,
+        "authorPosition": "top",
+        "authorNameFormat": "display_name",
+        "postsPerPage": 25,
+        "postOrder": "editorial",
+        "autoApplyUpdates": true,
+        "stickyPosition": "bottom"
+    },
+    "options": [
+        {
+            "name": "language",
+            "label": "Language",
+            "type": "select",
+            "options": [
+                {"value": "af", "label": "Afrikaans"},
+                {"value": "en", "label": "English"}
+            ],
+            "default": "en"
+        },
+        {
+            "name": "show-hide-group",
+            "label": "Show or hide elements",
+            "type": "groupheading"
+        },
+        {
+            "name": "showLiveblogLogo",
+            "label": "Show Liveblog logo",
+            "type": "checkbox",
+            "default": false,
+            "help": "Turn off for branded embeds (recommended for Maroela)."
+        },
+        {
+            "name": "showTitle",
+            "label": "Show the blog title",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "showDescription",
+            "label": "Show the blog description",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "showImage",
+            "label": "Show the blog image",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "hidePostOrder",
+            "label": "Hide sorting options",
+            "type": "checkbox",
+            "default": false,
+            "help": "Hide Editorial / Newest / Oldest in the toolbar"
+        },
+        {
+            "name": "showTagsDropdown",
+            "label": "Allow users filter content in embed",
+            "type": "checkbox",
+            "default": true,
+            "help": "Show or hide the tag filter control in the toolbar"
+        },
+        {
+            "name": "hasHighlights",
+            "label": "Show highlight button",
+            "type": "checkbox",
+            "default": true,
+            "help": "Lets readers filter the timeline to highlighted posts only"
+        },
+        {
+            "name": "canComment",
+            "label": "Users can comment",
+            "type": "checkbox",
+            "default": false,
+            "help": "Enables a commenting form for users (also controlled per blog)"
+        },
+        {
+            "name": "date-group",
+            "label": "Date and time",
+            "type": "groupheading"
+        },
+        {
+            "name": "datetimeFormat",
+            "label": "Date format",
+            "type": "datetimeformat",
+            "default": "D MMM YYYY · HH:mm",
+            "help": "Moment.js format used on posts and update lines"
+        },
+        {
+            "name": "showRelativeDate",
+            "label": "Show relative date for new posts",
+            "type": "checkbox",
+            "default": true,
+            "help": "Recent posts show relative time; older than 8h use the format above"
+        },
+        {
+            "name": "showUpdateDatetime",
+            "label": "Show post update time",
+            "type": "checkbox",
+            "default": true,
+            "help": "Shows the small Opgedateer / Updated line when a post was edited"
+        },
+        {
+            "name": "authors-group",
+            "label": "Authors",
+            "type": "groupheading"
+        },
+        {
+            "name": "showAuthor",
+            "label": "Show the author",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "authorNameFormat",
+            "label": "Author name format",
+            "type": "select",
+            "default": "display_name",
+            "dependsOn": {"showAuthor": true},
+            "options": [
+                {"value": "display_name", "label": "Full name"},
+                {"value": "byline", "label": "Byline"},
+                {"value": "sign_off", "label": "Sign off"}
+            ]
+        },
+        {
+            "name": "authorPosition",
+            "label": "Author info position",
+            "type": "select",
+            "default": "top",
+            "dependsOn": {"showAuthor": true},
+            "options": [
+                {"value": "top", "label": "Top"},
+                {"value": "bottom", "label": "Bottom"}
+            ]
+        },
+        {
+            "name": "showAuthorAvatar",
+            "label": "Show author avatar",
+            "type": "checkbox",
+            "default": true,
+            "dependsOn": {"showAuthor": true}
+        },
+        {
+            "name": "posts-options-group",
+            "label": "Posts and toolbar",
+            "type": "groupheading"
+        },
+        {
+            "name": "stickyPosition",
+            "label": "Pinned post behaviour",
+            "type": "select",
+            "options": [
+                {"value": "bottom", "label": "Show below toolbar"},
+                {"value": "top", "label": "Show above toolbar"}
+            ],
+            "default": "bottom"
+        },
+        {
+            "name": "hidePinnedPostDatetime",
+            "label": "Hide pinned posts date",
+            "type": "checkbox",
+            "default": false
+        },
+        {
+            "name": "showGallery",
+            "label": "Show slideshow gallery",
+            "type": "checkbox",
+            "default": false,
+            "help": "Multiple images in one post appear as a gallery"
+        },
+        {
+            "name": "showSharingButtons",
+            "label": "Show social sharing buttons",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "showPermalinkButton",
+            "label": "Show permalink button",
+            "type": "checkbox",
+            "default": true
+        },
+        {
+            "name": "updates-ordering-group",
+            "label": "Updates and ordering",
+            "type": "groupheading"
+        },
+        {
+            "name": "postsPerPage",
+            "label": "Posts per page",
+            "type": "number",
+            "default": 25
+        },
+        {
+            "name": "postOrder",
+            "label": "Default post order",
+            "type": "select",
+            "options": [
+                {"value": "editorial", "label": "Editorial"},
+                {"value": "newest_first", "label": "Newest first"},
+                {"value": "oldest_first", "label": "Oldest first"}
+            ],
+            "default": "editorial"
+        },
+        {
+            "name": "autoApplyUpdates",
+            "label": "Auto-apply live updates",
+            "type": "checkbox",
+            "default": true,
+            "help": "Turn off to show See new updates prompts"
+        }
+    ],
+    "supportStylesSettings": true,
+    "styleOptions": [
+        {
+            "label": "General",
+            "name": "general",
+            "cssSelector": "div.lb-timeline",
+            "columns": 3,
+            "options": [
+                {
+                    "label": "Page background",
+                    "property": "background",
+                    "type": "colorpicker",
+                    "default": "#f5efe7"
+                },
+                {
+                    "label": "Link colour",
+                    "property": "color",
+                    "type": "colorpicker",
+                    "tagName": "a",
+                    "default": "#c45712"
+                }
+            ]
+        },
+        {
+            "label": "Buttons",
+            "name": "lb-buttons",
+            "cssSelector": "div.lb-timeline .lb-button",
+            "columns": 4,
+            "options": [
+                {
+                    "label": "Button background",
+                    "property": "background-color",
+                    "type": "colorpicker",
+                    "default": "#c45712"
+                },
+                {
+                    "label": "Button text",
+                    "property": "color",
+                    "type": "colorpicker",
+                    "default": "#ffffff"
+                }
+            ]
+        }
+    ],
+    "i18n": {
+        "af": {
+            "Highlights": "Hoogtepunte",
+            "Editorial": "Redaksioneel",
+            "Newest first": "Nuutste eerste",
+            "Oldest first": "Oudste eerste",
+            "Load more posts": "Laai meer plasings",
+            "No posts for now": "Geen plasings op die oomblik nie",
+            "See latest updates": "Sien jongste opdaterings",
+            "See one new update": "Sien een nuwe opdatering",
+            "See new updates": "Sien nuwe opdaterings",
+            " new updates": " nuwe opdaterings",
+            "Filter": "Filter",
+            "Powered by": "Aangedryf deur",
+            "Advertisement": "Advertensie",
+            "Comment": "Kommentaar",
+            "Updated": "Opgedateer"
+        },
+        "en": {
+            "Highlights": "Highlights",
+            "Editorial": "Editorial",
+            "Newest first": "Newest first",
+            "Oldest first": "Oldest first",
+            "Load more posts": "Load more posts",
+            "No posts for now": "No posts for now",
+            "See latest updates": "See latest updates",
+            "See one new update": "See one new update",
+            "See new updates": "See new updates",
+            " new updates": " new updates",
+            "Filter": "Filter",
+            "Powered by": "Powered by",
+            "Advertisement": "Advertisement",
+            "Comment": "Comment",
+            "Updated": "Updated"
+        }
+    }
+}
