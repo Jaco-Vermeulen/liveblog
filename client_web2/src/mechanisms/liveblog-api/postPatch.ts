@@ -6,7 +6,6 @@ const POST_PATCH_KEYS = [
   'post_status',
   'sticky',
   'lb_highlight',
-  'scheduled',
   'published_date',
   'groups',
   'deleted',
