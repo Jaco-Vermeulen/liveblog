@@ -15,6 +15,15 @@ class AccessAuthService(DbAuthService):
     def authenticate(self, credentials):
         self._check_subscription_level()
         self.disable_sd_desktop_notification(credentials)
+
+        # superdesk-core calls user.get('password').encode() before its None check,
+        # which raises AttributeError and breaks the JSON error handler (500).
+        user = get_resource_service("auth_users").find_one(
+            req=None, username=credentials.get("username")
+        )
+        if not user or not user.get("password") or not credentials.get("password"):
+            raise CredentialsAuthError(credentials)
+
         return super().authenticate(credentials)
 
     def _check_subscription_level(self):

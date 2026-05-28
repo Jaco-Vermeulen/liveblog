@@ -1,0 +1,14 @@
+{
+  "date": "2026-05-26",
+  "scope": "phase1",
+  "command": "npm test -- --run",
+  "testFiles": { "passed": 5, "failed": 0, "total": 5 },
+  "tests": { "passed": 17, "failed": 0, "total": 17 },
+  "files": [
+    "src/mechanisms/request-logger/logger.test.ts",
+    "src/mechanisms/liveblog-api/client.test.ts",
+    "src/mechanisms/auth-manager/services/sessionStorage.test.ts",
+    "src/mechanisms/navigation-manager/nav-config.test.ts",
+    "src/components/ui/LbCard.test.tsx"
+  ]
+}

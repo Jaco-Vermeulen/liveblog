@@ -87,7 +87,7 @@ LOG_CONFIG_FILE = env("LOG_CONFIG_FILE", "logging_config.yml")
 LOG_SERVER_ADDRESS = env("LOG_SERVER_ADDRESS", "localhost")
 LOG_SERVER_PORT = int(env("LOG_SERVER_PORT", 5555))
 
-APPLICATION_NAME = env("APP_NAME", "Live Blog")
+APPLICATION_NAME = env("APP_NAME", "Maroela Media Liveblog")
 server_url = urlparse(env("SUPERDESK_URL", "http://localhost:5000/api"))
 CLIENT_URL = env("SUPERDESK_CLIENT_URL", "http://localhost:9000")
 # Add absolute url protocol to make sure it work with email clients
@@ -280,6 +280,10 @@ MAIL_USERNAME = env("MAIL_USERNAME", "liveblogsf@gmail.com")
 MAIL_PASSWORD = env("MAIL_PASSWORD", "fabric2010")
 MAIL_FROM = env("MAIL_FROM", "liveblogsf@gmail.com")
 MAIL_SUPPRESS_SEND = env("MAIL_SUPPRESS_SEND", False)
+EMAIL_LOGO_URL = env(
+    "EMAIL_LOGO_URL",
+    "https://mcusercontent.com/3d8f21b3e2/images/3a06e0a5-db1d-a4ea-cac2-8e87fb118fd0.png",
+)
 ADMINS = [MAIL_FROM]
 
 # LDAP settings

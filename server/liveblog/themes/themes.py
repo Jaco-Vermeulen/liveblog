@@ -60,6 +60,17 @@ STEPS = {"ampTheme": 2, "seoTheme": 2, "default": 1}
 
 THEMES_MAX_RESULTS = 50
 
+# Dev-only paths excluded from theme zip downloads (npm/less artifacts, VCS).
+THEME_ZIP_SKIP_DIRS = frozenset(
+    {
+        "node_modules",
+        ".git",
+        "__pycache__",
+        ".hg",
+        ".svn",
+    }
+)
+
 upload_theme_blueprint = superdesk.Blueprint("upload_theme", __name__)
 download_theme_blueprint = superdesk.Blueprint("download_theme", __name__)
 themes_assets_blueprint = superdesk.Blueprint(
@@ -229,13 +240,16 @@ class ThemesService(BaseService):
         """
         Resolve settings for embed rendering.
 
-        - Theme document settings (Theme Manager) apply for options owned by the
-          child theme (e.g. Maroela logo / language toggles).
-        - Blog ``theme_settings`` apply for inherited/default options only
-          (posts per page, sort order, etc.).
+        - Defaults come from merged theme options (parent + child).
+        - Per-blog ``theme_settings`` override defaults for keys the theme
+          document does not define.
+        - Theme document ``settings`` (Theme Manager / ``theme.json``) win for
+          any key they set, so toggles like show/hide title, image, filter,
+          author, dates, etc. apply consistently on the embed.
         """
         theme_settings = self.get_default_settings(theme)
         blog_settings = blog.get("theme_settings") or {}
+        theme_doc_settings = theme.get("settings") or {}
         blog_preferences = blog_preferences or blog.get("blog_preferences") or {}
 
         valid_keys = {
@@ -243,13 +257,16 @@ class ThemesService(BaseService):
             for o in self.get_options(theme)
             if o.get("name") and o.get("type") != "groupheading"
         }
-        child_keys = self.get_child_theme_option_keys(theme)
 
         for key in valid_keys:
-            if key in child_keys:
+            if key in theme_doc_settings and theme_doc_settings[key] is not None:
                 continue
             if key in blog_settings:
                 theme_settings[key] = blog_settings[key]
+
+        for key, value in theme_doc_settings.items():
+            if key in valid_keys and value is not None:
+                theme_settings[key] = value
 
         pref_language = blog_preferences.get("language")
         if pref_language:
@@ -376,12 +393,30 @@ class ThemesService(BaseService):
             base_assets_dir = THEMES_UPLOADS_DIR
         return "/{}/".format("/".join([base_assets_dir, theme_name]))
 
+    # Present in default and child themes that ship a full images/ override set.
+    _THEME_IMAGES_OVERRIDE_MARKER = "action_link.svg"
+
+    def theme_has_full_image_assets(self, theme_name):
+        """
+        True when a theme ships its own icon set under ``images/``.
+
+        Child themes may add a sparse ``images/`` folder (e.g. brand marks only).
+        Those should still inherit ``assets_root`` from the parent theme.
+        """
+        images_dir = os.path.join(self.get_theme_path(theme_name), "images")
+        if not os.path.isdir(images_dir):
+            return False
+        return os.path.isfile(
+            os.path.join(images_dir, self._THEME_IMAGES_OVERRIDE_MARKER)
+        )
+
     def get_theme_assets_root(self, theme):
         """
         URL prefix for theme static assets (images, etc.) used in templates.
 
         Child themes that extend another theme usually reuse the parent ``images``
-        folder; use the parent assets root when the child has no local images.
+        folder; use the parent assets root when the child has no local images or
+        only adds brand assets (no full icon set).
         """
         if theme.get("public_url"):
             return theme.get("public_url")
@@ -390,8 +425,7 @@ class ThemesService(BaseService):
         if not theme_name:
             return self.get_theme_assets_url("default")
 
-        theme_path = self.get_theme_path(theme_name)
-        if os.path.isdir(os.path.join(theme_path, "images")):
+        if self.theme_has_full_image_assets(theme_name):
             return self.get_theme_assets_url(theme_name)
 
         parent_name = theme.get("extends")
@@ -399,6 +433,8 @@ class ThemesService(BaseService):
             parent_theme = self.find_one(req=None, name=parent_name)
             if parent_theme:
                 return self.get_theme_assets_root(parent_theme)
+            if self.is_local_theme(parent_name):
+                return self.get_theme_assets_root({"name": parent_name})
 
         return self.get_theme_assets_url(theme_name)
 
@@ -838,6 +874,24 @@ def redeploy_a_theme(theme_name):
     )
 
 
+def _zip_theme_directory(zip_file, theme_filepath, zip_folder):
+    """
+    Add theme files to zip, skipping dev-only dirs and unreadable symlinks.
+    """
+    for root, dirs, files in os.walk(theme_filepath):
+        dirs[:] = [name for name in dirs if name not in THEME_ZIP_SKIP_DIRS]
+        zip_root = root.replace(theme_filepath, zip_folder)
+        for file in files:
+            full_path = os.path.join(root, file)
+            if not os.path.isfile(full_path):
+                continue
+            arcname = os.path.join(zip_root, file)
+            try:
+                zip_file.write(full_path, arcname)
+            except OSError as err:
+                logger.warning("Skipping theme file %s: %s", full_path, err)
+
+
 @upload_theme_blueprint.route("/theme-download/<theme_name>", methods=["GET"])
 @cross_origin()
 def download_a_theme(theme_name):
@@ -854,15 +908,7 @@ def download_a_theme(theme_name):
         theme_zip = BytesIO()
         # keep the same nameing convention as we have in github.
         with zipfile.ZipFile(theme_zip, "w") as tz:
-            # add all the files from the theme folder
-            for root, dirs, files in os.walk(theme_filepath):
-                # compile the root for zip.
-                zip_root = root.replace(theme_filepath, zip_folder)
-                # add dir itself (needed for empty dirs)
-                tz.write(os.path.join(root, "."), os.path.join(zip_root, "."))
-                for file in files:
-                    # compile the path in the zip for the file.
-                    tz.write(os.path.join(root, file), os.path.join(zip_root, file))
+            _zip_theme_directory(tz, theme_filepath, zip_folder)
 
         response = make_response(theme_zip.getvalue(), 200)
         response.headers["Cache-Control"] = "no-cache"

@@ -2,7 +2,7 @@
 #
 #   docker compose up -d
 #
-# Then open http://localhost:9000 (admin / admin)
+# Then open http://localhost:9000 (client_web2 admin — admin / admin)
 #
 # Re-seed data: docker compose run --rm -e LIVEBLOG_FORCE_INIT=1 init
 
@@ -38,6 +38,7 @@ x-liveblog-env: &liveblog-env
   MAIL_PASSWORD: ${MAIL_PASSWORD:-}
   MAIL_FROM: ${MAIL_FROM:-}
   MAIL_SUPPRESS_SEND: ${MAIL_SUPPRESS_SEND:-}
+  EMAIL_LOGO_URL: ${EMAIL_LOGO_URL:-https://mcusercontent.com/3d8f21b3e2/images/3a06e0a5-db1d-a4ea-cac2-8e87fb118fd0.png}
 
 services:
   redis:
@@ -111,6 +112,14 @@ services:
     environment: *liveblog-env
     volumes:
       - ./server/liveblog/themes/themes_assets:/opt/server/liveblog/themes/themes_assets:ro
+      - ./server/liveblog/system_themes.py:/opt/server/liveblog/system_themes.py:ro
+      - ./server/liveblog/blogs/embeds.py:/opt/server/liveblog/blogs/embeds.py:ro
+      - ./server/liveblog/auth/db.py:/opt/server/liveblog/auth/db.py:ro
+      - ./server/liveblog/auth/emails.py:/opt/server/liveblog/auth/emails.py:ro
+      - ./server/liveblog/auth/__init__.py:/opt/server/liveblog/auth/__init__.py:ro
+      - ./server/liveblog/auth/email_assets:/opt/server/liveblog/auth/email_assets:ro
+      - ./server/superdesk/templates:/opt/server/superdesk/templates:ro
+      - ./server/liveblog/themes/themes.py:/opt/server/liveblog/themes/themes.py:ro
       - ./server/wsgi.py:/opt/server/wsgi.py:ro
       - ./server/gunicorn_config.py:/opt/server/gunicorn_config.py:ro
       - ./docker:/opt/docker:ro
@@ -139,17 +148,22 @@ services:
       context: .
       dockerfile: docker/Dockerfile.client
     container_name: liveblog-client
-    environment: *liveblog-env
+    environment:
+      <<: *liveblog-env
+      # Vite dev proxy (inside Docker network) — browser uses relative /api on :9000
+      VITE_LIVEBLOG_API_URL: http://server:5000/api
+      VITE_LIVEBLOG_WS_URL: ${SUPERDESK_WS_URL:-ws://localhost:5100}
+      CLIENT_PORT: "9000"
+      VITE_DEV_HOST: "0.0.0.0"
     ports:
       - "9000:9000"
-      - "35729:35729"
     volumes:
-      - ./client:/opt/client
-      - client-node-modules:/opt/client/node_modules
+      - ./client_web2:/opt/client
+      - client-web2-node-modules:/opt/client/node_modules
     depends_on:
       server:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  client-node-modules:
+  client-web2-node-modules:

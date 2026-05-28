@@ -24,7 +24,9 @@ set +u
 python3 manage.py app:initialize_data
 python3 manage.py users:create -u admin -p admin -e 'admin@example.com' --admin --firstname Admin --lastname User || true
 python3 manage.py register_local_themes
-python3 manage.py app:rebuild_elastic_index --index="${ES_INDEX}" || true
+python3 manage.py app:rebuild_elastic_index --index="${ES_INDEX}"
+python3 manage.py app:index_from_mongo --from=blogs
+python3 manage.py app:index_from_mongo --from=archive
 set -u
 
 mkdir -p "$(dirname "${MARKER}")"

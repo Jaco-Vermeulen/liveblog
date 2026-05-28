@@ -49,9 +49,9 @@ First run builds images and can take **15–30 minutes**. Open **http://localhos
 | `register_local_themes` | init |
 | Elasticsearch index + rebuild | init |
 | `honcho` (gunicorn, wamp, celery, beat) | server |
-| `npm ci` + `grunt server` | client |
+| `npm ci` + Vite dev server (`client_web2`) | client |
 
-No profiles. No manual pyenv, pip, manage.py, honcho, npm, or grunt on the host.
+No profiles. No manual pyenv, pip, manage.py, honcho, or npm on the host.
 
 ### Useful commands
 
@@ -82,10 +82,13 @@ behave --format progress2 --logging-level ERROR features/syndication.feature
 ### Production frontend
 
 ```shell
-cd client
-grunt build --force
-grunt connect:build
+cd client_web2
+npm ci
+npm run build
+npm run preview
 ```
+
+Legacy AngularJS admin (`client/`) is retained for reference; use branch `legacy` if you still need the old Grunt build.
 
 ### Optional: host development
 

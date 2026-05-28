@@ -2,9 +2,17 @@ import superdesk
 from apps.auth import AuthResource
 from liveblog.auth.db import AccessAuthService
 from .reset_password import LiveBlogResetPasswordService
+from liveblog.auth import emails as liveblog_emails
 
 from apps.auth.db.reset_password import ResetPasswordResource, ActiveTokensResource
+import apps.auth.db.reset_password as reset_password_module
+import superdesk.emails as superdesk_emails_module
 from apps.auth.db.change_password import ChangePasswordService, ChangePasswordResource
+
+# Afrikaans Maroela templates + web2 /reset-password?token= links.
+# Patch both module attr and superdesk.emails — ResetPasswordService imports the latter by name.
+reset_password_module.send_reset_password_email = liveblog_emails.send_reset_password_email
+superdesk_emails_module.send_reset_password_email = liveblog_emails.send_reset_password_email
 
 
 def init_app(app):

@@ -1,0 +1,23 @@
+{
+  "name": "liveblog-docs4",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Live documentation server for client_web2 plans",
+  "scripts": {
+    "start": "node server/index.js",
+    "export": "node scripts/export.js",
+    "export:public": "node scripts/export.js --public",
+    "build": "node scripts/build.js",
+    "build:public": "node scripts/build.js --public",
+    "electron": "electron electron/main.cjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "marked": "^15.0.6"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0"
+  }
+}

@@ -7,7 +7,34 @@
 | **maroela** | Legacy embed theme (Source Sans 3, `#c45c26`, minimal overrides) |
 | **nuwe-maroela** | Modern embed aligned with **maroela_web2** (Lato, cards, teal toolbar) |
 
-## Client portal (admin) — maroela_web2 UX redux
+## Client portal — web2 (React modernisation)
+
+**Status:** Docker default admin on `main` — `client_web2` at http://localhost:9000.
+
+Greenfield admin client in `client_web2/` — same strategic approach as **maroela_web2** (`maroela_demo/maroela_web2/plans/`).
+
+| Concern | Legacy (`client/`) | Web2 (`client_web2/`) |
+|---------|-------------------|------------------------|
+| Stack | AngularJS 1.6 + Superdesk + Grunt/Webpack 3 | React 19 + Vite 6 + Tailwind 4 |
+| Node | 10 (legacy branch / host-only) | ≥ 20 (Docker `Dockerfile.client`) |
+| Dev URL | legacy branch / host | http://localhost:9000 (compose + `npm run dev`) |
+| **Plans** | — | **`client_web2/plans/`** (15 mechanisms, full README specs) |
+| **README standards** | — | `MECHANISM_README_STANDARD.md`, `README_REQUIREMENTS.md` |
+| Directives | — | `client_web2/plans/directives/` |
+| Agent rules | — | `client_web2/AGENT_INSTRUCTIONS.md` |
+
+```bash
+cd client_web2
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Design tokens match Maroela portal (`--mar-*` in `client_web2/src/index.css`).
+
+---
+
+## Client portal (admin) — legacy maroela_web2 UX redux
 
 Light-mode admin shell. Responsive layout + readable typography in **`portal.css`** (plain CSS, Maroela tokens). **17px** body overrides Superdesk ~12px. Sidebar ≥1024px; hamburger drawer below.
 
@@ -15,7 +42,7 @@ Light-mode admin shell. Responsive layout + readable typography in **`portal.css
 |------|------|
 | `client/app/styles/tailwind/portal.css` | Portal UX: nav, blog grid, forms, login (CSS variables) |
 | `client/tailwind.config.js` | Reserved for future Tailwind build (Node 14+); not in webpack pipeline today |
-| `docker/Dockerfile.client` | Node 10 (Superdesk/node-sass toolchain) |
+| `docker/Dockerfile.client` | Node 20 — `client_web2` Vite dev server |
 | `client/app/styles/sass/maroela-brand.scss` | SCSS tokens + editor/settings (shell/ui) |
 | `client/app/styles/sass/maroela-shell.scss` | Editor rail, modals (legacy SCSS) |
 | `client/app/styles/sass/maroela-portal.scss` | Timeline posts, Sir Trevor, panels |

@@ -41,6 +41,32 @@ THEMES_DIRECTORY = os.path.abspath(
 )
 
 
+def resolve_embed_filter_tags(global_tags, blog, output=None):
+    """
+    Tags shown in the embed filter dropdown.
+
+    Priority: output channel tags → global preferences → unique tags from blog posts.
+    """
+    if output and output.get("tags"):
+        return list(output.get("tags"))
+
+    tags = list(global_tags or [])
+    if tags:
+        return tags
+
+    blog_instance = Blog(blog)
+    posts = blog_instance.posts(wrap=True, limit=250, deleted=False)
+    seen = set()
+    collected = []
+    for post in posts.get("_items", []):
+        for tag in post.get("tags") or []:
+            if tag and tag not in seen:
+                seen.add(tag)
+                collected.append(tag)
+    collected.sort(key=lambda t: str(t).lower())
+    return collected
+
+
 def collect_theme_assets(theme, assets=None, template=None, parents=[]):
     from liveblog.themes import UnknownTheme
 
@@ -242,6 +268,7 @@ def embed(blog_id, theme=None, output=None, api_host=None):
         .get_global_prefs()
         .get("global_tags", [])
     )
+    filter_tags = resolve_embed_filter_tags(global_tags, blog, output)
     blog_schema = ""
 
     if is_seo:
@@ -274,7 +301,7 @@ def embed(blog_id, theme=None, output=None, api_host=None):
 
         # get global_tags if this is not an output channel or if the output channel is not restricted to a set of tags
         if len(dropdown_tags) == 0:
-            dropdown_tags = global_tags
+            dropdown_tags = filter_tags
 
         api_response = {"posts": posts, "stickyPosts": sticky_posts}
         embed_env = theme_service.get_theme_template_env(
@@ -323,7 +350,7 @@ def embed(blog_id, theme=None, output=None, api_host=None):
         "async": asyncTheme,
         "i18n": i18n,
         "hook_urls": bool(TRIGGER_HOOK_URLS),
-        "global_tags": global_tags,
+        "global_tags": filter_tags,
         "schema": blog_schema,
     }
 

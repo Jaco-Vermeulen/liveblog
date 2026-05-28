@@ -4,6 +4,10 @@ data
 **/__pycache__
 **/.pytest_cache
 client/node_modules
+client_web2/node_modules
+client_web2/dist
+client_web2/coverage
+client_web2/.vite
 **/themes_assets/**/node_modules
 client/dist
 client/.tmp

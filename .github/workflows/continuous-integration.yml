@@ -62,15 +62,15 @@ jobs:
         python-version: 3.6
         auto-activate-base: false
 
-    - name: Cache Node.js modules
+    - name: Cache Node.js modules (client_web2)
       uses: actions/cache@v3
       with:
         path: |
           ~/.npm
-          client/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('client/package-lock.json') }}
+          client_web2/node_modules
+        key: ${{ runner.os }}-node-web2-${{ hashFiles('client_web2/package-lock.json', 'client_web2/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-node-web2-
 
     - name: Cache Python packages
       uses: actions/cache@v3
@@ -91,13 +91,20 @@ jobs:
         pytest --ignore=src/ --disable-pytest-warnings -v
         behave --format progress2 --logging-level ERROR
 
-    - name: Install Nodejs dependencies and lint
-      working-directory: ./client
+    - name: Setup Node 20 for client_web2
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: npm
+        cache-dependency-path: client_web2/package-lock.json
+
+    - name: Install client_web2 dependencies, lint, and unit tests
+      working-directory: ./client_web2
       run: |
         npm config set loglevel warn
-        npm install -g grunt-cli
         npm ci
         npm run lint
+        npm test
 
     - name: Initialize app data
       working-directory: ./server
@@ -114,27 +121,43 @@ jobs:
         (nohup honcho start &)
         (nohup sudo python -m smtpd -n -c DebuggingServer localhost:2225 &)
 
-    - name: Build client
-      working-directory: ./client
+    - name: Build and serve client_web2
+      working-directory: ./client_web2
+      env:
+        VITE_LIVEBLOG_API_URL: http://localhost:5000/api
+        VITE_LIVEBLOG_WS_URL: ws://localhost:5100
+        CLIENT_PORT: '9000'
       run: |
-        grunt build --server='http://localhost:5000/api' --ws='ws://localhost:5100'
-        cd dist
-        while [ ! -f index.html ]; do sleep .5; done
-        (nohup python -m http.server 9000 &)
+        npm run build
+        (nohup npm run preview -- --host 0.0.0.0 --port 9000 &)
+        for i in $(seq 1 60); do
+          if curl -sf -o /dev/null http://localhost:9000/; then
+            echo "client_web2 preview ready"
+            break
+          fi
+          sleep 2
+        done
 
-    - name: Setup Node 24 for Playwright
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
+    - name: Wait for API and run auth smoke
+      run: |
+        for i in $(seq 1 60); do
+          if curl -sf -o /dev/null http://localhost:5000/api/; then
+            echo "API ready"
+            break
+          fi
+          sleep 2
+        done
+        node client_web2/scripts/smoke-auth-no-password.mjs
+      env:
+        SUPERDESK_URL: 'http://localhost:5000/api'
 
     - name: Install Playwright dependencies
-      working-directory: ./client/e2e
-      shell: bash
-      run: |
-        npm ci
-        npx playwright install chromium --with-deps
+      working-directory: ./client_web2
+      run: npx playwright install chromium --with-deps
 
-    - name: Run Playwright e2e tests
-      working-directory: ./client/e2e
-      shell: bash
-      run: npx playwright test --reporter=line
+    - name: Run Playwright e2e tests (client_web2)
+      working-directory: ./client_web2
+      env:
+        PLAYWRIGHT_BASE_URL: http://localhost:9000
+        PLAYWRIGHT_SKIP_WEBSERVER: '1'
+      run: npm run test:e2e
