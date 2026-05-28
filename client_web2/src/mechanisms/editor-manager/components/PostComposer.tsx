@@ -18,6 +18,7 @@ import { FreetypeFields } from '../subsystems/freetype-fields';
 import { PollBlockEditor } from '../subsystems/polls';
 import { RichTextBlockEditor } from '../subsystems/rich-text-editor';
 import type { ComposerState, EditorPostType, SirTrevorBlockType } from '../types';
+import { PostTagsSelector } from './PostTagsSelector';
 
 const BLOCK_TYPES: {
   type: SirTrevorBlockType;
@@ -53,6 +54,10 @@ export interface PostComposerProps {
   onSaveDraft: () => void;
   onStickyChange: (sticky: boolean) => void;
   onHighlightChange: (highlight: boolean) => void;
+  globalTags?: string[];
+  allowMultipleTags?: boolean;
+  tagsLoading?: boolean;
+  onTagsChange: (tags: string[]) => void;
 }
 
 export function PostComposer({
@@ -78,6 +83,10 @@ export function PostComposer({
   onSaveDraft,
   onStickyChange,
   onHighlightChange,
+  globalTags = [],
+  allowMultipleTags = true,
+  tagsLoading = false,
+  onTagsChange,
 }: PostComposerProps) {
   const publishLabel = composer.scheduleEnabled ? 'Skeduleer' : 'Publiseer';
 
@@ -274,6 +283,15 @@ export function PostComposer({
           />
         </LbFormField>
       )}
+
+      <PostTagsSelector
+        availableTags={globalTags}
+        selectedTags={composer.tags}
+        allowMultiple={allowMultipleTags}
+        disabled={isSubmitting}
+        isLoading={tagsLoading}
+        onChange={onTagsChange}
+      />
 
       <footer className="m-editor-composer__actions">
         {!isEditing && (

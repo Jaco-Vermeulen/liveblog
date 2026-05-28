@@ -17,6 +17,7 @@ export function usePosts(blogId: string) {
         post_status?: string;
         sticky?: boolean;
         lb_highlight?: boolean;
+        tags?: string[];
         published_date?: string;
         scheduled?: boolean;
       } = {},
@@ -29,6 +30,7 @@ export function usePosts(blogId: string) {
           post_status: params.post_status ?? existing?.post_status ?? 'open',
           sticky: params.sticky ?? existing?.sticky ?? false,
           lb_highlight: params.lb_highlight ?? existing?.lb_highlight ?? false,
+          tags: params.tags,
           published_date: params.published_date,
           scheduled: params.scheduled,
         },
@@ -39,12 +41,19 @@ export function usePosts(blogId: string) {
   );
 
   const saveDraft = useCallback(
-    (post: Post | null, items: PostItem[], sticky: boolean, highlight: boolean) =>
+    (
+      post: Post | null,
+      items: PostItem[],
+      sticky: boolean,
+      highlight: boolean,
+      tags: string[] = [],
+    ) =>
       savePost(items, {
         post,
         post_status: 'draft',
         sticky,
         lb_highlight: highlight,
+        tags,
       }),
     [savePost],
   );

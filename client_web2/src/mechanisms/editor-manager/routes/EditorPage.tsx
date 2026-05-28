@@ -16,6 +16,7 @@ import { useEditorWebSocket } from '../hooks/useEditorWebSocket';
 import { usePostComposer } from '../hooks/usePostComposer';
 import { usePosts } from '../hooks/usePosts';
 import { useEditorEmbedRuntime } from '../hooks/useEditorEmbedRuntime';
+import { useEditorLiveblogSettings } from '../hooks/useEditorLiveblogSettings';
 import { useTimeline } from '../hooks/useTimeline';
 import { applyPostsNotification } from '../services/applyPostsNotification';
 import type { EditorPanel } from '../types';
@@ -33,6 +34,8 @@ export function EditorPage() {
   const timelineApi = useTimeline(id ?? '', { panel });
   const postsApi = usePosts(id ?? '');
   const composerApi = usePostComposer(blog);
+  const { globalTags, allowMultipleTags, isLoading: tagsSettingsLoading } =
+    useEditorLiveblogSettings();
 
   useEditorEmbedRuntime();
 
@@ -229,6 +232,10 @@ export function EditorPage() {
             onSaveDraft={() => void composerApi.saveDraft().then(() => timelineApi.fetchNewPage())}
             onStickyChange={composerApi.setSticky}
             onHighlightChange={composerApi.setHighlight}
+            globalTags={globalTags}
+            allowMultipleTags={allowMultipleTags}
+            tagsLoading={tagsSettingsLoading}
+            onTagsChange={composerApi.setTags}
           />
         }
         timeline={timeline}

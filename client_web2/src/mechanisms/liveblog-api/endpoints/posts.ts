@@ -132,6 +132,7 @@ export async function savePostWithItems(
     post_status: postPatch.post_status ?? existingPost?.post_status ?? 'open',
     sticky: postPatch.sticky ?? existingPost?.sticky ?? false,
     lb_highlight: postPatch.lb_highlight ?? existingPost?.lb_highlight ?? false,
+    tags: postPatch.tags ?? existingPost?.tags,
     scheduled: postPatch.scheduled ?? existingPost?.scheduled,
     published_date: postPatch.published_date ?? existingPost?.published_date,
     ...(savedItems.length > 0 ? { groups: buildNewPostGroups(savedItems) } : {}),

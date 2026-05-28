@@ -32,6 +32,7 @@ export interface ComposerState {
   blocks: SirTrevorBlock[];
   sticky: boolean;
   highlight: boolean;
+  tags: string[];
   scheduleEnabled: boolean;
   scheduledDate: string | null;
   isDirty: boolean;

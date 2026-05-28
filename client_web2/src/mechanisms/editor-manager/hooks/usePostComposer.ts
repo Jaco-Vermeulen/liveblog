@@ -29,6 +29,7 @@ export function usePostComposer(blog: Blog | undefined) {
   const [blocks, setBlocks] = useState<SirTrevorBlock[]>([defaultBlock()]);
   const [sticky, setSticky] = useState(false);
   const [highlight, setHighlight] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduledDate, setScheduledDate] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -45,6 +46,7 @@ export function usePostComposer(blog: Blog | undefined) {
     blocks,
     sticky,
     highlight,
+    tags,
     scheduleEnabled,
     scheduledDate,
     isDirty,
@@ -88,6 +90,7 @@ export function usePostComposer(blog: Blog | undefined) {
         }
         setSticky(Boolean(post.sticky));
         setHighlight(Boolean(post.lb_highlight));
+        setTags(Array.isArray(post.tags) ? [...post.tags] : []);
         const future = scheduleEnabledFromPost(post.published_date);
         setScheduleEnabled(future);
         setScheduledDate(future ? post.published_date ?? null : null);
@@ -97,6 +100,7 @@ export function usePostComposer(blog: Blog | undefined) {
         setBlocks([defaultBlock()]);
         setSticky(false);
         setHighlight(false);
+        setTags([]);
         setScheduleEnabled(false);
         setScheduledDate(null);
       }
@@ -191,6 +195,11 @@ export function usePostComposer(blog: Blog | undefined) {
     setIsDirty(true);
   }, []);
 
+  const setTagsAction = useCallback((next: string[]) => {
+    setTags(next);
+    setIsDirty(true);
+  }, []);
+
   const setScheduleEnabledAction = useCallback((enabled: boolean) => {
     setScheduleEnabled(enabled);
     if (!enabled) {
@@ -241,6 +250,7 @@ export function usePostComposer(blog: Blog | undefined) {
         post_status: 'open',
         sticky,
         lb_highlight: highlight,
+        tags,
         ...resolveSchedulePatch(),
       });
       reset();
@@ -256,6 +266,7 @@ export function usePostComposer(blog: Blog | undefined) {
     resolveSchedulePatch,
     savePost,
     sticky,
+    tags,
   ]);
 
   const saveDraftAction = useCallback(async () => {
@@ -263,12 +274,12 @@ export function usePostComposer(blog: Blog | undefined) {
     const items = resolveItems();
     setIsSubmitting(true);
     try {
-      await saveDraft(currentPost, items, sticky, highlight);
+      await saveDraft(currentPost, items, sticky, highlight, tags);
       reset();
     } finally {
       setIsSubmitting(false);
     }
-  }, [blogId, currentPost, highlight, reset, resolveItems, saveDraft, sticky]);
+  }, [blogId, currentPost, highlight, reset, resolveItems, saveDraft, sticky, tags]);
 
   const scheduledDatetimeLocal = useMemo(
     () => isoToDatetimeLocal(scheduledDate),
@@ -295,6 +306,7 @@ export function usePostComposer(blog: Blog | undefined) {
     isFreetypeMode,
     setSticky,
     setHighlight,
+    setTags: setTagsAction,
     setScheduleEnabled: setScheduleEnabledAction,
     setScheduledDateFromLocal,
     scheduledDatetimeLocal,
