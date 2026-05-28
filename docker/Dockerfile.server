@@ -29,6 +29,7 @@ RUN python -m pip install --upgrade 'pip<=20.2.3' 'setuptools<50' wheel \
 COPY server/ /opt/server/
 COPY docker/Procfile-dev /opt/docker/Procfile-dev
 COPY docker/scripts/server-entrypoint.sh /docker/scripts/server-entrypoint.sh
+COPY docker/scripts/ensure-elastic-sync.sh /docker/scripts/ensure-elastic-sync.sh
 COPY docker/scripts/init-data.sh /docker/scripts/init-data.sh
 COPY docker/scripts/wait-for-infra.sh /docker/scripts/wait-for-infra.sh
 
