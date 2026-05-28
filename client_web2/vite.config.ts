@@ -7,6 +7,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiTarget = env.VITE_LIVEBLOG_API_URL ?? 'http://localhost:5000';
   const liveblogOrigin = apiTarget.replace(/\/api\/?$/, '');
+  const allowedHosts = [
+    'localhost',
+    '127.0.0.1',
+    'live.nuwe-maroela.co.za',
+    ...(env.VITE_ALLOWED_HOSTS
+      ? env.VITE_ALLOWED_HOSTS.split(',').map((host) => host.trim()).filter(Boolean)
+      : []),
+  ];
 
   return {
     plugins: [react(), tailwindcss()],
@@ -19,6 +27,7 @@ export default defineConfig(({ mode }) => {
       host: process.env.VITE_DEV_HOST === '0.0.0.0' ? '0.0.0.0' : true,
       port: Number(process.env.CLIENT_PORT ?? 9000),
       strictPort: true,
+      allowedHosts,
       proxy: {
         '/api': {
           target: liveblogOrigin,
