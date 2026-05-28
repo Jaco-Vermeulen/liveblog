@@ -15,6 +15,7 @@ export interface PreviewDeviceFrameProps {
   deviceMode: PreviewDeviceMode;
   orientation: PreviewDeviceOrientation;
   themePreviewUrl: string | null;
+  refreshToken?: number;
   embedHandlers: PreviewEmbedHandlers | null;
   draftSlot?: ReactNode;
   /** React fallback when iframe is cross-origin or embed URL missing */
@@ -25,6 +26,7 @@ export function PreviewDeviceFrame({
   deviceMode,
   orientation,
   themePreviewUrl,
+  refreshToken = 0,
   embedHandlers,
   draftSlot,
   children,
@@ -40,6 +42,18 @@ export function PreviewDeviceFrame({
   );
 
   const useLiveTheme = Boolean(themePreviewUrl) && !useFallback;
+  const iframeSrc = useMemo(() => {
+    if (!themePreviewUrl) return null;
+    try {
+      const parsed = new URL(themePreviewUrl, window.location.origin);
+      parsed.searchParams.set('_lbpv', String(refreshToken));
+      return parsed.toString();
+    } catch {
+      const join = themePreviewUrl.includes('?') ? '&' : '?';
+      return `${themePreviewUrl}${join}_lbpv=${encodeURIComponent(String(refreshToken))}`;
+    }
+  }, [themePreviewUrl, refreshToken]);
+
   const isDesktop = deviceMode === 'desktop';
   const isPhone = viewport.frameMode === 'phone';
 
@@ -123,11 +137,11 @@ export function PreviewDeviceFrame({
         ref={scrollRef}
         className={`lb-preview-device__scroll${useLiveTheme ? ' lb-preview-device__scroll--iframe' : ''}`}
       >
-        {useLiveTheme && themePreviewUrl ? (
+        {useLiveTheme && iframeSrc ? (
           <div className="lb-preview-iframe-stack">
             {draftSlot ? <div className="lb-preview-draft-overlay">{draftSlot}</div> : null}
             <ThemeIframePreview
-              src={themePreviewUrl}
+              src={iframeSrc}
               handlers={embedHandlers}
               onNeedsFallback={() => setUseFallback(true)}
             />

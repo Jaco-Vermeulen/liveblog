@@ -27,6 +27,7 @@ export function EditorPage() {
   const { blog, isLoading, error } = useBlog(id);
   const [panel, setPanel] = useState<EditorPanel>('editor');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [previewRefreshToken, setPreviewRefreshToken] = useState(0);
   const { viewMode, setViewMode, resetToEdit } = useEditorViewMode();
 
   const timelineApi = useTimeline(id ?? '', { panel });
@@ -67,6 +68,9 @@ export function EditorPage() {
     try {
       await composerApi.submit();
       await timelineApi.fetchNewPage();
+      if (!composerApi.composer.scheduleEnabled) {
+        setPreviewRefreshToken((prev) => prev + 1);
+      }
       setActionMessage(
         composerApi.composer.scheduleEnabled ? 'Plasing geskeduleer.' : 'Plasing gepubliseer.',
       );
@@ -81,6 +85,7 @@ export function EditorPage() {
     try {
       await postsApi.deletePost(post);
       timelineApi.removePost(post._id);
+      setPreviewRefreshToken((prev) => prev + 1);
     } catch {
       setActionMessage('Kon nie plasing verwyder nie.');
     }
@@ -90,6 +95,7 @@ export function EditorPage() {
     try {
       await postsApi.publishPost(post);
       await timelineApi.fetchNewPage();
+      setPreviewRefreshToken((prev) => prev + 1);
     } catch {
       setActionMessage('Kon nie plasing publiseer nie.');
     }
@@ -100,6 +106,7 @@ export function EditorPage() {
     try {
       await postsApi.unpublishPost(post);
       timelineApi.removePost(post._id);
+      setPreviewRefreshToken((prev) => prev + 1);
       setActionMessage('Plasing ontpubliseer.');
     } catch {
       setActionMessage('Kon nie plasing ontpubliseer nie.');
@@ -177,6 +184,7 @@ export function EditorPage() {
           <BlogLivePreviewPane
             blog={blog}
             immersive={viewMode === 'preview'}
+            refreshToken={previewRefreshToken}
             posts={timelineApi.posts}
             allowPinHighlight={canEditPosts}
             onPostSelect={composerApi.loadPost}

@@ -14,6 +14,7 @@ export interface BlogLivePreviewPaneProps {
   blog: Blog;
   immersive?: boolean;
   draftSlot?: ReactNode;
+  refreshToken?: number;
   posts: Post[];
   allowPinHighlight?: boolean;
   onPostSelect: (post: Post) => void;
@@ -28,6 +29,7 @@ export function BlogLivePreviewPane({
   blog,
   immersive = false,
   draftSlot,
+  refreshToken = 0,
   posts,
   allowPinHighlight = true,
   onPostSelect,
@@ -189,6 +191,7 @@ export function BlogLivePreviewPane({
           deviceMode={deviceMode}
           orientation={orientation}
           themePreviewUrl={themePreviewUrl}
+          refreshToken={refreshToken}
           embedHandlers={embedHandlers}
           draftSlot={draftSlot}
         >
