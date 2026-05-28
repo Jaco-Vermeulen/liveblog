@@ -1,12 +1,13 @@
-/* Liveblog responsive embed helper (parent page script)
- * Targets: <iframe id="liveblog-iframe" data-responsive="yes" ...>
+/* Liveblog responsive embed helper (parent page script).
+ * Supports cross-origin embeds via postMessage and same-origin via direct measurement.
  */
 (function () {
   var IFRAME_ID = 'liveblog-iframe';
   var MIN_HEIGHT = 320;
   var MAX_HEIGHT = 200000;
   var POLL_MS = 600;
-  var lastHeight = 0;
+  var RESPONSIVE_SELECTOR = 'iframe#liveblog-iframe, iframe[data-liveblog-embed]';
+  var lastHeights = new WeakMap();
   var pollTimer = null;
 
   function clampHeight(value) {
@@ -16,8 +17,9 @@
     return Math.ceil(n);
   }
 
-  function getIframe() {
-    return document.getElementById(IFRAME_ID);
+  function getResponsiveIframes() {
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(RESPONSIVE_SELECTOR));
+    return nodes.filter(isResponsive);
   }
 
   function isResponsive(iframe) {
@@ -29,8 +31,8 @@
 
   function setIframeHeight(iframe, height) {
     var next = clampHeight(height);
-    if (next === lastHeight) return;
-    lastHeight = next;
+    if (next === lastHeights.get(iframe)) return;
+    lastHeights.set(iframe, next);
     iframe.style.height = next + 'px';
   }
 
@@ -53,13 +55,13 @@
   }
 
   function tick() {
-    var iframe = getIframe();
-    if (!isResponsive(iframe)) return;
-    var measured = measureIframeContentHeight(iframe);
-    if (measured != null) {
-      // small buffer prevents cut-off due to margins/layout jitter
-      setIframeHeight(iframe, measured + 8);
-    }
+    getResponsiveIframes().forEach(function (iframe) {
+      var measured = measureIframeContentHeight(iframe);
+      if (measured != null) {
+        // small buffer prevents cut-off due to margins/layout jitter
+        setIframeHeight(iframe, measured + 8);
+      }
+    });
   }
 
   function startPolling() {
@@ -68,24 +70,38 @@
   }
 
   // Optional postMessage support for cross-origin embeds where child posts height.
+  function findIframeByWindow(sourceWin) {
+    var frames = getResponsiveIframes();
+    for (var i = 0; i < frames.length; i += 1) {
+      if (frames[i].contentWindow === sourceWin) return frames[i];
+    }
+    return null;
+  }
+
   function onMessage(event) {
-    var iframe = getIframe();
-    if (!isResponsive(iframe)) return;
     var data = event && event.data;
     if (!data || typeof data !== 'object') return;
     if (data.type !== 'liveblog:height') return;
     if (typeof data.height !== 'number' && typeof data.height !== 'string') return;
+    var iframe = findIframeByWindow(event.source);
+    if (!iframe) {
+      var fallback = document.getElementById(IFRAME_ID);
+      if (isResponsive(fallback)) iframe = fallback;
+    }
+    if (!iframe) return;
     setIframeHeight(iframe, data.height);
   }
 
   function init() {
-    var iframe = getIframe();
-    if (!isResponsive(iframe)) return;
-    iframe.setAttribute('scrolling', 'no');
-    iframe.style.width = iframe.style.width || '100%';
+    var iframes = getResponsiveIframes();
+    if (!iframes.length) return;
+    iframes.forEach(function (iframe) {
+      iframe.setAttribute('scrolling', 'no');
+      iframe.style.width = iframe.style.width || '100%';
+      iframe.addEventListener('load', tick);
+    });
     tick();
     startPolling();
-    iframe.addEventListener('load', tick);
     window.addEventListener('resize', tick);
     window.addEventListener('message', onMessage);
   }
