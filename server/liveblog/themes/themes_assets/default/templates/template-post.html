@@ -76,10 +76,10 @@
     {% if post and post.groups and post.groups[1] and post.groups[1].refs and (post.groups[1].refs | length > 0) %}
         {% for ref in post.groups[1].refs %}
           {% if ref.item and ref.item.item_type %}
-            {% if ref.item.item_type == "image" and ref.item.meta.media %}
+            {% if ref.item.item_type == "image" and ref.item.meta and ref.item.meta.media %}
               {% set isNotTheLastItem = loop.index0 + 1 < loop.length %}
-              {% set isNextItemOfImageType = post.groups[1].refs[loop.index0 + 1].item.item_type == "image" %}
-              {% set isPreviousItemOfImageType = post.groups[1].refs[loop.index0 - 1].item.item_type == "image" %}
+              {% set isNextItemOfImageType = isNotTheLastItem and post.groups[1].refs[loop.index0 + 1].item and post.groups[1].refs[loop.index0 + 1].item.item_type == "image" %}
+              {% set isPreviousItemOfImageType = loop.index0 > 0 and post.groups[1].refs[loop.index0 - 1].item and post.groups[1].refs[loop.index0 - 1].item.item_type == "image" %}
               {% set inGalleryLoop = loop.index0 > 0 and isPreviousItemOfImageType %}
 
               {% if settings.showGallery and isNotTheLastItem and isNextItemOfImageType and (loop.index0 - 1 < 0 or not inGalleryLoop) %}
@@ -97,7 +97,10 @@
               {% endif %}
 
               <!-- image item start -->
-              <div class="lb-item {% if ref.item.meta.media.renditions.original.height > ref.item.meta.media.renditions.original.width %}portrait{% endif %}{{ref.item.item_type}}">
+              {% set originalRendition = ref.item.meta.media.renditions.original if ref.item.meta.media.renditions and ref.item.meta.media.renditions.original else {} %}
+              {% set originalHeight = originalRendition.height | default(0) %}
+              {% set originalWidth = originalRendition.width | default(0) %}
+              <div class="lb-item {% if originalHeight > originalWidth %}portrait{% endif %}{{ref.item.item_type}}">
             {% else %}
               <!-- item start -->
               <div class="lb-item {{ref.item.item_type}}">
@@ -123,7 +126,7 @@
             </div>
 
             <!-- item end -->
-            {% if settings.showGallery and ref.item.item_type == "image" and loop.index0 - 1 >= 0 and post.groups[1].refs[loop.index0 - 1].item.item_type == "image" and post.groups[1].refs[loop.index0 + 1].item.item_type != "image" %}    </div>
+            {% if settings.showGallery and ref.item.item_type == "image" and loop.index0 > 0 and post.groups[1].refs[loop.index0 - 1].item and post.groups[1].refs[loop.index0 - 1].item.item_type == "image" and (not isNotTheLastItem or not isNextItemOfImageType) %}    </div>
                   <span class="lb-slideshow_prev">
                       <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 501.5 501.5"><g><path fill="#2E435A" d="M302.67 90.877l55.77 55.508L254.575 250.75 358.44 355.116l-55.77 55.506L143.56 250.75z"/></g></svg>
                   </span>

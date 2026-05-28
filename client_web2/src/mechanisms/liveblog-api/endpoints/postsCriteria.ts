@@ -22,9 +22,15 @@ const TIMELINE_SORTS: Record<TimelineSort, Record<string, Record<string, unknown
   editorial_asc: { order: { order: 'asc', missing: '_last', unmapped_type: 'long' } },
 };
 
+const PUBLISHED_DATE_TOLERANCE_MS = 5 * 60 * 1000;
+
 function getPostFilters(filters: PostFilters): PostsQueryCriteria['postFilter'] {
   const operator = filters.scheduled ? 'gte' : 'lte';
-  const publishedDate = filters.maxPublishedDate ?? new Date().toISOString();
+  const now = Date.now();
+  const toleranceAdjustedNow = filters.scheduled
+    ? new Date(now - PUBLISHED_DATE_TOLERANCE_MS).toISOString()
+    : new Date(now + PUBLISHED_DATE_TOLERANCE_MS).toISOString();
+  const publishedDate = filters.maxPublishedDate ?? toleranceAdjustedNow;
   return {
     range: {
       published_date: { [operator]: publishedDate },

@@ -11,12 +11,13 @@ function blockTextValue(raw: unknown): string {
 }
 
 function buildSyntheticMedia(url: string): Record<string, unknown> {
+  const fallbackRendition = { href: url, width: 1, height: 1 };
   return {
     renditions: {
-      thumbnail: { href: url },
-      viewImage: { href: url },
-      baseImage: { href: url },
-      original: { href: url },
+      thumbnail: fallbackRendition,
+      viewImage: fallbackRendition,
+      baseImage: fallbackRendition,
+      original: fallbackRendition,
     },
   };
 }
