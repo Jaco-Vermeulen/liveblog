@@ -57,9 +57,13 @@ export function EditorPage() {
         addPost: timelineApi.addPost,
         fetchNewPage: () => timelineApi.fetchNewPage(),
       });
+      if (data.created || data.updated || data.deleted || data.scheduled_done) {
+        setPreviewRefreshToken((prev) => prev + 1);
+      }
     },
     onRemoveTimelinePost: ({ post_id }) => {
       timelineApi.removePost(post_id);
+      setPreviewRefreshToken((prev) => prev + 1);
     },
   });
 
@@ -214,6 +218,8 @@ export function EditorPage() {
             onRemoveBlock={composerApi.removeBlock}
             onRemoveBlockIfEmpty={composerApi.removeBlockIfEmpty}
             onUpdateBlock={composerApi.updateBlock}
+            onUploadImage={composerApi.uploadImage}
+            imageUploadingIndex={composerApi.imageUploadingIndex}
             onPostTypeChange={composerApi.setPostType}
             onFreetypeDataChange={composerApi.updateFreetypeData}
             onScheduleEnabledChange={composerApi.setScheduleEnabled}

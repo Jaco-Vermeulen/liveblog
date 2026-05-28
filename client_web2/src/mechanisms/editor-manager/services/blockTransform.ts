@@ -67,13 +67,26 @@ function blockToPostItem(block: SirTrevorBlock): PostItem | null {
       };
     }
     case 'Image': {
-      const url = String(block.data.url ?? block.data.picture_url ?? '').trim();
+      const media = (block.data.media as Record<string, unknown> | undefined) ?? undefined;
+      const renditions =
+        media && typeof media === 'object' && 'renditions' in media
+          ? (media.renditions as Record<string, { href?: string }>)
+          : undefined;
+      const renditionUrl =
+        renditions?.viewImage?.href ??
+        renditions?.baseImage?.href ??
+        renditions?.thumbnail?.href;
+      const url = String(block.data.url ?? block.data.picture_url ?? renditionUrl ?? '').trim();
       if (!url) return null;
+      const meta = {
+        ...((block.data.meta as Record<string, unknown> | undefined) ?? {}),
+        ...(media ? { media } : {}),
+      };
       return {
         item_type: 'image',
         text: url,
         group_type: 'default',
-        meta: block.data.meta as Record<string, unknown> | undefined,
+        meta,
       };
     }
     default:
@@ -137,10 +150,25 @@ function itemToBlock(item: PostItem): SirTrevorBlock | null {
     };
   }
   if (item.item_type === 'image') {
+    const media =
+      item.meta && typeof item.meta === 'object' && 'media' in item.meta
+        ? (item.meta.media as Record<string, unknown>)
+        : undefined;
+    const renditions =
+      media && typeof media === 'object' && 'renditions' in media
+        ? (media.renditions as Record<string, { href?: string }>)
+        : undefined;
+    const fallbackUrl =
+      renditions?.viewImage?.href ??
+      renditions?.baseImage?.href ??
+      renditions?.thumbnail?.href ??
+      item.text ??
+      '';
     return {
       type: 'Image',
       data: {
-        url: item.text ?? '',
+        url: fallbackUrl,
+        media,
         meta: item.meta,
       },
     };

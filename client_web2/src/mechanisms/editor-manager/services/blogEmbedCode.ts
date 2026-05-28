@@ -1,12 +1,12 @@
 import type { Blog } from '@/mechanisms/liveblog-api';
 
 export function resolveEmbedClientOrigin(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
   const apiBase = import.meta.env.VITE_LIVEBLOG_API_URL as string | undefined;
   if (apiBase) {
     return apiBase.replace(/\/api\/?$/i, '');
-  }
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
   }
   return 'http://localhost:5000';
 }

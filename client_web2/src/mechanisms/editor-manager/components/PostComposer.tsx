@@ -42,6 +42,8 @@ export interface PostComposerProps {
   onRemoveBlock: (index: number) => void;
   onRemoveBlockIfEmpty: (index: number) => void;
   onUpdateBlock: (index: number, data: Record<string, unknown>) => void;
+  onUploadImage: (index: number, file: File) => Promise<void> | void;
+  imageUploadingIndex?: number | null;
   onPostTypeChange: (postType: EditorPostType) => void;
   onFreetypeDataChange: (data: Record<string, unknown>) => void;
   onScheduleEnabledChange: (enabled: boolean) => void;
@@ -65,6 +67,8 @@ export function PostComposer({
   onRemoveBlock,
   onRemoveBlockIfEmpty,
   onUpdateBlock,
+  onUploadImage,
+  imageUploadingIndex = null,
   onPostTypeChange,
   onFreetypeDataChange,
   onScheduleEnabledChange,
@@ -155,6 +159,29 @@ export function PostComposer({
                 />
               ) : block.type === 'Image' ? (
                 <LbFormField label="Beeld-URL" htmlFor={`block-image-${index}`}>
+                  <div className="mb-2">
+                    <LbButton
+                      type="button"
+                      variant="secondary"
+                      disabled={imageUploadingIndex === index}
+                      onClick={() =>
+                        document.getElementById(`block-image-file-${index}`)?.click()
+                      }
+                    >
+                      {imageUploadingIndex === index ? 'Laai op…' : 'Laai beeld op'}
+                    </LbButton>
+                    <input
+                      id={`block-image-file-${index}`}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) void onUploadImage(index, file);
+                        e.currentTarget.value = '';
+                      }}
+                    />
+                  </div>
                   <LbInput
                     id={`block-image-${index}`}
                     type="url"
