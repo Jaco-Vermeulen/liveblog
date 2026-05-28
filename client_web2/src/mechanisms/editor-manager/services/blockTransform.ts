@@ -10,6 +10,17 @@ function blockTextValue(raw: unknown): string {
   return isRichTextHtml(s) ? normalizeRichTextHtml(s) : s.trim();
 }
 
+function buildSyntheticMedia(url: string): Record<string, unknown> {
+  return {
+    renditions: {
+      thumbnail: { href: url },
+      viewImage: { href: url },
+      baseImage: { href: url },
+      original: { href: url },
+    },
+  };
+}
+
 export function blocksToPostItems(blocks: SirTrevorBlock[]): PostItem[] {
   return blocks
     .map((block) => blockToPostItem(block))
@@ -78,9 +89,10 @@ function blockToPostItem(block: SirTrevorBlock): PostItem | null {
         renditions?.thumbnail?.href;
       const url = String(block.data.url ?? block.data.picture_url ?? renditionUrl ?? '').trim();
       if (!url) return null;
+      const resolvedMedia = media ?? buildSyntheticMedia(url);
       const meta = {
         ...((block.data.meta as Record<string, unknown> | undefined) ?? {}),
-        ...(media ? { media } : {}),
+        media: resolvedMedia,
       };
       return {
         item_type: 'image',
