@@ -17,6 +17,13 @@ function mockPost(id: string, overrides: Partial<Post> = {}): Post {
 }
 
 describe('findPostIdInArticle', () => {
+  it('reads id from data-post-id on article', () => {
+    const article = document.createElement('article');
+    article.className = 'lb-post list-group-item';
+    article.setAttribute('data-post-id', '6a1422edad6d7cc47db776ee');
+    expect(findPostIdInArticle(article)).toBe('6a1422edad6d7cc47db776ee');
+  });
+
   it('reads id from permalink anchor', () => {
     const article = document.createElement('article');
     article.className = 'lb-post list-group-item';
@@ -36,8 +43,7 @@ describe('syncEmbedEditorTools', () => {
   it('injects toolbar with edit action', () => {
     const doc = document.implementation.createHTMLDocument('embed');
     doc.body.innerHTML = `
-      <article class="lb-post list-group-item">
-        <div class="lb-post-permalink"><a id="post-abcdefgh" href="#">#</a></div>
+      <article class="lb-post list-group-item" data-post-id="post-abcdefgh">
       </article>
     `;
 

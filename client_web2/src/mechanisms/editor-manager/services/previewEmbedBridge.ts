@@ -69,8 +69,11 @@ const ICONS = {
   trash: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
 } as const;
 
-/** Resolve post id from theme DOM (classic/angular permalink anchor). */
+/** Resolve post id from theme DOM (`data-post-id` or permalink anchor). */
 export function findPostIdInArticle(article: Element): string | null {
+  const fromAttr = article.getAttribute('data-post-id')?.trim();
+  if (fromAttr && fromAttr.length >= 8) return fromAttr;
+
   const link =
     article.querySelector<HTMLAnchorElement>('.lb-post-permalink a[id]') ??
     article.querySelector<HTMLAnchorElement>('a[id]');

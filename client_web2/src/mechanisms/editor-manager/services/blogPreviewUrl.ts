@@ -15,17 +15,30 @@ function serverOrigin(): string {
   return 'http://localhost:5000';
 }
 
+function sameOriginEmbedPath(url: URL): string | null {
+  if (!url.pathname.startsWith('/embed')) return null;
+  return `${url.pathname}${url.search}`;
+}
+
 /**
  * URL of the themed public embed (real theme CSS + templates from server).
- * Dev: same-origin path via Vite `/embed` proxy.
+ * Uses a same-origin `/embed/...` path when possible so the admin UI can inject
+ * post toolbars into the iframe (cross-origin embeds fall back to React cards).
  */
 export function resolveBlogThemePreviewUrl(blog: Blog): string {
   const raw = blog.public_url?.trim();
   if (raw) {
     try {
-      const u = new URL(raw);
-      if (import.meta.env.DEV && u.pathname.startsWith('/embed')) {
-        return `${u.pathname}${u.search}`;
+      const u = new URL(raw, typeof window !== 'undefined' ? window.location.origin : undefined);
+      const embedPath = sameOriginEmbedPath(u);
+      if (embedPath && import.meta.env.DEV) {
+        return embedPath;
+      }
+      if (embedPath && typeof window !== 'undefined') {
+        const admin = window.location;
+        if (u.hostname === admin.hostname) {
+          return embedPath;
+        }
       }
       return raw;
     } catch {
@@ -35,6 +48,9 @@ export function resolveBlogThemePreviewUrl(blog: Blog): string {
 
   const path = `/embed/${blog._id}`;
   if (import.meta.env.DEV) {
+    return path;
+  }
+  if (typeof window !== 'undefined') {
     return path;
   }
   return `${serverOrigin()}${path}`;
