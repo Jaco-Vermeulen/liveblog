@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from bson.json_util import dumps as bson_dumps
 from eve.io.mongo import MongoJSONEncoder
 from flask import current_app as app
-from flask import json, render_template, request, url_for
+from flask import json, render_template, request, send_file, url_for
 from superdesk import get_resource_service
 from superdesk.errors import SuperdeskApiError
 from liveblog.blogs.blog import Blog
@@ -36,6 +36,7 @@ logger = logging.getLogger("superdesk")
 embed_blueprint = superdesk.Blueprint(
     "embed_liveblog", __name__, template_folder="templates"
 )
+EMBED_JS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "embed.js")
 THEMES_DIRECTORY = os.path.abspath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, "themes")
 )
@@ -192,6 +193,21 @@ def render_bloglist_embed(api_host=None, assets_root=None):
         "assets_root": assets_root,
     }
     return render_template("blog-list-embed.html", **scope)
+
+
+@embed_blueprint.route("/embed.js")
+def embed_js():
+    """Responsive iframe helper for parent pages (WordPress, CMS)."""
+    if not os.path.isfile(EMBED_JS_PATH):
+        logger.error("embed.js missing at %s", EMBED_JS_PATH)
+        return "embed.js not found", 404
+    response = send_file(
+        EMBED_JS_PATH,
+        mimetype="application/javascript",
+        max_age=300,
+    )
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 
 @embed_blueprint.route("/embed/<blog_id>", defaults={"theme": None, "output": None})

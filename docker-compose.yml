@@ -114,6 +114,7 @@ services:
       - ./server/liveblog/themes/themes_assets:/opt/server/liveblog/themes/themes_assets:ro
       - ./server/liveblog/system_themes.py:/opt/server/liveblog/system_themes.py:ro
       - ./server/liveblog/blogs/embeds.py:/opt/server/liveblog/blogs/embeds.py:ro
+      - ./server/liveblog/blogs/embed.js:/opt/server/liveblog/blogs/embed.js:ro
       - ./server/liveblog/auth/db.py:/opt/server/liveblog/auth/db.py:ro
       - ./server/liveblog/auth/emails.py:/opt/server/liveblog/auth/emails.py:ro
       - ./server/liveblog/auth/__init__.py:/opt/server/liveblog/auth/__init__.py:ro
