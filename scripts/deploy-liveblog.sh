@@ -245,9 +245,9 @@ write_nginx_locations() {
     }
 
     location = /embed.js {
-        proxy_pass http://liveblog_ui;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        alias ${INSTALL_DIR:-/opt/liveblog}/client_web2/public/embed.js;
+        default_type application/javascript;
+        add_header Cache-Control "public, max-age=300";
     }
 
     location ^~ /embed/ {
