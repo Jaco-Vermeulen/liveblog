@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
           target: liveblogOrigin,
           changeOrigin: true,
         },
-        '/embed': {
+        '/embed/': {
           target: liveblogOrigin,
           changeOrigin: true,
         },
@@ -52,6 +52,24 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: Number(process.env.CLIENT_PORT ?? 9000),
       strictPort: true,
+      proxy: {
+        '/api': {
+          target: liveblogOrigin,
+          changeOrigin: true,
+        },
+        '/embed/': {
+          target: liveblogOrigin,
+          changeOrigin: true,
+        },
+        '/themes_assets': {
+          target: liveblogOrigin,
+          changeOrigin: true,
+        },
+        '/themes_uploads': {
+          target: liveblogOrigin,
+          changeOrigin: true,
+        },
+      },
     },
   };
 });
