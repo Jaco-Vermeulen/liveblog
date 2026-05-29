@@ -60,7 +60,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     location /api { proxy_pass http://liveblog_api; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }
     location /embed { proxy_pass http://liveblog_api; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }
-    location /themes_assets { proxy_pass http://liveblog_api; proxy_set_header Host \$host; }
+    location /themes_assets/ { alias ${INSTALL_DIR:-/opt/liveblog}/server/liveblog/themes/themes_assets/; }
     location /themes_uploads { proxy_pass http://liveblog_api; proxy_set_header Host \$host; }
     location /ws { proxy_pass http://liveblog_ws; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection \"Upgrade\"; proxy_set_header Host \$host; }
     location / { proxy_pass http://liveblog_ui; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }
@@ -80,7 +80,7 @@ server {
     client_max_body_size 50m;
     location /api { proxy_pass http://liveblog_api; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }
     location /embed { proxy_pass http://liveblog_api; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }
-    location /themes_assets { proxy_pass http://liveblog_api; proxy_set_header Host \$host; }
+    location /themes_assets/ { alias ${INSTALL_DIR:-/opt/liveblog}/server/liveblog/themes/themes_assets/; }
     location /themes_uploads { proxy_pass http://liveblog_api; proxy_set_header Host \$host; }
     location /ws { proxy_pass http://liveblog_ws; proxy_http_version 1.1; proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "Upgrade"; proxy_set_header Host \$host; }
     location / { proxy_pass http://liveblog_ui; proxy_set_header Host \$host; proxy_set_header X-Forwarded-Proto \$scheme; }

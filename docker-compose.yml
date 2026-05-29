@@ -120,6 +120,8 @@ services:
       - ./server/liveblog/auth/email_assets:/opt/server/liveblog/auth/email_assets:ro
       - ./server/superdesk/templates:/opt/server/superdesk/templates:ro
       - ./server/liveblog/themes/themes.py:/opt/server/liveblog/themes/themes.py:ro
+      - ./server/liveblog/themes/__init__.py:/opt/server/liveblog/themes/__init__.py:ro
+      - ./server/liveblog/themes/utils.py:/opt/server/liveblog/themes/utils.py:ro
       - ./server/wsgi.py:/opt/server/wsgi.py:ro
       - ./server/gunicorn_config.py:/opt/server/gunicorn_config.py:ro
       - ./docker:/opt/docker:ro

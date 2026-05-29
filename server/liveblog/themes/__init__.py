@@ -6,7 +6,8 @@ from .themes import (
 )
 from .themes import UnknownTheme
 from .commands import RegisterLocalThemesCommand, RegisterThemeCommand
-from .utils import send_uploaded_static_file
+from .themes import LOCAL_THEMES_DIRECTORY
+from .utils import send_themes_assets_static_file, send_uploaded_static_file
 
 __all__ = [
     "upload_theme_blueprint",
@@ -23,8 +24,16 @@ def init_app(app):
 
     # endpoint for uploading a theme
     app.register_blueprint(upload_theme_blueprint, url_prefix=app.api_prefix or None)
-    # endpoint to serve static files for themes
-    app.register_blueprint(themes_assets_blueprint)
+
+    # Bundled theme static files — explicit route (blueprint static is 404 without url_prefix).
+    try:
+        app.add_url_rule(
+            "/themes_assets/<path:filename>",
+            endpoint="themes_assets.static",
+            view_func=send_themes_assets_static_file(app, LOCAL_THEMES_DIRECTORY),
+        )
+    except AssertionError:
+        pass
 
     # Additional endpoint to serve uploaded themes (used when s3 storage is disabled)
     try:
