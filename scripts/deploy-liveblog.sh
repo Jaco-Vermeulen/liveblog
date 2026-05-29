@@ -244,7 +244,13 @@ write_nginx_locations() {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    location /embed {
+    location = /embed.js {
+        proxy_pass http://liveblog_ui;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location ^~ /embed/ {
         proxy_pass http://liveblog_api;
         proxy_redirect off;
         proxy_set_header Host \$host;
@@ -253,10 +259,8 @@ write_nginx_locations() {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    location /themes_assets {
-        proxy_pass http://liveblog_api;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+    location /themes_assets/ {
+        alias ${INSTALL_DIR:-/opt/liveblog}/server/liveblog/themes/themes_assets/;
     }
 
     location /themes_uploads {
