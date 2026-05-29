@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEFAULT="$ROOT/server/liveblog/themes/themes_assets/default"
 TRIBUTE="$ROOT/server/liveblog/themes/themes_assets/tribute-light"
 
-echo "[build-themes] default (gulp, Node 11 Docker)..."
+echo "[build-themes] default (gulp, Node 11 Docker, NO uglify)..."
 docker run --rm -v "$DEFAULT:/w" -w /w node:11.15.0 bash -c '
   sed -i "s/deb.debian.org/archive.debian.org/g" /etc/apt/sources.list
   sed -i "s|security.debian.org|archive.debian.org|g" /etc/apt/sources.list
@@ -14,7 +14,8 @@ docker run --rm -v "$DEFAULT:/w" -w /w node:11.15.0 bash -c '
   apt-get install -y -qq --allow-unauthenticated git python make g++
   rm -rf node_modules
   npm install
-  npm run build
+  # production gulp uglifies JS and breaks the embed bundle — build without minify
+  NODE_ENV=development npx gulp production
 '
 
 echo "[build-themes] tribute-light CSS..."
