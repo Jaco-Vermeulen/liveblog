@@ -92,6 +92,8 @@ server/liveblog/themes/themes_assets/*
 !server/liveblog/themes/themes_assets/tribute/**
 !server/liveblog/themes/themes_assets/tribute-light
 !server/liveblog/themes/themes_assets/tribute-light/**
+!server/liveblog/themes/themes_assets/tribute-ultimate
+!server/liveblog/themes/themes_assets/tribute-ultimate/**
 # Never commit theme-local node_modules
 server/liveblog/themes/themes_assets/*/node_modules/
 

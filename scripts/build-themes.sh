@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEFAULT="$ROOT/server/liveblog/themes/themes_assets/default"
 TRIBUTE="$ROOT/server/liveblog/themes/themes_assets/tribute-light"
+TRIBUTE_ULTIMATE="$ROOT/server/liveblog/themes/themes_assets/tribute-ultimate"
 DIST_CSS="default-a9e961ac13.css"
 DIST_JS="default-a77864ded7.js"
 
@@ -41,7 +42,11 @@ fs.writeFileSync('$DEFAULT/theme.json', JSON.stringify(t, null, 4) + '\n');
 echo "[build-themes] tribute-light CSS..."
 (cd "$TRIBUTE" && npm ci && npm run build:css)
 
+echo "[build-themes] tribute-ultimate CSS..."
+(cd "$TRIBUTE_ULTIMATE" && npm ci && npm run build:css)
+
 echo "[build-themes] done."
 echo "  default: dist/$DIST_CSS dist/$DIST_JS"
 echo "  tribute-light: dist/tribute-light.css"
+echo "  tribute-ultimate: dist/tribute-ultimate.css"
 echo "Commit dist/ + theme.json + rev-manifest.json, then push."

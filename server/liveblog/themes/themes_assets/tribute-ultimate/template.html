@@ -1,0 +1,216 @@
+<!-- inject:template-content -->
+{% macro translate(text) %}{% if not options.i18n[settings.language] %}{{ text }}{% elif not options.i18n[settings.language][text] %}{{ text }}{% else %}{{ options.i18n[settings.language][text] }}{% endif %}{% endmacro %}
+
+{% include "template-embed-utils.html" %}
+
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.add('tribute-ultimate-root');
+  function applyScheme(scheme) {
+    if (scheme === 'dark') {
+      root.setAttribute('data-color-scheme', 'dark');
+    } else {
+      root.setAttribute('data-color-scheme', 'light');
+    }
+  }
+  try {
+    var param = new URLSearchParams(window.location.search).get('colorScheme');
+    if (param === 'dark' || param === 'light') {
+      applyScheme(param);
+    } else {
+      applyScheme('light');
+    }
+  } catch (e) {
+    applyScheme('light');
+  }
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'lb:colorScheme') {
+      applyScheme(e.data.data);
+    }
+  });
+}());
+</script>
+
+{% include "template-watermark.html" %}
+{% include "template-poll-utils.html" %}
+{% include "template-gdpr-consent-placeholder.html" %}
+
+<div data-timeline class="lb-timeline tribute-ultimate-timeline {{ settings.language }}">
+  {% block timeline_top %}
+
+  {% if settings.showTitle and blog.title %}
+    <header class="tribute-masthead">
+      <h1 class="tribute-masthead__title">{{ blog.title }}</h1>
+    </header>
+  {% endif %}
+
+  {% if settings.showDescription and blog.description %}
+    <div class="tribute-lead description">{{ blog.description | safe }}</div>
+  {% endif %}
+
+  {% if settings.showImage and blog.picture_url %}
+    <figure class="tribute-hero">
+      <img class="tribute-hero__image" src="{{ blog.picture_url }}" alt="" />
+    </figure>
+  {% endif %}
+
+  {% if settings.stickyPosition == 'top' and api_response.stickyPosts._items|length %}
+    <div class="timeline-top timeline-top--loaded">
+      <section data-timeline-sticky class="lb-posts list-group">
+        {% for post in api_response.stickyPosts._items %}
+          {% if not post.deleted %}
+            {% include "template-post.html" %}
+          {% endif %}
+        {% endfor %}
+      </section>
+    </div>
+  {% endif %}
+
+  {% endblock %}
+
+  {% block timeline_header %}
+  {% set hasFilterTags = (output and global_tags|length > 1) or (not output and global_tags and global_tags|length > 0) %}
+  {% set showToolbarActions = settings.hasHighlights or settings.canComment or settings.showLiveblogLogo or output.logo_url %}
+  {% set showToolbar = (not settings.hidePostOrder) or (settings.showTagsDropdown and hasFilterTags) or showToolbarActions %}
+  {% if showToolbar %}
+  <div class="header-bar tribute-toolbar">
+    {% if not settings.hidePostOrder %}
+      <nav class="sorting-bar tribute-toolbar__sort" aria-label="Sort posts">
+        <div class="sorting-bar__orders">
+          <button type="button" class="sorting-bar__dropdownBtn" data-js-sort_dropdown_button>
+            {% if settings.postOrder == 'editorial' %}
+              {{ translate("Editorial") }}
+            {% elif settings.postOrder == 'newest_first' %}
+              {{ translate("Newest first") }}
+            {% elif settings.postOrder == 'oldest_first' %}
+              {{ translate("Oldest first") }}
+            {% endif %}
+          </button>
+          <div class="sorting-bar__dropdownContent" role="menu">
+            <div class="sorting-bar__order {%if settings.postOrder == 'editorial' %}sorting-bar__order--active{% endif %}">
+              <button type="button" role="menuitem" data-js-orderby_editorial>{{ translate("Editorial") }}</button>
+            </div>
+            <div class="sorting-bar__order {%if settings.postOrder == 'newest_first' %}sorting-bar__order--active{% endif %}">
+              <button type="button" role="menuitem" data-js-orderby_descending>{{ translate("Newest first") }}</button>
+            </div>
+            <div class="sorting-bar__order {%if settings.postOrder == 'oldest_first'%}sorting-bar__order--active{% endif %}">
+              <button type="button" role="menuitem" data-js-orderby_ascending>{{ translate("Oldest first") }}</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    {% endif %}
+
+    {% if settings.showTagsDropdown and hasFilterTags %}
+    <div class="tags-filter-bar tribute-toolbar__filter">
+      <div class="tags-filter-bar__orders">
+        <button type="button" class="tags-filter-bar__dropdownBtn" data-js-tags_filter_dropdown_button>{{ translate("Filter") }}</button>
+        <div class="tags-filter-bar__dropdownContent">
+          {% for tag in global_tags -%}
+          <div class="tags-filter-bar__order">
+            <label>
+              <input type="checkbox" value="{{ tag }}" data-tags-filter-option/>
+              {{ tag }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if showToolbarActions %}
+    <div class="header-bar__actions tribute-toolbar__actions">
+      {% if settings.hasHighlights %}
+        <button type="button" class="header-bar__highlight tribute-toolbar__chip" data-js-show-highlighted>
+          <span>{{ translate('Highlights') }}</span>
+        </button>
+      {% endif %}
+      {% if settings.canComment %}
+        <button type="button" class="header-bar__comment tribute-toolbar__chip" data-js-show-comment-dialog>
+          {{ translate("Comment") }}
+        </button>
+      {% endif %}
+      {% if settings.showLiveblogLogo or output.logo_url %}
+        {% if output.logo_url %}
+        <div class="header-bar__logo tribute-toolbar__brand">
+          <img src="{{ output.logo_url }}" alt="" />
+        </div>
+        {% else %}
+        <a class="header-bar__logo tribute-toolbar__brand" href="https://www.liveblog.pro" target="_blank" rel="noopener">
+          <span>{{ translate("Powered by") }}</span>
+          <img src="{{ assets_root }}images/lb-logo.svg" alt="" />
+        </a>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% endblock %}
+
+  {% if settings.canComment %}
+    {% include "template-comment.html" %}
+  {% endif %}
+
+  {% block timeline_body %}
+  <div class="timeline-body timeline-body--loaded tribute-stream">
+      <div id="shared-post-container" class="shared-post-container mod--displaynone">
+        <div data-latest-updates class="lb-post new-updates tribute-live-cta">
+          <div>{{ translate("See latest updates") }}</div>
+        </div>
+        <div class="post-wrap"></div>
+      </div>
+      <div data-one-new-update class="lb-post new-updates tribute-live-cta mod--displaynone">
+        <div>{{ translate("See one new update") }}</div>
+      </div>
+      <div data-new-updates class="lb-post new-updates tribute-live-cta mod--displaynone">
+        <div>{{ translate("See new updates") }}</div>
+      </div>
+      <div data-counted-updates class="lb-post new-updates tribute-live-cta mod--displaynone">
+        <div>
+          <span id="data-counted-updates-length-container"></span>
+          {{ translate(" new updates") }}
+        </div>
+      </div>
+
+    {% if settings.stickyPosition == 'bottom' and api_response.stickyPosts._items|length %}
+      <section data-timeline-sticky class="lb-posts list-group sticky">
+        {% for post in api_response.stickyPosts._items %}
+          {% if not post.deleted %}
+            {% include "template-post.html" %}
+          {% endif %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+      <div data-empty-message class="lb-post empty-message tribute-empty{% if api_response.posts._items|length %} mod--displaynone{% endif %}">
+        <div>{{ translate("No posts for now") }}</div>
+      </div>
+
+      <section data-timeline-normal class="lb-posts list-group normal tribute-posts">
+        {% if api_response.posts._items|length > 0 %}
+          {% for post in api_response.posts._items %}
+            {% if not post.deleted %}
+              {% include "template-post.html" %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </section>
+
+      {% if api_response.posts._meta.max_results < api_response.posts._meta.total %}
+        <button type="button" data-load-more class="lb-button load-more-posts tribute-load-more">
+          {{ translate("Load more posts") }}
+        </button>
+      {% endif %}
+  </div>
+  {% endblock %}
+</div>
+
+{% if include_js_options %}
+  <script type="text/javascript">window.LB = {{ json_options|safe }};</script>
+{% endif %}
+<!-- endinject -->
+<!-- inject:template-analytics -->
+<!-- endinject -->

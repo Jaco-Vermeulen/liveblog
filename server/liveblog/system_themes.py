@@ -8,4 +8,5 @@ system_themes = (
     "nuwe-maroela",
     "tribute",
     "tribute-light",
+    "tribute-ultimate",
 )

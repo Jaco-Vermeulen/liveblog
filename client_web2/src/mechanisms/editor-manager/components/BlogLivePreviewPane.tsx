@@ -200,6 +200,7 @@ export function BlogLivePreviewPane({
               'lb-timeline',
               'lb-themed-preview',
               theme?.name === 'tribute-light' ? 'tribute-light-timeline' : '',
+              theme?.name === 'tribute-ultimate' ? 'tribute-ultimate-timeline' : '',
               theme?.name === 'tribute' ? 'tribute-timeline' : '',
             ]
               .filter(Boolean)

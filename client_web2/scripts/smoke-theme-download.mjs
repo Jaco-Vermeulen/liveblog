@@ -37,7 +37,7 @@ async function main() {
   const token = await login();
   console.log('login ok');
 
-  for (const name of ['tribute', 'tribute-light', 'classic']) {
+  for (const name of ['tribute', 'tribute-light', 'tribute-ultimate', 'classic']) {
     const bytes = await downloadTheme(name, token);
     console.log(`theme-download/${name} ok`, bytes, 'bytes');
   }

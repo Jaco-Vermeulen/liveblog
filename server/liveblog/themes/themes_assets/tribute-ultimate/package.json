@@ -1,0 +1,15 @@
+{
+  "name": "liveblog-tribute-ultimate-theme",
+  "version": "1.0.0",
+  "description": "Tribute Ultimate — airy editorial Liveblog embed theme",
+  "private": true,
+  "scripts": {
+    "build:css": "lessc less/tribute-ultimate.less dist/tribute-ultimate.css"
+  },
+  "dependencies": {
+    "liveblog-default-theme": "file:../default"
+  },
+  "devDependencies": {
+    "less": "^4.6.4"
+  }
+}
