@@ -9,6 +9,23 @@ const POLLS_EXPIRY_DAYS = 365;
 const apiHost = LB.api_host.match(/\/$/i) ? LB.api_host : LB.api_host + '/';
 const blogId = LB.blog._id;
 
+function pollI18n(key, fallback) {
+  try {
+    var lang = (LB.settings && LB.settings.language) || 'en';
+    var map = LB.i18n && LB.i18n[lang];
+    if (map && map[key]) {
+      return map[key];
+    }
+    var afMap = LB.i18n && LB.i18n.af;
+    if (afMap && afMap[key]) {
+      return afMap[key];
+    }
+  } catch (e) {
+    /* ignore */
+  }
+  return fallback;
+}
+
 /**
  * Updates the UI with the new total votes and switches to the poll closed view
  */
@@ -61,7 +78,7 @@ function placeVote(event) {
   
   // Check if voting happened on another tab
   if (hasVoted(selectedPoll)) {
-    alert("You have already voted on this poll.")
+    alert(pollI18n('You have already voted on this poll', 'Jy het reeds op hierdie poll gestem.'))
     return;
   }
 

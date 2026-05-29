@@ -237,6 +237,7 @@ body.lb-wrapBody {
   padding: 0 1rem;
   border: none;
   background: transparent;
+  background-image: none;
   font-family: var(--tl-font-ui);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -247,7 +248,7 @@ body.lb-wrapBody {
   cursor: pointer;
 
   &::after {
-    content: " ▾";
+    content: " \25BE";
     opacity: 0.7;
   }
 }
@@ -342,6 +343,8 @@ body.lb-wrapBody {
   height: 100%;
   min-height: var(--tl-toolbar-h);
   padding: 0 1rem;
+  background: transparent;
+  background-image: none;
   font-family: var(--tl-font-ui);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -358,7 +361,7 @@ body.lb-wrapBody {
   }
 
   &::after {
-    content: " ▾";
+    content: " \25BE";
     margin-left: 0.35rem;
     opacity: 0.7;
   }
@@ -392,6 +395,38 @@ body.lb-wrapBody {
   }
 }
 
+// Default theme styles toolbar actions as 32px icon boxes with hidden labels.
+.lb-timeline .header-bar__highlight.tribute-toolbar__chip,
+.lb-timeline .header-bar__comment.tribute-toolbar__chip {
+  width: auto;
+  height: auto;
+  margin: 0;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: unset;
+  background-position: unset;
+
+  span {
+    display: inline;
+    position: static;
+    transform: none;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    white-space: nowrap;
+  }
+
+  &:hover span {
+    display: inline;
+  }
+
+  &.header-bar__highlight--active {
+    background-color: var(--tl-teal-muted);
+    border-color: rgba(21, 117, 120, 0.35);
+  }
+}
+
 .lb-timeline .tribute-toolbar__brand {
   display: flex;
   align-items: center;
@@ -419,7 +454,7 @@ body.lb-wrapBody {
 .lb-timeline .lb-sticky-top-post {
   position: relative;
   margin: 0 !important;
-  padding: 1.25rem 1.35rem 1.15rem 1.5rem !important;
+  padding: 1.25rem 1.35rem !important;
   background: var(--tl-paper);
   border: 1px solid var(--tl-rule);
   border-left: 4px solid var(--tl-orange);
@@ -636,6 +671,110 @@ body.lb-wrapBody {
   }
 }
 
+// Default theme indents post body items (margin-left: 60px) — flush in Tribute Light.
+.lb-timeline .items-container .lb-item {
+  margin-left: 0 !important;
+  margin-right: 0;
+}
+
+// Embeds — centered in the post column. Use block layout: flex + inline-block iframely
+// cards collapse to 0px width (iframe invisible; only title link remains).
+.lb-timeline .items-container .lb-item.embed,
+.lb-timeline .items-container .lb-item[class*="embed"] {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.lb-timeline .item--embed__consent-wrapper,
+.lb-timeline .item--embed__wrapper,
+.lb-timeline .item--embed {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lb-timeline .item--embed__element,
+.lb-timeline .item--embed__generic {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  text-align: center;
+}
+
+// Iframely cards must span the embed column (inline-block inside flex was 0px wide).
+.lb-timeline .item--embed__generic .iframely-embed,
+.lb-timeline .item--embed__generic [class*="iframely"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+}
+
+// Until iframely.load() runs, oEmbed may ship a fixed 133px stub — avoid a blank sliver.
+.lb-timeline .iframely-responsive {
+  width: 100%;
+  min-height: 280px;
+}
+
+.lb-timeline .iframely-responsive iframe {
+  width: 100% !important;
+  min-height: 280px;
+}
+
+.lb-timeline .fb-post {
+  display: inline-block;
+  max-width: 100%;
+  min-width: 280px;
+  text-align: left;
+}
+
+.lb-timeline .lb-responsive-video {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lb-timeline .item--embed__element iframe,
+.lb-timeline .item--embed__generic iframe,
+.lb-timeline .item--embed__generic > div,
+.lb-timeline .item--embed__generic > blockquote,
+.lb-timeline .fb-post,
+.lb-timeline .twitter-tweet {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.lb-timeline .item--embed__illustration {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+
+  img {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.lb-timeline .item--embed__info {
+  width: 100%;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.lb-timeline .item--embed__title,
+.lb-timeline .item--embed__description,
+.lb-timeline .item--embed__credit {
+  text-align: center;
+}
+
 // ─── Post meta footer — small, subtle status line (Opgedateer) ─────────────────
 .lb-timeline .lb-post-bottom,
 .lb-timeline .lb-post-meta-footer {
@@ -687,7 +826,7 @@ body.lb-wrapBody {
   line-height: 1.35;
 
   &::after {
-    content: "·";
+    content: "\00B7";
     margin: 0 0.35rem;
     font-weight: 400;
     color: var(--tl-meta);
@@ -829,6 +968,7 @@ body.lb-wrapBody {
     align-items: center;
     width: 100%;
     min-height: var(--tl-toolbar-h);
+    background-image: none;
   }
 
   .lb-timeline .sorting-bar__dropdownContent {
@@ -925,3 +1065,146 @@ html[data-color-scheme="dark"] .lb-timeline .header-bar.tribute-toolbar {
   background: var(--tl-paper) !important;
   border-color: var(--tl-rule) !important;
 }
+
+// Filter dropdown: anchor under button (parent default theme uses wide __orders + margin-left).
+.lb-timeline .tags-filter-bar__orders {
+  display: inline-block;
+  width: auto;
+  float: none !important;
+}
+
+.lb-timeline .tags-filter-bar__dropdownContent {
+  left: 0 !important;
+  right: auto !important;
+  margin: 0.25rem 0 0 0 !important;
+
+  &.tags-filter-bar__dropdownContent--active {
+    display: block !important;
+    margin-left: 0 !important;
+  }
+}
+
+// ─── Poll (Tribute Light) ─────────────────────────────────────────────────────
+.lb-timeline .items-container .lb-poll_container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0.25rem 0 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--tl-rule);
+  border-radius: var(--tl-radius-sm);
+  background: var(--tl-parchment);
+  box-shadow: none;
+  gap: 0.75rem;
+}
+
+.lb-timeline .lb-poll_question {
+  font-family: var(--tl-font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--tl-ink);
+  margin: 0 0 0.35rem;
+}
+
+.lb-timeline .lb-poll_options_container {
+  gap: 0.65rem;
+}
+
+.lb-timeline .lb-poll_open_option {
+  gap: 0.65rem;
+}
+
+.lb-timeline .lb_poll_custom_label,
+.lb-timeline .lb-poll_answer {
+  font-family: var(--tl-font-ui);
+  font-size: 0.9375rem;
+  color: var(--tl-ink-soft);
+}
+
+.lb-timeline .lb-poll_subtitle {
+  font-family: var(--tl-font-ui);
+  font-size: 0.75rem;
+  color: var(--tl-meta);
+}
+
+.lb-timeline .lb-poll_percentage {
+  font-family: var(--tl-font-ui);
+  font-size: 0.8125rem;
+  color: var(--tl-meta);
+}
+
+.lb-timeline .lb-poll_footer {
+  margin-top: 0.35rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--tl-rule);
+}
+
+.lb-timeline .lb-poll_vote_btn {
+  font-family: var(--tl-font-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tl-paper);
+  background: var(--tl-orange);
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+
+  &:hover {
+    background: var(--tl-orange-bright);
+    transform: translateY(-1px);
+  }
+}
+
+.lb-timeline .lb-poll_custom_radio + label::before {
+  border-color: var(--tl-rule-strong);
+}
+
+.lb-timeline .lb-poll_custom_radio:checked + label::before {
+  border-color: var(--tl-teal);
+  background-color: var(--tl-teal);
+  box-shadow: inset 0 0 0 2px var(--tl-paper);
+}
+
+.lb-timeline .lb-poll_custom_radio:checked + label {
+  color: var(--tl-ink);
+  font-weight: 600;
+}
+
+.lb-timeline .lb-poll_closed_bar_bg {
+  background-color: var(--tl-rule);
+}
+
+.lb-timeline .lb-poll_closed_bar_fg {
+  background-color: var(--tl-teal);
+}
+
+/* Poll — full width inside post (override default 75%) */
+.lb-timeline .lb-item.poll .lb-poll_container,
+.lb-timeline div .lb-poll_container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+
+.lb-timeline .lb-poll_form {
+  width: 100%;
+}
+
+.lb-timeline .lb-poll_footer {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lb-timeline .lb-poll_footer_summary {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@import "scorecard-card.less";

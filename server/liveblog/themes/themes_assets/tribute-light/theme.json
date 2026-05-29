@@ -12,7 +12,7 @@
     "styles": ["dist/tribute-light.css"],
     "scripts": [],
     "settings": {
-        "language": "en",
+        "language": "af",
         "showLiveblogLogo": false,
         "showTitle": true,
         "showDescription": true,
@@ -46,7 +46,7 @@
                 {"value": "af", "label": "Afrikaans"},
                 {"value": "en", "label": "English"}
             ],
-            "default": "en"
+            "default": "af"
         },
         {
             "name": "show-hide-group",
@@ -303,7 +303,13 @@
             "Powered by": "Aangedryf deur",
             "Advertisement": "Advertensie",
             "Comment": "Kommentaar",
-            "Updated": "Opgedateer"
+            "Updated": "Opgedateer",
+            "Total votes": "Totale stemme",
+            "Votes": "Stemme",
+            "Vote": "Stem",
+            "Ends": "Eindig",
+            "Poll closed": "Poll gesluit",
+            "You have already voted on this poll": "Jy het reeds op hierdie poll gestem."
         },
         "en": {
             "Highlights": "Highlights",
@@ -320,7 +326,13 @@
             "Powered by": "Powered by",
             "Advertisement": "Advertisement",
             "Comment": "Comment",
-            "Updated": "Updated"
+            "Updated": "Updated",
+            "Total votes": "Totale stemme",
+            "Votes": "Stemme",
+            "Vote": "Stem",
+            "Ends": "Eindig",
+            "Poll closed": "Poll gesluit",
+            "You have already voted on this poll": "Jy het reeds op hierdie poll gestem."
         }
     }
 }

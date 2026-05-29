@@ -39,11 +39,23 @@ export function cleanEmbedMeta(meta: EmbedMeta): EmbedMeta {
   return next;
 }
 
+/**
+ * Drop inline provider scripts from oEmbed HTML. Themes load `cdn.iframe.ly/embed.js`
+ * once globally; per-post `iframely.net/embed.js` tags conflict and never resize cards.
+ */
+export function sanitizeEmbedHtml(html: string): string {
+  if (!html.trim() || typeof document === 'undefined') return html;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('script').forEach((node) => node.remove());
+  return tmp.innerHTML.trim();
+}
+
 export function fixEmbedHtml(meta: EmbedMeta): EmbedMeta {
   if (!meta.html || typeof document === 'undefined') return meta;
   const tmp = document.createElement('div');
   tmp.innerHTML = meta.html;
-  return { ...meta, html: tmp.innerHTML };
+  return { ...meta, html: sanitizeEmbedHtml(tmp.innerHTML) };
 }
 
 export function mergeEmbedCardEdits(base: EmbedMeta, edits: EmbedCardEdits): EmbedMeta {

@@ -1,3 +1,4 @@
+{% macro translate(text) %}{% if not options.i18n[settings.language] %}{{ text }}{% elif not options.i18n[settings.language][text] %}{{ text }}{% else %}{{ options.i18n[settings.language][text] }}{% endif %}{% endmacro %}
 {% set pollId = ref.item._id %}
 {% set poll = ref.item.poll_body %}
 
@@ -5,7 +6,6 @@
   <p class="lb-poll_question">{{ poll.question }}</p>
     <form class="lb-poll_form" onsubmit="placeVote(event, this)">
 
-      <!-- When the poll is open -->
       <div id="poll-open-{{ pollId }}" class="lb-poll_options_container" style="display: flex;">
         {% for answer in poll.answers %}
           <div class="lb-poll_open_option">
@@ -15,8 +15,7 @@
         {% endfor %}
         <input type="text" name="selectedPoll" value="{{ pollId }}" style="display: none">
       </div>
-      
-      <!-- When the poll is closed -->
+
       <div id="poll-closed-{{ pollId }}" class="lb-poll_options_container">
         {% for answer in poll.answers %}
             <div class="lb-poll_closed_option">
@@ -31,20 +30,20 @@
                         {{ answer.percentage }}%
                     </p>
                 </div>
-                <p class="lb-poll_subtitle">Votes: {{ answer.votes }}</p>
+                <p class="lb-poll_subtitle">{{ translate("Votes") }}: {{ answer.votes }}</p>
             </div>
         {% endfor %}
       </div>
 
       <div class="lb-poll_footer">
           <div class="lb-poll_footer_summary">
-            <p class="lb-poll_subtitle">Total Votes: <span id="total-votes-{{ pollId }}"></span></p>
-            <p class="lb-poll_subtitle">&bull;</p>
+            <p class="lb-poll_subtitle">{{ translate("Total votes") }}: <span id="total-votes-{{ pollId }}"></span></p>
+            <p class="lb-poll_subtitle" aria-hidden="true">&bull;</p>
             <p class="lb-poll_subtitle"><span id="vote-end-{{ pollId }}"></span></p>
           </div>
-          <button id="vote-button-{{ pollId }}" class="lb-poll_vote_btn" type="submit">VOTE</button>
+          <button id="vote-button-{{ pollId }}" class="lb-poll_vote_btn" type="submit">{{ translate("Vote") }}</button>
       </div>
-      
+
     </form>
 </div>
 

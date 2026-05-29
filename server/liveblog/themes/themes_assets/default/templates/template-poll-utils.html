@@ -1,4 +1,18 @@
 <script>
+  function lbPollI18n(key, fallback) {
+    try {
+      var i18n = window.LB && window.LB.i18n;
+      var lang = window.LB && window.LB.settings && window.LB.settings.language;
+      if (i18n && lang && i18n[lang] && i18n[lang][key]) {
+        return i18n[lang][key];
+      }
+      if (i18n && i18n.af && i18n.af[key]) {
+        return i18n.af[key];
+      }
+    } catch (e) {}
+    return fallback;
+  }
+
   function getTotalVotes(poll, pollId) {
     let elementId = `total-votes-${pollId}`;
     let totalVotes = poll.answers.reduce((acc, ans) => acc + ans.votes, 0);
@@ -8,17 +22,22 @@
   function getTimeLeft(poll, pollId) {
     let elementId = `vote-end-${pollId}`;
     let buttonId = `vote-button-${pollId}`;
-    
-    if(typeof window.moment === 'function') {
+
+    if (typeof window.moment === 'function') {
+      var lang = (window.LB && window.LB.settings && window.LB.settings.language) || 'en';
+      if (window.moment.locale) {
+        window.moment.locale(lang);
+      }
       let now = window.moment();
       let activeUntil = window.moment(poll.active_until);
       let timeLeft = activeUntil.fromNow();
 
       if (activeUntil.isBefore(now)) {
-        document.getElementById(elementId).innerText = "Poll closed";
-        document.getElementById(buttonId).style.display = "none";
+        document.getElementById(elementId).innerText = lbPollI18n('Poll closed', 'Poll closed');
+        document.getElementById(buttonId).style.display = 'none';
       } else {
-        document.getElementById(elementId).innerText = "Ends " + timeLeft;
+        var endsLabel = lbPollI18n('Ends', 'Ends');
+        document.getElementById(elementId).innerText = endsLabel + ' ' + timeLeft;
       }
     }
   }

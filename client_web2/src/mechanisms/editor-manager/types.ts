@@ -19,7 +19,15 @@ export type PreviewDeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 export type PreviewDeviceOrientation = 'portrait' | 'landscape';
 
-export type SirTrevorBlockType = 'Text' | 'Image' | 'Embed' | 'Quote' | 'Comment' | 'Poll' | 'Video';
+export type SirTrevorBlockType =
+  | 'Text'
+  | 'Image'
+  | 'Embed'
+  | 'Quote'
+  | 'Comment'
+  | 'Poll'
+  | 'Scorecard'
+  | 'Video';
 
 export interface SirTrevorBlock {
   type: SirTrevorBlockType;

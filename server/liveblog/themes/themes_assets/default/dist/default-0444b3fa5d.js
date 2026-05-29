@@ -2104,7 +2104,7 @@ var output = "";
 try {
 var frame = frame.push(true);
 output += "\r\n  <div class=\"lb-post-bottom\">\r\n    ";
-if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "settings")),"showUpdateDatetime") && (runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"content_updated_date") != runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"firstcreated")) && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"post_items_type") != "advertisement") {
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "settings")),"showUpdateDatetime") && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"published_date") && (runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"content_updated_date") != runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"published_date")) && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "post")),"post_items_type") != "advertisement") {
 output += "\r\n      <div class=\"lb-post-updated\">\r\n        <span>";
 output += runtime.suppressValue((lineno = 148, colno = 24, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "translate"), "translate", context, ["Updated"])), env.opts.autoescape);
 output += "</span> <span class=\"lb-post-updated-time relativeDate";
@@ -2455,7 +2455,7 @@ var output = "";
 try {
 var frame = frame.push(true);
 output += "\r\n  <div class=\"lb-post-bottom\">\r\n    ";
-if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "settings")),"showUpdateDatetime") && (runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"content_updated_date") != runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"firstcreated")) && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"post_items_type") != "advertisement") {
+if(runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "settings")),"showUpdateDatetime") && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"published_date") && (runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"content_updated_date") != runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"published_date")) && runtime.memberLookup((runtime.contextOrFrameLookup(context, frame, "item")),"post_items_type") != "advertisement") {
 output += "\r\n      <div class=\"lb-post-updated\">\r\n        <span>";
 output += runtime.suppressValue((lineno = 42, colno = 24, runtime.callWrap(runtime.contextOrFrameLookup(context, frame, "translate"), "translate", context, ["Updated"])), env.opts.autoescape);
 output += "</span> <span class=\"lb-post-updated-time relativeDate";

@@ -64,7 +64,9 @@ const checkAndHandlePlaceholders = () => {
         wireCookiesEnabler();
     } else {
         embedNodes.forEach(exposeContent);
-        setTimeout(loadEmbeds, 500);
+        setTimeout(loadEmbeds, 100);
+        setTimeout(loadEmbeds, 600);
+        setTimeout(loadEmbeds, 1500);
     }
 };
 

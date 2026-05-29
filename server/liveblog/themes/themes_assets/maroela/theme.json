@@ -174,7 +174,13 @@
             "Your comment is being reviewed and will be published as soon as it's approved": "Jou kommentaar word hersien en sal gepubliseer word sodra dit goedgekeur is",
             "credit:": "krediet:",
             "Activate": "Aktiveer",
-            "Filter": "Filter"
+            "Filter": "Filter",
+            "Total votes": "Totale stemme",
+            "Votes": "Stemme",
+            "Vote": "Stem",
+            "Ends": "Eindig",
+            "Poll closed": "Poll gesluit",
+            "You have already voted on this poll": "Jy het reeds op hierdie poll gestem."
         },
         "en": {
             "Highlights": "Highlights",
@@ -210,7 +216,13 @@
             "Your comment is being reviewed and will be published as soon as it's approved": "Your comment is being reviewed and will be published as soon as it's approved",
             "credit:": "credit:",
             "Activate": "Activate",
-            "Filter": "Filter"
+            "Filter": "Filter",
+            "Total votes": "Total votes",
+            "Votes": "Votes",
+            "Vote": "Vote",
+            "Ends": "Ends",
+            "Poll closed": "Poll closed",
+            "You have already voted on this poll": "You have already voted on this poll"
         }
     }
 }

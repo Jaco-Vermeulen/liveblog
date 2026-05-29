@@ -4,6 +4,7 @@ import {
   canAccessIframeDocument,
   syncEmbedEditorTools,
 } from '../services/previewEmbedBridge';
+import { schedulePreviewThemeEmbeds } from '../services/schedulePreviewThemeEmbeds';
 
 /** Wire admin toolbars into a same-origin theme embed iframe. */
 export function usePreviewEmbedBridge(
@@ -12,11 +13,14 @@ export function usePreviewEmbedBridge(
   onFallback?: () => void,
 ): void {
   const teardownRef = useRef<(() => void) | null>(null);
+  const embedActivationRef = useRef<(() => void) | null>(null);
   const fallbackCalledRef = useRef(false);
 
   useEffect(() => {
     teardownRef.current?.();
     teardownRef.current = null;
+    embedActivationRef.current?.();
+    embedActivationRef.current = null;
 
     if (!handlers) return;
 
@@ -35,6 +39,8 @@ export function usePreviewEmbedBridge(
       if (!doc?.body) return;
       teardownRef.current?.();
       teardownRef.current = syncEmbedEditorTools(doc, handlers);
+      embedActivationRef.current?.();
+      embedActivationRef.current = schedulePreviewThemeEmbeds(iframe);
     };
 
     const onLoad = () => {
@@ -49,6 +55,8 @@ export function usePreviewEmbedBridge(
       iframe.removeEventListener('load', onLoad);
       teardownRef.current?.();
       teardownRef.current = null;
+      embedActivationRef.current?.();
+      embedActivationRef.current = null;
     };
   }, [iframeRef, handlers, onFallback]);
 }

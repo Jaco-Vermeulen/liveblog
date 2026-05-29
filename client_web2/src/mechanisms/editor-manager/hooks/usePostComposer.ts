@@ -3,11 +3,13 @@ import type { Blog, Post } from '@/mechanisms/liveblog-api';
 import { uploadArchiveMedia } from '@/mechanisms/liveblog-api';
 import { freetypeDataToPostItem, useFreetypesList } from '@/mechanisms/freetypes-manager';
 import { DEFAULT_POST_TYPE } from '../subsystems/freetype-fields';
+import { defaultScorecardBody, normalizeScorecardBody } from '../subsystems/scorecard';
 import {
   blocksToPostItems,
   freetypeHasContent,
   isBlockEmpty,
   loadFreetypeFromPost,
+  loadScorecardFromPost,
   postToBlocks,
 } from '../services/blockTransform';
 import {
@@ -36,6 +38,9 @@ export function usePostComposer(blog: Blog | undefined) {
   const [currentPost, setCurrentPost] = useState<Post | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUploadingIndex, setImageUploadingIndex] = useState<number | null>(null);
+  const [scorecardUploading, setScorecardUploading] = useState<'home' | 'away' | 'background' | null>(
+    null,
+  );
   const [selectedPostType, setSelectedPostType] = useState<EditorPostType>(DEFAULT_POST_TYPE);
   const [freetypeData, setFreetypeData] = useState<Record<string, unknown>>({});
 
@@ -78,6 +83,12 @@ export function usePostComposer(blog: Blog | undefined) {
     (post: Post | null) => {
       setCurrentPost(post);
       if (post) {
+        const scorecardBody = loadScorecardFromPost(post);
+        if (scorecardBody) {
+          setSelectedPostType(DEFAULT_POST_TYPE);
+          setFreetypeData({});
+          setBlocks([{ type: 'Scorecard', data: { scorecardBody } }]);
+        } else {
         const loaded = loadFreetypeFromPost(post, freetypes);
         if (loaded) {
           setSelectedPostType(loaded.freetype);
@@ -87,6 +98,7 @@ export function usePostComposer(blog: Blog | undefined) {
           setSelectedPostType(DEFAULT_POST_TYPE);
           setFreetypeData({});
           setBlocks(postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()]);
+        }
         }
         setSticky(Boolean(post.sticky));
         setHighlight(Boolean(post.lb_highlight));
@@ -111,8 +123,25 @@ export function usePostComposer(blog: Blog | undefined) {
 
   const createBlock = (type: SirTrevorBlockType): SirTrevorBlock => {
     if (type === 'Embed') return { type, data: { url: '', embedMeta: null } };
-    if (type === 'Poll') return { type, data: { pollBody: null } };
+    if (type === 'Poll') {
+      return {
+        type,
+        data: {
+          pollBody: {
+            question: '',
+            answers: [
+              { option: '', votes: 0 },
+              { option: '', votes: 0 },
+            ],
+            active_until: '',
+          },
+        },
+      };
+    }
     if (type === 'Image') return { type, data: { url: '' } };
+    if (type === 'Scorecard') {
+      return { type, data: { scorecardBody: defaultScorecardBody() } };
+    }
     if (type === 'Text') return defaultBlock();
     return { type, data: {} };
   };
@@ -150,6 +179,39 @@ export function usePostComposer(blog: Blog | undefined) {
     );
     setIsDirty(true);
   }, []);
+
+  const uploadScorecardAsset = useCallback(
+    async (index: number, target: 'home' | 'away' | 'background', file: File) => {
+      if (!file) return;
+      setScorecardUploading(target);
+      try {
+        const uploaded = await uploadArchiveMedia(file);
+        setBlocks((prev) =>
+          prev.map((block, i) => {
+            if (i !== index || block.type !== 'Scorecard') return block;
+            const body = normalizeScorecardBody(block.data.scorecardBody);
+            if (target === 'background') {
+              return { ...block, data: { scorecardBody: { ...body, backgroundUrl: uploaded.picture_url } } };
+            }
+            const team = target === 'home' ? 'home' : 'away';
+            return {
+              ...block,
+              data: {
+                scorecardBody: {
+                  ...body,
+                  [team]: { ...body[team], logoUrl: uploaded.picture_url },
+                },
+              },
+            };
+          }),
+        );
+        setIsDirty(true);
+      } finally {
+        setScorecardUploading(null);
+      }
+    },
+    [],
+  );
 
   const uploadImage = useCallback(async (index: number, file: File) => {
     if (!file) return;
@@ -294,7 +356,9 @@ export function usePostComposer(blog: Blog | undefined) {
     removeBlockIfEmpty,
     updateBlock,
     uploadImage,
+    uploadScorecardAsset,
     imageUploadingIndex,
+    scorecardUploading,
     setPostType,
     updateFreetypeData,
     submit,

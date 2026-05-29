@@ -5,7 +5,6 @@ import { LbAlert } from '@/components/ui/LbAlert';
 import { LbLoadingScreen } from '@/components/ui/LbLoadingScreen';
 import { LiveblogApiError } from '@/mechanisms/liveblog-api';
 import { BlogLivePreviewPane } from '../components/BlogLivePreviewPane';
-import { ComposerDraftPreview } from '../components/ComposerDraftPreview';
 import { canPublishPost } from '../services/blogSecurity';
 import { EditorLayout } from '../components/EditorLayout';
 import { PostComposer } from '../components/PostComposer';
@@ -199,11 +198,7 @@ export function EditorPage() {
             onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
             onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
             onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
-            draftSlot={
-              viewMode === 'split' || viewMode === 'preview' ? (
-                <ComposerDraftPreview composer={composerApi.composer} user={authState.user} />
-              ) : null
-            }
+            draftSlot={null}
           >
             {timeline}
           </BlogLivePreviewPane>
@@ -222,7 +217,9 @@ export function EditorPage() {
             onRemoveBlockIfEmpty={composerApi.removeBlockIfEmpty}
             onUpdateBlock={composerApi.updateBlock}
             onUploadImage={composerApi.uploadImage}
+            onUploadScorecardAsset={composerApi.uploadScorecardAsset}
             imageUploadingIndex={composerApi.imageUploadingIndex}
+            scorecardUploading={composerApi.scorecardUploading}
             onPostTypeChange={composerApi.setPostType}
             onFreetypeDataChange={composerApi.updateFreetypeData}
             onScheduleEnabledChange={composerApi.setScheduleEnabled}

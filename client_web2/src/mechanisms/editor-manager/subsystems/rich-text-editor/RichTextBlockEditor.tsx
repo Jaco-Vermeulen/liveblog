@@ -76,7 +76,6 @@ export function RichTextBlockEditor({
   id,
 }: RichTextBlockEditorProps) {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const allowExplicitBoldRef = useRef(false);
   const undoPastRef = useRef<string[]>([]);
   const undoFutureRef = useRef<string[]>([]);
   const lastHtmlRef = useRef('');
@@ -161,21 +160,10 @@ export function RichTextBlockEditor({
       const before = el.innerHTML;
       document.execCommand(command, false, cmdValue);
       document.execCommand('styleWithCSS', false, 'false');
-      if (command === 'bold') {
-        allowExplicitBoldRef.current = false;
-        if (document.queryCommandState('bold')) {
-          document.execCommand('bold', false);
-        }
-      }
       recordCommandChange(before, el.innerHTML);
     },
     [recordCommandChange],
   );
-
-  const applyBoldExplicitly = useCallback(() => {
-    allowExplicitBoldRef.current = true;
-    applyEditorCommand('bold', undefined, true);
-  }, [applyEditorCommand]);
 
   const applyAlignment = useCallback(
     (align: 'left' | 'center' | 'right' | 'justify') => {
@@ -204,15 +192,6 @@ export function RichTextBlockEditor({
     applyEditorCommand('createLink', url.trim());
   }, [applyEditorCommand]);
 
-  const resetStickyFormattingMode = useCallback(() => {
-    document.execCommand('styleWithCSS', false, 'false');
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0 && selection.isCollapsed && document.queryCommandState('bold')) {
-      document.execCommand('bold', false);
-    }
-    allowExplicitBoldRef.current = false;
-  }, []);
-
   const onInput = useCallback(
     (event: React.FormEvent<HTMLDivElement>) => {
       const el = event.currentTarget;
@@ -235,25 +214,21 @@ export function RichTextBlockEditor({
     [commitChange],
   );
 
-  const onBeforeInput = useCallback(
-    (event: React.FormEvent<HTMLDivElement>) => {
-      const native = event.nativeEvent as InputEvent;
-      const inputType = native.inputType || '';
-      if (inputType.toLowerCase().includes('formatbold') && !allowExplicitBoldRef.current) {
-        event.preventDefault();
-        resetStickyFormattingMode();
-        return;
-      }
-      allowExplicitBoldRef.current = false;
-    },
-    [resetStickyFormattingMode],
-  );
-
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
         event.preventDefault();
-        resetStickyFormattingMode();
+        applyEditorCommand('bold', undefined, true);
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'i') {
+        event.preventDefault();
+        applyEditorCommand('italic', undefined, true);
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'u') {
+        event.preventDefault();
+        applyEditorCommand('underline', undefined, true);
         return;
       }
       const mod = event.ctrlKey || event.metaKey;
@@ -268,7 +243,7 @@ export function RichTextBlockEditor({
         applyRedo();
       }
     },
-    [applyRedo, applyUndo, resetStickyFormattingMode],
+    [applyEditorCommand, applyRedo, applyUndo],
   );
 
   useEffect(() => {
@@ -290,7 +265,7 @@ export function RichTextBlockEditor({
     <div className="m-rich-text-editor">
       <div className="m-rich-text-editor__toolbar" role="toolbar" aria-label="Teksformatering">
           <ToolbarGroup label="Font">
-            <ToolbarBtn title="Vet" onClick={applyBoldExplicitly}>
+            <ToolbarBtn title="Vet" onClick={() => applyEditorCommand('bold', undefined, true)}>
               <Bold className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
             <ToolbarBtn title="Skuins" onClick={() => applyEditorCommand('italic', undefined, true)}>
@@ -371,12 +346,9 @@ export function RichTextBlockEditor({
           aria-multiline="true"
           aria-label={placeholder}
           className="m-rich-text-editor__body"
-          onBeforeInput={onBeforeInput}
           onInput={onInput}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          onMouseUp={resetStickyFormattingMode}
-          onDoubleClick={resetStickyFormattingMode}
         />
       </div>
     </div>

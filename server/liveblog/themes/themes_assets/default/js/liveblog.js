@@ -14,4 +14,13 @@ window.LiveBlog = {
   loadEmbeds: theme.loadEmbeds
 };
 
+function exposeLoadEmbeds() {
+  if (window.LB) {
+    window.LB.loadEmbeds = theme.loadEmbeds;
+  }
+}
+
+exposeLoadEmbeds();
+document.addEventListener('DOMContentLoaded', exposeLoadEmbeds);
+
 module.exports = {};

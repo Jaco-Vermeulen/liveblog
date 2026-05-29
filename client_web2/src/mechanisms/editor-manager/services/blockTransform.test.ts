@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { SCORECARD_FREETYPE_NAME } from '@/mechanisms/freetypes-manager/builtinFreetypes';
 import {
   blocksToPostItems,
   freetypeHasContent,
   isBlockEmpty,
   loadFreetypeFromPost,
+  loadScorecardFromPost,
   postToBlocks,
 } from './blockTransform';
 
@@ -30,6 +32,21 @@ describe('blockTransform', () => {
         data: { pollBody: { question: '', answers: [], active_until: '' } },
       }),
     ).toBe(true);
+    expect(
+      isBlockEmpty({
+        type: 'Poll',
+        data: {
+          pollBody: {
+            question: 'Draft vraag',
+            answers: [
+              { option: '', votes: 0 },
+              { option: '', votes: 0 },
+            ],
+            active_until: '',
+          },
+        },
+      }),
+    ).toBe(false);
   });
 
   it('maps poll blocks to post items', () => {
@@ -119,6 +136,39 @@ describe('blockTransform', () => {
     });
     expect(blocks[0]?.type).toBe('Image');
     expect(blocks[0]?.data.url).toBe('https://example.com/pic.png');
+  });
+
+  it('loads scorecard posts for scorecard editor (not generic freetype)', () => {
+    const post = {
+      _id: 'p1',
+      blog: 'b1',
+      post_status: 'open',
+      groups: [],
+      mainItem: {
+        item: {
+          item_type: SCORECARD_FREETYPE_NAME,
+          group_type: 'freetype',
+          text: '<div class="lb-scorecard-card">',
+          meta: {
+            data: {
+              match: { variant: 'cricket', scorers_label: 'Kolwers' },
+              home: { name: 'Proteas', score: '200' },
+              away: { name: 'India', score: '180' },
+            },
+          },
+        },
+      },
+    };
+
+    const freetype = loadFreetypeFromPost(post, [
+      { _id: 'builtin-scorecard', name: SCORECARD_FREETYPE_NAME, template: '<span></span>' },
+    ]);
+    const scorecard = loadScorecardFromPost(post);
+
+    expect(freetype).toBeNull();
+    expect(scorecard?.variant).toBe('cricket');
+    expect(scorecard?.home.name).toBe('Proteas');
+    expect(scorecard?.scorersLabel).toBe('Kolwers');
   });
 
   it('loads freetype posts for editor', () => {

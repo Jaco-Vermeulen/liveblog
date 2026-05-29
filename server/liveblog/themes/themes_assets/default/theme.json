@@ -1,7 +1,7 @@
 {
     "label": "Liveblog 3 Default SEO Theme",
     "name": "default",
-    "version": "3.93.2",
+    "version": "3.93.3",
     "asyncTheme": true,
     "seoTheme": true,
     "author": "Sourcefabric <contact@sourcefabric.org>",
@@ -18,9 +18,9 @@
     },
     "license": "AGPL-3.0",
     "devStyles": ["dist/default-a9e961ac13.css"],
-    "devScripts": ["dist/default-0444b3fa5d.js"],
+    "devScripts": ["dist/default-a77864ded7.js"],
     "styles": ["dist/default-a9e961ac13.css"],
-    "scripts": ["dist/default-0444b3fa5d.js"],
+    "scripts": ["dist/default-a77864ded7.js"],
     "options": [
         {
             "name": "language",
@@ -1236,7 +1236,13 @@
             "Your comment is being reviewed and will be published as soon as it's approved": "Jou kommentaar word hersien en sal gepubliseer word sodra dit goedgekeur is",
             "credit:": "krediet:",
             "Activate": "Aktiveer",
-            "Filter": "Filter"
+            "Filter": "Filter",
+            "Total votes": "Totale stemme",
+            "Votes": "Stemme",
+            "Vote": "Stem",
+            "Ends": "Eindig",
+            "Poll closed": "Poll gesluit",
+            "You have already voted on this poll": "Jy het reeds op hierdie poll gestem."
         }
     }
 }

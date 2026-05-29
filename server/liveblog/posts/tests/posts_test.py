@@ -765,3 +765,12 @@ class PostsModuleTestCase(TestCase):
         }
         assert check_content_diff(updates, original)
         assert not check_content_diff(original, original)
+
+    def test_content_updated_date_matches_published_when_not_edited(self):
+        """Public 'Updated' label must compare content_updated_date to published_date."""
+        post = self.blog_posts[0]
+        self.assertEqual(post["content_updated_date"], post["published_date"])
+        # Draft-first posts can have firstcreated before publish; that must not imply an edit.
+        post["firstcreated"] = "2018-04-01T00:00:00+00:00"
+        self.assertNotEqual(post["content_updated_date"], post["firstcreated"])
+        self.assertEqual(post["content_updated_date"], post["published_date"])

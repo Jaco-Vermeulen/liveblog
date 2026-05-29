@@ -1,0 +1,256 @@
+// client_web2 scorecard HTML (lb-scorecard-card) — keep in LESS so `npm run build:css` does not drop styles.
+body .lb-scorecard-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: linear-gradient(145deg, #157578 0%, #0d4f52 100%);
+  color: #fffdf8;
+  padding: 1.1rem 1rem 1rem;
+  background-size: cover;
+  background-position: center;
+  margin: 0.75rem 0;
+}
+
+body .lb-scorecard-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(21, 117, 120, 0.92) 0%, rgba(13, 79, 82, 0.94) 100%);
+  pointer-events: none;
+}
+
+body .lb-scorecard-card--has-bg .lb-scorecard-card__overlay {
+  opacity: 0.88;
+}
+
+body .lb-scorecard-card > *:not(.lb-scorecard-card__overlay) {
+  position: relative;
+  z-index: 1;
+}
+
+body .lb-scorecard-card__scoreline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+body .lb-scorecard-card__team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  min-width: 0;
+}
+
+body .lb-scorecard-card__logo {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: contain;
+  border-radius: 0.35rem;
+  background: rgba(255, 253, 248, 0.12);
+}
+
+body .lb-scorecard-card__logo--placeholder {
+  border: 1px dashed rgba(255, 253, 248, 0.35);
+}
+
+body .lb-scorecard-card__team-name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+body .lb-scorecard-card--cricket .lb-scorecard-card__team-score {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+body .lb-scorecard-card__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+body .lb-scorecard-card__result-scores {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+body .lb-scorecard-card__score {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+body .lb-scorecard-card__score-sep {
+  font-size: 1.5rem;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+body .lb-scorecard-card__result-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+body .lb-scorecard-card__current-over {
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+body .lb-scorecard-card__result-status {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  line-height: 1.2;
+}
+
+body .lb-scorecard-card__scorers-panel {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 253, 248, 0.2);
+  font-size: 0.8125rem;
+}
+
+body .lb-scorecard-card__scorers-panel--split .lb-scorecard-card__scorers-row {
+  align-items: stretch;
+}
+
+body .lb-scorecard-card__scorers-panel--bowlers {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(255, 253, 248, 0.15);
+}
+
+body .lb-scorecard-card__scorers-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+body .lb-scorecard-card__scorers-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+body .lb-scorecard-card__scorers-side {
+  flex: 1;
+  min-width: 0;
+}
+
+body .lb-scorecard-card__scorers-side[data-side='away'] {
+  text-align: right;
+}
+
+body .lb-scorecard-card__scorers-side[data-side='away'] .lb-scorecard-card__scorers-heading {
+  text-align: right;
+}
+
+body .lb-scorecard-card__scorer-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+  min-width: 0;
+}
+
+body .lb-scorecard-card__scorer-list[data-side='away'] {
+  text-align: right;
+}
+
+body .lb-scorecard-card__scorer-list li {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+  align-items: center;
+}
+
+body .lb-scorecard-card__scorer-list[data-side='away'] li {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+body .lb-scorecard-card__scorer-name {
+  font-weight: 700;
+  word-break: break-word;
+}
+
+body .lb-scorecard-card__scorer-min {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #f5d4b8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+  background: rgba(255, 253, 248, 0.12);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+body .lb-scorecard-card__scorer-stat {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+body .lb-scorecard-card__team-extras {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.6875rem;
+  opacity: 0.85;
+  width: 100%;
+}
+
+body .lb-scorecard-card__team-extras li {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-bottom: 0.1rem;
+}
+
+body .lb-scorecard-card__extra-label {
+  opacity: 0.75;
+}
+
+body .lb-scorecard-card__extra-value {
+  font-weight: 700;
+}
+
+body .lb-scorecard-card__meta {
+  margin-top: 0.65rem;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  text-align: center;
+}
+
+body .lb-scorecard-card__meta p {
+  margin: 0.15rem 0;
+}
+
+.lb-timeline .lb-item.Scorecard {
+  padding: 0;
+  background: transparent;
+  border: none;
+}

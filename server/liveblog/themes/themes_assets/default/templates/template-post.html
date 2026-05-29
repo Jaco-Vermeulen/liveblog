@@ -118,6 +118,12 @@
               {% include "template-item-comment.html" %}
             {% elif ref.item.item_type == "poll" %}
               {% include "template-poll.html" %}
+            {% elif ref.item.item_type == "Scorecard" %}
+              {% if ref.item.meta and ref.item.meta.data %}
+                {% include "template-scorecard.html" %}
+              {% else %}
+                {{ ref.item.text | safe }}
+              {% endif %}
             {% elif ref.item.item_type == "video" and not ref.item.meta.provider_name %}
               {% include "template-mobile-app-video-workaround.html" %}
             {% else %}
@@ -147,7 +153,7 @@
 
   {% block post_footer %}
   <div class="lb-post-bottom">
-    {% if settings.showUpdateDatetime and (post.content_updated_date != post.firstcreated) and post.post_items_type != "advertisement" %}
+    {% if settings.showUpdateDatetime and post.published_date and (post.content_updated_date != post.published_date) and post.post_items_type != "advertisement" %}
       <div class="lb-post-updated">
         <span>{{ translate('Updated') }}</span> <span class="lb-post-updated-time relativeDate{% if settings.clientDatetimeOnly %} mod--displaynone{% endif %}" data-js-timestamp="{{post.content_updated_date}}">{{post.content_updated_date | date('')}}</span>
       </div>

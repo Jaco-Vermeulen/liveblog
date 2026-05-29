@@ -16,7 +16,7 @@ export interface EditorLayoutProps {
   onViewModeChange: (mode: EditorViewMode) => void;
   showViewModeSwitch?: boolean;
   composer: ReactNode;
-  preview: ReactNode;
+  preview?: ReactNode | null;
   timeline: ReactNode;
 }
 
@@ -33,7 +33,7 @@ export function EditorLayout({
   timeline,
 }: EditorLayoutProps) {
   const showComposer = viewMode === 'edit' || viewMode === 'split';
-  const showPreview = viewMode === 'preview' || viewMode === 'split';
+  const showPreview = Boolean(preview) && (viewMode === 'preview' || viewMode === 'split');
   /** Classic edit mode: timeline beside composer. Split/preview: posts live inside preview pane only. */
   const showTimeline = viewMode === 'edit';
   const columnsClass = `m-editor-columns m-editor-columns--${viewMode}`;

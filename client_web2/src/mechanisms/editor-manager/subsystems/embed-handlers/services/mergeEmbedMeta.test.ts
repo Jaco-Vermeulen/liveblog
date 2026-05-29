@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { metaForSave } from './mergeEmbedMeta';
+import { metaForSave, sanitizeEmbedHtml } from './mergeEmbedMeta';
 
 describe('mergeEmbedMeta', () => {
+  it('strips inline iframely loader scripts from saved html', () => {
+    const html =
+      '<div class="iframely-embed"><iframe src="https://iframely.net/api/iframe"></iframe></div>' +
+      '<script async src="https://iframely.net/embed.js"></script>';
+    expect(sanitizeEmbedHtml(html)).not.toContain('<script');
+    expect(sanitizeEmbedHtml(html)).toContain('iframely-embed');
+  });
+
   it('clears thumbnail when cover hidden', () => {
     const meta = metaForSave(
       {

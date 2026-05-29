@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import type { PollBody } from '@/mechanisms/liveblog-api';
-import { buildPollActiveUntil } from './pollCalculations';
+import { buildPollActiveUntil, parsePollDuration } from './pollCalculations';
 
 export interface PollBlockEditorProps {
   pollBody: PollBody | null;
@@ -14,56 +14,68 @@ const emptyAnswers = () => [
   { option: '', votes: 0 },
 ];
 
+function defaultPollDraft(): PollBody {
+  return {
+    question: '',
+    answers: emptyAnswers(),
+    active_until: '',
+  };
+}
+
 export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
-  const question = pollBody?.question ?? '';
-  const answers = pollBody?.answers ?? emptyAnswers();
+  const draft = pollBody ?? defaultPollDraft();
+  const question = draft.question ?? '';
+  const answers = draft.answers?.length ? draft.answers : emptyAnswers();
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
 
-  const emitIfValid = (
+  useEffect(() => {
+    if (pollBody?.active_until) {
+      const parsed = parsePollDuration(pollBody.active_until);
+      setDays(parsed.days);
+      setHours(parsed.hours);
+      setMinutes(parsed.minutes);
+    } else {
+      setDays(0);
+      setHours(0);
+      setMinutes(0);
+    }
+  }, [pollBody?.active_until]);
+
+  const emitDraft = (
     nextQuestion: string,
     nextAnswers: typeof answers,
     d: number,
     h: number,
     m: number,
   ) => {
-    const filled =
-      nextQuestion.trim() !== '' &&
-      nextAnswers.length >= 2 &&
-      nextAnswers.every((a) => a.option.trim() !== '') &&
-      (d > 0 || h > 0 || m > 0);
-
-    if (!filled) {
-      onChange(null);
-      return;
-    }
-
+    const hasDuration = d > 0 || h > 0 || m > 0;
     onChange({
-      question: nextQuestion.trim(),
-      answers: nextAnswers.map((a) => ({ option: a.option.trim(), votes: a.votes })),
-      active_until: buildPollActiveUntil(d, h, m),
+      question: nextQuestion,
+      answers: nextAnswers.map((a) => ({ option: a.option, votes: a.votes ?? 0 })),
+      active_until: hasDuration ? buildPollActiveUntil(d, h, m) : '',
     });
   };
 
   const updateQuestion = (value: string) => {
-    emitIfValid(value, answers, days, hours, minutes);
+    emitDraft(value, answers, days, hours, minutes);
   };
 
   const updateAnswer = (index: number, value: string) => {
     const next = answers.map((a, i) => (i === index ? { ...a, option: value } : a));
-    emitIfValid(question, next, days, hours, minutes);
+    emitDraft(question, next, days, hours, minutes);
   };
 
   const addAnswer = () => {
     const next = [...answers, { option: '', votes: 0 }];
-    emitIfValid(question, next, days, hours, minutes);
+    emitDraft(question, next, days, hours, minutes);
   };
 
   const removeAnswer = (index: number) => {
     if (answers.length <= 2) return;
     const next = answers.filter((_, i) => i !== index);
-    emitIfValid(question, next, days, hours, minutes);
+    emitDraft(question, next, days, hours, minutes);
   };
 
   return (
@@ -111,7 +123,7 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
             onChange={(e) => {
               const d = Number(e.target.value);
               setDays(d);
-              emitIfValid(question, answers, d, hours, minutes);
+              emitDraft(question, answers, d, hours, minutes);
             }}
           />
         </LbFormField>
@@ -125,7 +137,7 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
             onChange={(e) => {
               const h = Number(e.target.value);
               setHours(h);
-              emitIfValid(question, answers, days, h, minutes);
+              emitDraft(question, answers, days, h, minutes);
             }}
           />
         </LbFormField>
@@ -139,7 +151,7 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
             onChange={(e) => {
               const m = Number(e.target.value);
               setMinutes(m);
-              emitIfValid(question, answers, days, hours, m);
+              emitDraft(question, answers, days, hours, m);
             }}
           />
         </LbFormField>

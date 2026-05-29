@@ -306,6 +306,24 @@
   padding: 0.5rem 0.65rem 0.75rem;
 }
 
+/* React fallback preview — same Iframely width fix as tribute-light timeline */
+.m-portal-editor .lb-themed-preview .m-embed-html .iframely-embed,
+.m-portal-editor .lb-themed-preview .m-embed-html [class*='iframely'] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.m-portal-editor .lb-themed-preview .m-embed-html .iframely-responsive {
+  width: 100%;
+  min-height: 280px;
+}
+
+.m-portal-editor .lb-themed-preview .m-embed-html .iframely-responsive iframe {
+  width: 100% !important;
+  min-height: 280px;
+}
+
 .m-portal-editor .lb-post.lb-post--admin-preview {
   position: relative;
 }

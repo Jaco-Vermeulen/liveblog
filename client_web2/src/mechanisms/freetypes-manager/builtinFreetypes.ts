@@ -104,8 +104,20 @@ export const BUILTIN_EDITOR_FREETYPES: Freetype[] = [
   },
 ];
 
+/** Legacy sports scoreboard — hidden until product enables it in the composer. */
+export const SHOW_SCORECARD_FREETYPE = true;
+
+export const SCORECARD_FREETYPE_NAME = 'Scorecard';
+
+/** Plasing-tipe dropdown (standard vs custom freetypes) — off until custom types are needed. */
+export const SHOW_POST_TYPE_SELECTOR = false;
+
 export function mergeEditorFreetypes(apiFreetypes: Freetype[]): Freetype[] {
-  const names = new Set(apiFreetypes.map((f) => f.name));
+  const withoutScorecard = apiFreetypes.filter((f) => f.name !== 'Scorecard');
+  if (!SHOW_SCORECARD_FREETYPE) {
+    return withoutScorecard;
+  }
+  const names = new Set(withoutScorecard.map((f) => f.name));
   const builtins = BUILTIN_EDITOR_FREETYPES.filter((f) => !names.has(f.name));
-  return [...builtins, ...apiFreetypes];
+  return [...builtins, ...withoutScorecard];
 }

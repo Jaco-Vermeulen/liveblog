@@ -1,0 +1,161 @@
+{% set sc = ref.item.meta.data if ref.item.meta and ref.item.meta.data else {} %}
+{% set home = sc.home if sc.home else {} %}
+{% set away = sc.away if sc.away else {} %}
+{% set match = sc.match if sc.match else {} %}
+{% set variant = match.variant if match.variant else 'rugby' %}
+{% set scorers_heading = match.scorers_label if match.scorers_label else ('Kolwers' if variant == 'cricket' else 'Doelskoppe') %}
+{% set bowlers_heading = match.bowlers_label if match.bowlers_label else 'Boulers' %}
+{% set minute_suffix = variant != 'cricket' and variant != 'custom' %}
+{% set show_stat = variant == 'cricket' or variant == 'custom' %}
+{% set show_bowlers = variant == 'cricket' or variant == 'custom' %}
+{% set bg = '' %}
+{% if sc.background and sc.background.img and sc.background.img.picture_url %}
+  {% set bg = sc.background.img.picture_url %}
+{% endif %}
+{% set home_logo = '' %}
+{% if home.img1 and home.img1.picture_url %}
+  {% set home_logo = home.img1.picture_url %}
+{% endif %}
+{% set away_logo = '' %}
+{% if away.img1 and away.img1.picture_url %}
+  {% set away_logo = away.img1.picture_url %}
+{% endif %}
+{% set home_score = home.score if home.score else '0' %}
+{% set away_score = away.score if away.score else '0' %}
+{% set home_name = home.name if home.name else 'Tuisspan' %}
+{% set away_name = away.name if away.name else 'Wêreldspan' %}
+
+<div class="lb-scorecard-card{% if bg %} lb-scorecard-card--has-bg{% endif %}"{% if bg %} style="background-image:url({{ bg }})"{% endif %} role="region" aria-label="Skoorbord">
+  <div class="lb-scorecard-card__overlay" aria-hidden="true"></div>
+
+  <div class="lb-scorecard-card__scoreline">
+    <div class="lb-scorecard-card__team lb-scorecard-card__team--home">
+      {% if home_logo %}
+        <img src="{{ home_logo }}" alt="" class="lb-scorecard-card__logo" />
+      {% else %}
+        <div class="lb-scorecard-card__logo lb-scorecard-card__logo--placeholder" aria-hidden="true"></div>
+      {% endif %}
+      <span class="lb-scorecard-card__team-name">{{ home_name }}</span>
+      {% if home.extras %}
+        <ul class="lb-scorecard-card__team-extras">
+          {% for row in home.extras %}
+            {% if row.label or row.value %}
+              <li>
+                <span class="lb-scorecard-card__extra-label">{{ row.label if row.label else '—' }}</span>
+                <span class="lb-scorecard-card__extra-value">{{ row.value if row.value else '—' }}</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+    <div class="lb-scorecard-card__result" aria-label="Telling {{ home_score }} teen {{ away_score }}">
+      <div class="lb-scorecard-card__result-scores">
+        <span class="lb-scorecard-card__score">{{ home_score }}</span>
+        <span class="lb-scorecard-card__score-sep">-</span>
+        <span class="lb-scorecard-card__score">{{ away_score }}</span>
+      </div>
+      {% if match.quaters %}
+        <span class="lb-scorecard-card__result-status">{{ match.quaters }}</span>
+      {% endif %}
+    </div>
+
+    <div class="lb-scorecard-card__team lb-scorecard-card__team--away">
+      {% if away_logo %}
+        <img src="{{ away_logo }}" alt="" class="lb-scorecard-card__logo" />
+      {% else %}
+        <div class="lb-scorecard-card__logo lb-scorecard-card__logo--placeholder" aria-hidden="true"></div>
+      {% endif %}
+      <span class="lb-scorecard-card__team-name">{{ away_name }}</span>
+      {% if away.extras %}
+        <ul class="lb-scorecard-card__team-extras">
+          {% for row in away.extras %}
+            {% if row.label or row.value %}
+              <li>
+                <span class="lb-scorecard-card__extra-label">{{ row.label if row.label else '—' }}</span>
+                <span class="lb-scorecard-card__extra-value">{{ row.value if row.value else '—' }}</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if (home.scorers and home.scorers|length) or (away.scorers and away.scorers|length) %}
+    <div class="lb-scorecard-card__scorers-panel">
+      <p class="lb-scorecard-card__scorers-heading">{{ scorers_heading }}</p>
+      <div class="lb-scorecard-card__scorers-row">
+        {% if home.scorers %}
+          <ul class="lb-scorecard-card__scorer-list" data-side="home">
+            {% for scorer in home.scorers %}
+              {% if scorer.name or scorer.time or scorer.stat %}
+                <li>
+                  {% if show_stat %}
+                    <span class="lb-scorecard-card__scorer-stat">{{ scorer.stat if scorer.stat else '–' }}</span>
+                  {% endif %}
+                  <span class="lb-scorecard-card__scorer-min">{% if scorer.time %}{{ scorer.time }}{% if minute_suffix %}'{% endif %}{% else %}–{% endif %}</span>
+                  <span class="lb-scorecard-card__scorer-name">{{ scorer.name if scorer.name else '—' }}</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if away.scorers %}
+          <ul class="lb-scorecard-card__scorer-list" data-side="away">
+            {% for scorer in away.scorers %}
+              {% if scorer.name or scorer.time or scorer.stat %}
+                <li>
+                  <span class="lb-scorecard-card__scorer-name">{{ scorer.name if scorer.name else '—' }}</span>
+                  <span class="lb-scorecard-card__scorer-min">{% if scorer.time %}{{ scorer.time }}{% if minute_suffix %}'{% endif %}{% else %}–{% endif %}</span>
+                  {% if show_stat %}
+                    <span class="lb-scorecard-card__scorer-stat">{{ scorer.stat if scorer.stat else '–' }}</span>
+                  {% endif %}
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if show_bowlers and ((home.bowlers and home.bowlers|length) or (away.bowlers and away.bowlers|length)) %}
+    <div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--bowlers">
+      <p class="lb-scorecard-card__scorers-heading">{{ bowlers_heading }}</p>
+      <div class="lb-scorecard-card__scorers-row">
+        {% if home.bowlers %}
+          <ul class="lb-scorecard-card__scorer-list" data-side="home">
+            {% for bowler in home.bowlers %}
+              {% if bowler.name or bowler.figures %}
+                <li>
+                  <span class="lb-scorecard-card__scorer-min">{{ bowler.figures if bowler.figures else '–' }}</span>
+                  <span class="lb-scorecard-card__scorer-name">{{ bowler.name if bowler.name else '—' }}</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if away.bowlers %}
+          <ul class="lb-scorecard-card__scorer-list" data-side="away">
+            {% for bowler in away.bowlers %}
+              {% if bowler.name or bowler.figures %}
+                <li>
+                  <span class="lb-scorecard-card__scorer-name">{{ bowler.name if bowler.name else '—' }}</span>
+                  <span class="lb-scorecard-card__scorer-min">{{ bowler.figures if bowler.figures else '–' }}</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if match.info %}
+    <footer class="lb-scorecard-card__meta">
+      <p>{{ match.info }}</p>
+    </footer>
+  {% endif %}
+</div>

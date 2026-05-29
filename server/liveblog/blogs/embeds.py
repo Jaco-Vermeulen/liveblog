@@ -67,6 +67,33 @@ def resolve_embed_filter_tags(global_tags, blog, output=None):
     return collected
 
 
+def merge_theme_i18n(theme, parents=None):
+    """
+    Merge parent theme i18n into the child so strings like poll labels are
+    available when a child theme only overrides part of the catalogue.
+    """
+    parents = parents or []
+    theme_service = get_resource_service("themes")
+    merged = {}
+
+    if (
+        theme.get("extends")
+        and theme.get("name") != theme.get("extends")
+        and theme.get("extends") not in parents
+    ):
+        parent_theme = theme_service.find_one(req=None, name=theme.get("extends"))
+        if parent_theme:
+            parents = parents + [theme.get("extends")]
+            merged = merge_theme_i18n(parent_theme, parents)
+
+    for lang, strings in (theme.get("i18n") or {}).items():
+        lang_map = dict(merged.get(lang, {}))
+        lang_map.update(strings)
+        merged[lang] = lang_map
+
+    return merged
+
+
 def collect_theme_assets(theme, assets=None, template=None, parents=[]):
     from liveblog.themes import UnknownTheme
 
@@ -242,7 +269,7 @@ def embed(blog_id, theme=None, output=None, api_host=None):
     theme_settings = theme_service.get_embed_theme_settings(
         theme, blog, blog_preferences
     )
-    i18n = theme.get("i18n", {})
+    i18n = merge_theme_i18n(theme)
 
     # the blog level setting overrides the one in theme level
     # this way we allow user to enable/disable commenting only for certain blog(s)

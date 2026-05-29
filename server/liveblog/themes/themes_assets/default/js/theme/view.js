@@ -12,6 +12,7 @@ const gdprConsent = require('./gdpr');
 const nunjucks = require('nunjucks/browser/nunjucks-slim');
 const filters = require('../../misc/filters');
 const polls = require('./polls');
+const scorecardRender = require('./scorecard-render');
 import * as messages from './common/messages';
 
 const nunjucksEnv = new nunjucks.Environment();
@@ -41,6 +42,7 @@ function renderTimeline(api_response) {
   var optionsObj = {i18n: window.LB.i18n};
 
   api_response._items.forEach((post) => {
+    scorecardRender.hydrateScorecardPost(post);
     renderedPosts.push(
       nunjucks.env.render('template-post.html', {
         post: post,
@@ -72,6 +74,7 @@ function renderTimeline(api_response) {
  * @param {boolean} displayNone
  */
 function renderSinglePost(post, displayNone) {
+  scorecardRender.hydrateScorecardPost(post);
   return nunjucks.env.render(
     'template-post.html', {
       post: post,
@@ -210,7 +213,10 @@ function updatePost(post, rendered) {
   }
 
   elem.outerHTML = rendered;
-  reloadScripts(elem);
+  const updatedElem = document.querySelector(`[data-post-id="${post._id}"]`);
+  if (updatedElem) {
+    reloadScripts(updatedElem);
+  }
   attachSlideshow();
   attachPermalink();
   attachShareBox();
@@ -244,9 +250,17 @@ function displayNewPosts() {
   }
 }
 
+function isIframelyLoaderScript(script) {
+  const src = script.getAttribute('src') || '';
+  return /iframely\.(net|ly)|\/embed\.js/i.test(src);
+}
+
 function reloadScripts(elem) {
   const $scripts = elem.querySelectorAll('script');
   $scripts.forEach(($script) => {
+    if (isIframelyLoaderScript($script)) {
+      return;
+    }
     let s = document.createElement('script');
     s.type = 'text/javascript';
     if ($script.src) {
@@ -260,21 +274,94 @@ function reloadScripts(elem) {
     document.head.removeChild(s);
   });
 }
+
+/** Re-run inline/provider scripts inside embed markup (consent templates do not execute them). */
+function reloadEmbedScripts(root) {
+  const scope = root && root.querySelectorAll ? root : document;
+  scope.querySelectorAll(
+    '.lb-item.embed, .item--embed__consent-wrapper, .item--embed__generic'
+  ).forEach((container) => {
+    reloadScripts(container);
+  });
+}
+
+/** Resize / wire Iframely cards (Facebook oEmbed uses .iframely-embed). */
+function activateIframelyCards(root) {
+  if (!window.iframely || !window.iframely.load) {
+    return;
+  }
+  const scope = root && root.querySelectorAll ? root : document;
+  scope.querySelectorAll('.iframely-embed').forEach((node) => {
+    try {
+      window.iframely.load(node);
+    } catch (err) {
+      // ignore
+    }
+  });
+  try {
+    window.iframely.load(scope === document ? undefined : scope);
+  } catch (err) {
+    // ignore
+  }
+}
+
+/** Iframely cards often need several load() passes after GDPR unwrap / XHR insert. */
+function scheduleIframelyActivation(root, retries, delayMs) {
+  const maxRetries = retries === undefined ? 8 : retries;
+  const waitMs = delayMs === undefined ? 200 : delayMs;
+
+  function attempt(remaining) {
+    activateIframelyCards(root);
+    if (remaining > 0) {
+      setTimeout(() => attempt(remaining - 1), waitMs);
+    }
+  }
+
+  attempt(maxRetries);
+}
+
+function parseFacebookEmbeds(root) {
+  if (!window.FB || !window.FB.XFBML) {
+    return;
+  }
+  const scope = root && root.querySelectorAll ? root : document;
+  try {
+    window.FB.XFBML.parse(scope === document ? undefined : scope);
+  } catch (err) {
+    // ignore
+  }
+}
+
 /**
  * Trigger embed provider unpacking
  */
-function loadEmbeds() {
-  if (window.instgrm)
-    instgrm.Embeds.process();
+function loadEmbeds(root) {
+  const scope = root && root.querySelectorAll ? root : document;
 
-  if (window.twttr)
-    twttr.widgets.load();
+  reloadEmbedScripts(scope);
 
-  if (window.FB)
-    window.FB.XFBML.parse();
+  if (window.instgrm) {
+    try {
+      instgrm.Embeds.process();
+    } catch (err) {
+      // ignore
+    }
+  }
 
-  if (window.iframely)
-    iframely.load();
+  if (window.twttr) {
+    try {
+      twttr.widgets.load(scope === document ? undefined : scope);
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  parseFacebookEmbeds(scope);
+  setTimeout(() => parseFacebookEmbeds(scope), 400);
+  setTimeout(() => parseFacebookEmbeds(scope), 1200);
+
+  activateIframelyCards(scope);
+  scheduleIframelyActivation(scope);
 
   attachSlideshow();
 }
@@ -483,14 +570,36 @@ function scrollHeaderIntoView() {
   messages.send('scroll_header_into_view');
 }
 
+function isToolbarDropdownTrigger(target) {
+  if (!target || !target.closest) {
+    return false;
+  }
+  return Boolean(
+    target.closest(
+      '[data-js-tags_filter_dropdown_button], [data-js-sort_dropdown_button], .tags-filter-bar__dropdownBtn, .sorting-bar__dropdownBtn',
+    ),
+  );
+}
+
+function isInsideToolbarDropdown(target) {
+  if (!target || !target.closest) {
+    return false;
+  }
+  return Boolean(target.closest('.tags-filter-bar, .sorting-bar'));
+}
+
+var dropdownCloseAttached = false;
+
 function attachDropdownCloseEvent() {
+  if (dropdownCloseAttached) {
+    return;
+  }
+  dropdownCloseAttached = true;
   document.addEventListener("click", function (evt) {
     const target = evt.target;
-    const dropDownBtnClicked = target.className === 'sorting-bar__dropdownBtn' || target.className === 'tags-filter-bar__dropdownBtn',
-      clickedOutside = (target.closest('div') === null ||
-        !['tags-filter-bar', 'sorting-bar'].includes(target.closest('div').className.split('__')[0]))
+    const dropDownBtnClicked = isToolbarDropdownTrigger(target);
+    const clickedOutside = !isInsideToolbarDropdown(target);
     if (!dropDownBtnClicked && clickedOutside) {
-      // close tags-filter dropdown
       toggleTagsFilterDropdown(false);
       toggleSortDropdown(false);
     }

@@ -10,22 +10,13 @@ export const facebookHandler = createHandler('Facebook', PATTERNS, async (url, m
   const response = await fetchOembed(url);
   const data = { ...response };
 
+  // Store clean oEmbed HTML — timeline/preview activate via theme loadEmbeds + iframely.load().
+  // Do not inject parse scripts or strip fb-root (public theme provides #fb-root).
   if (data.provider_name === 'Facebook' && data.html && width !== undefined) {
-    const uniqueId = `_${Math.random().toString(36).slice(2, 11)}`;
     let html = data.html.replace('class="fb-post"', `class="fb-post" data-width="${width}"`);
     if (facebookAppId) {
       html = html.replace('js#xfbml=1', `js#xfbml=1&status=0&appId=${facebookAppId}`);
     }
-    html = html.replace('<div id="fb-root"></div>', '');
-    html = html.replace('</script>', `</script><div id="${uniqueId}">`);
-    html += '</div>';
-    html += [
-      '<script>',
-      `  if(window.FB !== undefined) {`,
-      `    window.FB.XFBML.parse(document.getElementById("${uniqueId}"));`,
-      '  }',
-      '</script>',
-    ].join('');
     data.html = html;
   }
 

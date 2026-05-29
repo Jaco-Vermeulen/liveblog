@@ -2,8 +2,7 @@ import { useCallback, useState } from 'react';
 import type { EditorViewMode } from '../types';
 
 function initialEditorViewMode(): EditorViewMode {
-  if (typeof window === 'undefined') return 'edit';
-  return window.matchMedia('(min-width: 1024px)').matches ? 'split' : 'edit';
+  return 'split';
 }
 
 export function useEditorViewMode() {

@@ -6,6 +6,7 @@ import {
   extractFreetypeFields,
   getPathValue,
   setPathValue,
+  SHOW_POST_TYPE_SELECTOR,
   useFreetypesList,
 } from '@/mechanisms/freetypes-manager';
 import { FreetypeFieldInput } from './FreetypeFieldInput';
@@ -46,36 +47,49 @@ export function FreetypeFields({
     return raw != null ? String(raw) : '';
   };
 
+  if (!SHOW_POST_TYPE_SELECTOR && isDefault) {
+    return null;
+  }
+
   return (
     <div className="m-editor-freetype" aria-label="Vrye tipe">
-      <LbFormField label="Plasing-tipe" htmlFor="editor-post-type">
-        <select
-          id="editor-post-type"
-          className="m-editor-composer__select"
-          value={isDefault ? DEFAULT_POST_TYPE : activeFreetype?.name ?? DEFAULT_POST_TYPE}
-          onChange={(e) => {
-            const name = e.target.value;
-            if (name === DEFAULT_POST_TYPE) {
-              onPostTypeChange(DEFAULT_POST_TYPE);
-              onFreetypeDataChange({});
-              return;
-            }
-            const ft = freetypes.find((f) => f.name === name);
-            if (ft) {
-              onPostTypeChange(ft);
-              onFreetypeDataChange({});
-            }
-          }}
-          disabled={loading}
-        >
-          <option value={DEFAULT_POST_TYPE}>Standaard (teks / inbed / poll)</option>
-          {freetypes.map((ft) => (
-            <option key={ft._id ?? ft.name} value={ft.name}>
-              {ft.name}
-            </option>
-          ))}
-        </select>
-      </LbFormField>
+      {SHOW_POST_TYPE_SELECTOR && (
+        <LbFormField label="Plasing-tipe" htmlFor="editor-post-type">
+          <select
+            id="editor-post-type"
+            className="m-editor-composer__select"
+            value={isDefault ? DEFAULT_POST_TYPE : activeFreetype?.name ?? DEFAULT_POST_TYPE}
+            onChange={(e) => {
+              const name = e.target.value;
+              if (name === DEFAULT_POST_TYPE) {
+                onPostTypeChange(DEFAULT_POST_TYPE);
+                onFreetypeDataChange({});
+                return;
+              }
+              const ft = freetypes.find((f) => f.name === name);
+              if (ft) {
+                onPostTypeChange(ft);
+                onFreetypeDataChange({});
+              }
+            }}
+            disabled={loading}
+          >
+            <option value={DEFAULT_POST_TYPE}>Standaard (teks / inbed / poll)</option>
+            {freetypes.map((ft) => (
+              <option key={ft._id ?? ft.name} value={ft.name}>
+                {ft.name}
+              </option>
+            ))}
+          </select>
+        </LbFormField>
+      )}
+
+      {!SHOW_POST_TYPE_SELECTOR && !isDefault && activeFreetype && (
+        <LbAlert variant="info" className="mb-3">
+          Hierdie plasing gebruik die vrye tipe &ldquo;{activeFreetype.name}&rdquo;. Jy kan die
+          velde hieronder wysig.
+        </LbAlert>
+      )}
 
       {error && (
         <LbAlert variant="error" className="mt-3">

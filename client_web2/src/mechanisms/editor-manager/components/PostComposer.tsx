@@ -5,6 +5,7 @@ import {
   Link2,
   Pin,
   Star,
+  Trophy,
   Type,
   X,
 } from 'lucide-react';
@@ -17,6 +18,7 @@ import { EmbedPreview, type EmbedMeta } from '../subsystems/embed-handlers';
 import { FreetypeFields } from '../subsystems/freetype-fields';
 import { PollBlockEditor } from '../subsystems/polls';
 import { RichTextBlockEditor } from '../subsystems/rich-text-editor';
+import { ScorecardBlockEditor, type ScorecardBody } from '../subsystems/scorecard';
 import type { ComposerState, EditorPostType, SirTrevorBlockType } from '../types';
 import { PostTagsSelector } from './PostTagsSelector';
 
@@ -29,6 +31,7 @@ const BLOCK_TYPES: {
   { type: 'Image', label: 'Beeld', icon: ImageIcon },
   { type: 'Embed', label: 'Inbed', icon: Link2 },
   { type: 'Poll', label: 'Poll', icon: BarChart2 },
+  { type: 'Scorecard', label: 'Skoorbord', icon: Trophy },
 ];
 
 export interface PostComposerProps {
@@ -44,7 +47,13 @@ export interface PostComposerProps {
   onRemoveBlockIfEmpty: (index: number) => void;
   onUpdateBlock: (index: number, data: Record<string, unknown>) => void;
   onUploadImage: (index: number, file: File) => Promise<void> | void;
+  onUploadScorecardAsset?: (
+    index: number,
+    target: 'home' | 'away' | 'background',
+    file: File,
+  ) => Promise<void> | void;
   imageUploadingIndex?: number | null;
+  scorecardUploading?: 'home' | 'away' | 'background' | null;
   onPostTypeChange: (postType: EditorPostType) => void;
   onFreetypeDataChange: (data: Record<string, unknown>) => void;
   onScheduleEnabledChange: (enabled: boolean) => void;
@@ -73,7 +82,9 @@ export function PostComposer({
   onRemoveBlockIfEmpty,
   onUpdateBlock,
   onUploadImage,
+  onUploadScorecardAsset,
   imageUploadingIndex = null,
+  scorecardUploading = null,
   onPostTypeChange,
   onFreetypeDataChange,
   onScheduleEnabledChange,
@@ -143,7 +154,13 @@ export function PostComposer({
               {(block.type !== 'Text' && block.type !== 'Quote') || composer.blocks.length > 1 ? (
                 <div className="m-editor-composer__block-head">
                   <span className="m-editor-composer__block-label">
-                    {block.type === 'Text' ? 'Teks' : block.type === 'Quote' ? 'Aanhaling' : block.type}
+                    {block.type === 'Text'
+                      ? 'Teks'
+                      : block.type === 'Quote'
+                        ? 'Aanhaling'
+                        : block.type === 'Scorecard'
+                          ? 'Skoorbord'
+                          : block.type}
                   </span>
                   {composer.blocks.length > 1 && (
                     <button
@@ -220,6 +237,14 @@ export function PostComposer({
                     onChange={(pollBody) => onUpdateBlock(index, { pollBody })}
                   />
                 </div>
+              ) : block.type === 'Scorecard' ? (
+                <ScorecardBlockEditor
+                  scorecardBody={(block.data.scorecardBody as ScorecardBody | null) ?? null}
+                  onChange={(scorecardBody) => onUpdateBlock(index, { scorecardBody })}
+                  onUploadLogo={(side, file) => onUploadScorecardAsset?.(index, side, file)}
+                  onUploadBackground={(file) => onUploadScorecardAsset?.(index, 'background', file)}
+                  uploadingSide={scorecardUploading}
+                />
               ) : (
                 <div
                   onBlur={(e) => {

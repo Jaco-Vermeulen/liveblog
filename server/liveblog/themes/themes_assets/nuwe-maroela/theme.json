@@ -350,7 +350,13 @@
 
             "Activate": "Aktiveer",
 
-            "Filter": "Filter"
+            "Filter": "Filter",
+            "Total votes": "Totale stemme",
+            "Votes": "Stemme",
+            "Vote": "Stem",
+            "Ends": "Eindig",
+            "Poll closed": "Poll gesluit",
+            "You have already voted on this poll": "Jy het reeds op hierdie poll gestem."
 
         },
 

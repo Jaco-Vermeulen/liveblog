@@ -78,11 +78,13 @@ var buttons = {
         .catch(catchError);
     },
 
-    "[data-js-sort_dropdown_button]": () => {
+    "[data-js-sort_dropdown_button]": (e) => {
+      e.stopPropagation();
       view.toggleSortDropdown();
     },
 
-    "[data-js-tags_filter_dropdown_button]": () => {
+    "[data-js-tags_filter_dropdown_button]": (e) => {
+      e.stopPropagation();
       view.toggleTagsFilterDropdown();
     },
 
@@ -152,17 +154,14 @@ var buttons = {
 
       if (handler === "[data-tags-filter-option]") {
         elems.forEach((el) => {
-          el.addEventListener('click', buttons.handlers[handler](el), false);
+          el.addEventListener('change', buttons.handlers[handler](el), false);
         })
         return;
       }
 
-      const el = elems[0]
-      if (!el) {
-        return false;
-      }
-
-      el.addEventListener('click', buttons.handlers[handler], false);
+      elems.forEach((el) => {
+        el.addEventListener('click', buttons.handlers[handler], false);
+      });
     });
 
     view.attachSlideshow();
