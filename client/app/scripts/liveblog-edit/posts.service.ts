@@ -25,7 +25,14 @@ const postsService = (api, $q, _userList, session) => {
             if (filters.sticky) {
                 filter.and.push({ term: { sticky: true } });
             } else {
-                filter.and.push({ bool: { must_not: { term: { sticky: true } } } });
+                filter.and.push({
+                    or: {
+                        filters: [
+                            { term: { sticky: false } },
+                            { missing: { field: 'sticky' } },
+                        ],
+                    },
+                });
             }
         }
 
@@ -60,14 +67,25 @@ const postsService = (api, $q, _userList, session) => {
 
     const getPostFilters = (filters: IFilters) => {
         const operator = filters.scheduled ? 'gte' : 'lte';
-        const postFilterRange = {};
         // eslint-disable-next-line newline-per-chained-call
         const publishedDate = filters.maxPublishedDate || moment().utc().format();
 
-        postFilterRange['published_date'] = {};
-        postFilterRange['published_date'][operator] = publishedDate;
+        if (filters.scheduled) {
+            const postFilterRange = {};
 
-        return { range: postFilterRange };
+            postFilterRange['published_date'] = {};
+            postFilterRange['published_date'][operator] = publishedDate;
+            return { range: postFilterRange };
+        }
+
+        return {
+            or: {
+                filters: [
+                    { range: { published_date: { lte: publishedDate } } },
+                    { missing: { field: 'published_date' } },
+                ],
+            },
+        };
     };
 
     /**

@@ -27,26 +27,53 @@ const PUBLISHED_DATE_TOLERANCE_MS = 5 * 60 * 1000;
 /**
  * Elasticsearch `term: { sticky: false }` does not match documents where `sticky` is absent.
  * Legacy posts often lack the field in the index while Mongo still counts them in total_posts.
+ * Uses `or` + `missing` for Elasticsearch 2.x filter syntax (same as legacy noSyndication).
  */
 export function buildStickyFilterClause(sticky: boolean): unknown {
   if (sticky) {
     return { term: { sticky: true } };
   }
-  return { bool: { must_not: { term: { sticky: true } } } };
+  return {
+    or: {
+      filters: [{ term: { sticky: false } }, { missing: { field: 'sticky' } }],
+    },
+  };
 }
 
-function getPostFilters(filters: PostFilters): PostsQueryCriteria['postFilter'] {
+/**
+ * Exclude scheduled posts (published_date in the future).
+ * Docs without published_date in the index must still match (legacy / partial reindex).
+ */
+export function buildPublishedDatePostFilter(
+  filters: PostFilters,
+): NonNullable<PostsQueryCriteria['postFilter']> {
   const operator = filters.scheduled ? 'gte' : 'lte';
   const now = Date.now();
   const toleranceAdjustedNow = filters.scheduled
     ? new Date(now - PUBLISHED_DATE_TOLERANCE_MS).toISOString()
     : new Date(now + PUBLISHED_DATE_TOLERANCE_MS).toISOString();
   const publishedDate = filters.maxPublishedDate ?? toleranceAdjustedNow;
+
+  if (filters.scheduled) {
+    return {
+      range: {
+        published_date: { [operator]: publishedDate },
+      },
+    };
+  }
+
   return {
-    range: {
-      published_date: { [operator]: publishedDate },
+    or: {
+      filters: [
+        { range: { published_date: { lte: publishedDate } } },
+        { missing: { field: 'published_date' } },
+      ],
     },
   };
+}
+
+function getPostFilters(filters: PostFilters): PostsQueryCriteria['postFilter'] {
+  return buildPublishedDatePostFilter(filters);
 }
 
 function applySortField(filters: PostFilters, source: PostsQueryCriteria['source']) {

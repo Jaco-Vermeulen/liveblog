@@ -25,16 +25,23 @@ export {
   getClientSortOrder,
 } from './postsCriteria';
 
-function criteriaToParams(criteria: PostsQueryCriteria): Record<string, string | number> {
-  const params: Record<string, string | number> = {
-    page: criteria.page ?? 1,
-    max_results: criteria.maxResults ?? 15,
-    source: JSON.stringify(criteria.source),
+/** Legacy Angular sends `post_filter` inside `source`, not as a separate query param. */
+export function serializePostsQueryCriteria(criteria: PostsQueryCriteria): Record<string, string | number> {
+  const sourcePayload: PostsQueryCriteria['source'] & { post_filter?: PostsQueryCriteria['postFilter'] } = {
+    ...criteria.source,
   };
   if (criteria.postFilter) {
-    params.post_filter = JSON.stringify(criteria.postFilter);
+    sourcePayload.post_filter = criteria.postFilter;
   }
-  return params;
+  return {
+    page: criteria.page ?? 1,
+    max_results: criteria.maxResults ?? 15,
+    source: JSON.stringify(sourcePayload),
+  };
+}
+
+function criteriaToParams(criteria: PostsQueryCriteria): Record<string, string | number> {
+  return serializePostsQueryCriteria(criteria);
 }
 
 export function listBlogPosts(

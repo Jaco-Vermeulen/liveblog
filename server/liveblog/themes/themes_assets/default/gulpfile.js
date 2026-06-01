@@ -96,7 +96,9 @@ if (match.length > 0) {
     });
   });
 
-  query.query.filtered.filter.and[0] = { bool: { must_not: { term: { sticky: true } } } };
+  query.query.filtered.filter.and[0] = {
+    or: { filters: [{ term: { sticky: false } }, { missing: { field: 'sticky' } }] },
+  };
   const { postsPerPage } = options.blog.theme_settings;
 
   request.get(`${postsEndpoint}?max_results=${postsPerPage}&source=${JSON.stringify(query)}`, (response) => {

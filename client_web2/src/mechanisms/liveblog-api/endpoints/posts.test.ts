@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { __resetLoggerForTests } from '@/mechanisms/request-logger';
 import { postsItemPath } from '../paths';
-import { enrichPost, listBlogPosts, savePost } from './posts';
+import { buildPostsQueryCriteria } from './postsCriteria';
+import { enrichPost, listBlogPosts, savePost, serializePostsQueryCriteria } from './posts';
 
 afterEach(() => {
   __resetLoggerForTests();
@@ -24,6 +25,22 @@ describe('listBlogPosts', () => {
     const url = String(vi.mocked(fetch).mock.calls[0][0]);
     expect(url).toContain('/blogs/507f1f77bcf86cd799439011/posts');
     expect(url).toContain('post_status');
+    expect(url).not.toContain('post_filter=');
+    const sourceParam = new URL(url, 'http://localhost').searchParams.get('source');
+    expect(sourceParam).toBeTruthy();
+    const source = JSON.parse(sourceParam!) as { post_filter?: unknown };
+    expect(source.post_filter).toBeDefined();
+  });
+});
+
+describe('serializePostsQueryCriteria', () => {
+  it('embeds post_filter inside source JSON like legacy Angular', () => {
+    const criteria = buildPostsQueryCriteria({ status: 'open', sticky: false }, 1, 25);
+    const params = serializePostsQueryCriteria(criteria);
+    expect(params).not.toHaveProperty('post_filter');
+    const source = JSON.parse(String(params.source)) as { post_filter?: unknown; query?: unknown };
+    expect(source.post_filter).toBeDefined();
+    expect(source.query).toBeDefined();
   });
 });
 

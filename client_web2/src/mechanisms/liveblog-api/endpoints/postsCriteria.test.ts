@@ -20,10 +20,21 @@ describe('buildPostsQueryCriteria', () => {
   it('treats missing sticky field as non-sticky when sticky is false', () => {
     const criteria = buildPostsQueryCriteria({ status: 'open', sticky: false });
     expect(criteria.source.query.filtered.filter.and).toContainEqual({
-      bool: { must_not: { term: { sticky: true } } },
+      or: {
+        filters: [{ term: { sticky: false } }, { missing: { field: 'sticky' } }],
+      },
     });
-    expect(criteria.source.query.filtered.filter.and).not.toContainEqual({
-      term: { sticky: false },
+  });
+
+  it('allows posts missing published_date in post_filter', () => {
+    const criteria = buildPostsQueryCriteria({ status: 'open' });
+    expect(criteria.postFilter).toEqual({
+      or: {
+        filters: [
+          { range: { published_date: { lte: expect.any(String) } } },
+          { missing: { field: 'published_date' } },
+        ],
+      },
     });
   });
 });

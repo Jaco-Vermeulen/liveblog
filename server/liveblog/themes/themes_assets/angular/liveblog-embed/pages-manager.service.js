@@ -51,7 +51,14 @@
                 if (isSticky) {
                     return {term: {sticky: true}};
                 }
-                return {bool: {must_not: {term: {sticky: true}}}};
+                return {
+                    or: {
+                        filters: [
+                            {term: {sticky: false}},
+                            {missing: {field: 'sticky'}},
+                        ],
+                    },
+                };
             }
 
             function retrievePage(page, opts) {
