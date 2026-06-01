@@ -42,7 +42,13 @@ sudo /root/deploy-liveblog.sh
 Or manually:
 
 ```bash
-cd /opt/liveblog && git pull && docker compose up -d --build
+cd /opt/liveblog && git pull origin master && docker compose up -d --build
+```
+
+After changes to public embed / theme JavaScript, rebuild the default theme bundle (staging usually has no `npm` on the host — the script uses Docker):
+
+```bash
+cd /opt/liveblog && bash scripts/rebuild-default-theme.sh && docker compose restart
 ```
 
 Default login after init: **admin** / **admin**.
