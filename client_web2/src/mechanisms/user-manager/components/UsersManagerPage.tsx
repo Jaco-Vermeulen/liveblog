@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbBadge } from '@/components/ui/LbBadge';
 import { LbButton } from '@/components/ui/LbButton';
@@ -10,12 +11,12 @@ import { UserEditModal } from './UserEditModal';
 
 function statusBadge(user: { is_enabled?: boolean; is_active?: boolean }) {
   if (user.is_enabled === false) {
-    return <LbBadge variant="muted">Gedeaktiveer</LbBadge>;
+    return <LbBadge variant="muted">{AF.users.status.deactivated}</LbBadge>;
   }
   if (user.is_active === false) {
-    return <LbBadge variant="orange">Onaktief</LbBadge>;
+    return <LbBadge variant="orange">{AF.users.status.inactive}</LbBadge>;
   }
-  return <LbBadge variant="teal">Aktief</LbBadge>;
+  return <LbBadge variant="teal">{AF.users.status.active}</LbBadge>;
 }
 
 export function UsersManagerPage() {
@@ -48,7 +49,7 @@ export function UsersManagerPage() {
     return (
       <LbContentContainer size="full" centered className="py-16">
         <LbSpinner tone="dark" />
-        <p className="mt-3 text-sm text-mar-muted">Laai gebruikers…</p>
+        <p className="mt-3 text-sm text-mar-muted">{AF.users.loading}</p>
       </LbContentContainer>
     );
   }
@@ -67,11 +68,11 @@ export function UsersManagerPage() {
       <div className="mb-6 min-w-0">
         <LbInput
           type="search"
-          placeholder="Soek op naam, gebruikersnaam of e-pos…"
+          placeholder={AF.users.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full max-w-md"
-          aria-label="Soek gebruikers"
+          aria-label={AF.users.searchAria}
         />
       </div>
 
@@ -101,7 +102,7 @@ export function UsersManagerPage() {
             {users.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-mar-muted">
-                  Geen gebruikers gevind nie.
+                  {AF.users.noUsersFound}
                 </td>
               </tr>
             ) : (

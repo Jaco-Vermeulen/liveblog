@@ -7,6 +7,7 @@ import {
   uploadUserAvatar,
   type LiveblogUser,
 } from '@/mechanisms/liveblog-api';
+import { AF } from '@/copy';
 import { useAuth } from './useAuth';
 import {
   isProfileFormDirty,
@@ -39,7 +40,7 @@ export function useProfile() {
       setUser(full);
       setForm(userToProfileForm(full));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie profiel laai nie');
+      setError(err instanceof Error ? err.message : AF.auth.errors.loadProfile);
     } finally {
       setLoading(false);
     }
@@ -69,14 +70,14 @@ export function useProfile() {
       setUser(updated);
       setForm(userToProfileForm(updated));
       await refreshUser();
-      setSaveMessage('Profiel gestoor.');
+      setSaveMessage(AF.auth.messages.profileSaved);
     } catch (err) {
       const message =
         err instanceof LiveblogApiError
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Kon nie profiel stoor nie';
+            : AF.auth.errors.saveProfile;
       setError(message);
     } finally {
       setSaving(false);
@@ -102,14 +103,14 @@ export function useProfile() {
         setUser(updated);
         setForm(userToProfileForm(updated));
         await refreshUser();
-        setSaveMessage('Profielfoto opgedateer.');
+        setSaveMessage(AF.auth.messages.photoUpdated);
       } catch (err) {
         const message =
           err instanceof LiveblogApiError
             ? err.message
             : err instanceof Error
               ? err.message
-              : 'Kon nie foto oplaai nie';
+              : AF.auth.errors.uploadPhoto;
         setError(message);
         throw err;
       } finally {
@@ -123,7 +124,7 @@ export function useProfile() {
     async (oldPassword: string, newPassword: string) => {
       const username = user?.username ?? state.user?.username;
       if (!username) {
-        throw new Error('Geen gebruiker nie');
+        throw new Error(AF.auth.errors.noUser);
       }
       await changeUserPassword({
         username,

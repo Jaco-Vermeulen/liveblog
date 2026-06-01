@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import {
   createContext,
   useCallback,
@@ -65,7 +66,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setItems(normalized);
       setUnread(countUnreadActivity(normalized, userId));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie kennisgewings laai nie');
+      setError(err instanceof Error ? err.message : AF.notifications.errors.load);
     } finally {
       setLoading(false);
     }

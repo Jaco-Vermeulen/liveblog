@@ -1,4 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react';
+import { AF } from '@/copy';
 import { ExternalLink } from 'lucide-react';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
@@ -55,7 +56,7 @@ export function GeneralSettings({
         <span className="font-medium">Blog ID:</span> {blogId}
       </div>
 
-      <LbFormField label="Blog-status" htmlFor="settings-status">
+      <LbFormField label={AF.editor.settings.status} htmlFor="settings-status">
         <label className="flex items-center gap-3 text-sm">
           <input
             id="settings-status"
@@ -68,7 +69,7 @@ export function GeneralSettings({
         </label>
       </LbFormField>
 
-      <LbFormField label="Titel" htmlFor="settings-title">
+      <LbFormField label={AF.editor.settings.title} htmlFor="settings-title">
         <LbInput
           id="settings-title"
           value={form.title}
@@ -77,7 +78,7 @@ export function GeneralSettings({
         />
       </LbFormField>
 
-      <LbFormField label="Blog-beeld" htmlFor="settings-image">
+      <LbFormField label={AF.editor.settings.blogImage} htmlFor="settings-image">
         {form.pictureUrl ? (
           <div className="space-y-2">
             <img
@@ -114,7 +115,7 @@ export function GeneralSettings({
         )}
       </LbFormField>
 
-      <LbFormField label="Beskrywing" htmlFor="settings-description">
+      <LbFormField label={AF.editor.settings.description} htmlFor="settings-description">
         <textarea
           id="settings-description"
           className={fieldClass}
@@ -124,7 +125,7 @@ export function GeneralSettings({
         />
       </LbFormField>
 
-      <LbFormField label="Tema" htmlFor="settings-theme">
+      <LbFormField label={AF.editor.settings.theme} htmlFor="settings-theme">
         <select
           id="settings-theme"
           className={fieldClass}
@@ -141,7 +142,7 @@ export function GeneralSettings({
         </select>
       </LbFormField>
 
-      <LbFormField label="Taal" htmlFor="settings-language">
+      <LbFormField label={AF.editor.settings.language} htmlFor="settings-language">
         <select
           id="settings-language"
           className={fieldClass}
@@ -158,7 +159,7 @@ export function GeneralSettings({
         </select>
       </LbFormField>
 
-      <LbFormField label="Inbed-hoogte" htmlFor="settings-embed-height">
+      <LbFormField label={AF.editor.settings.embedHeight} htmlFor="settings-embed-height">
         <label className="flex items-center gap-3 text-sm">
           <input
             id="settings-embed-height"
@@ -171,7 +172,7 @@ export function GeneralSettings({
         </label>
       </LbFormField>
 
-      <LbFormField label="Inbed-kode" htmlFor="settings-embed-code">
+      <LbFormField label={AF.editor.settings.embedCode} htmlFor="settings-embed-code">
         <textarea
           id="settings-embed-code"
           className={`${fieldClass} min-h-[140px] font-mono text-xs`}
@@ -195,7 +196,7 @@ export function GeneralSettings({
         </p>
       )}
 
-      <LbFormField label="Kategorie" htmlFor="settings-category">
+      <LbFormField label={AF.editor.settings.category} htmlFor="settings-category">
         <select
           id="settings-category"
           className={fieldClass}
@@ -204,13 +205,13 @@ export function GeneralSettings({
         >
           {BLOG_CATEGORIES.map((cat) => (
             <option key={cat || 'none'} value={cat}>
-              {cat || '— Geen —'}
+              {cat || AF.editor.settings.categoryNone}
             </option>
           ))}
         </select>
       </LbFormField>
 
-      <LbFormField label="Gebruikers kan kommentaar lewer" htmlFor="settings-comments">
+      <LbFormField label={AF.editor.settings.allowComments} htmlFor="settings-comments">
         <select
           id="settings-comments"
           className={fieldClass}
@@ -225,7 +226,7 @@ export function GeneralSettings({
         </select>
       </LbFormField>
 
-      <LbFormField label="Plasing-limiet" htmlFor="settings-post-limit">
+      <LbFormField label={AF.editor.settings.postLimit} htmlFor="settings-post-limit">
         <select
           id="settings-post-limit"
           className={fieldClass}

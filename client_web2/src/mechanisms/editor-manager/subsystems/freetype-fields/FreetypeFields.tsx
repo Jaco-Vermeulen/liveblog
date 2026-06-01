@@ -9,7 +9,10 @@ import {
   SHOW_POST_TYPE_SELECTOR,
   useFreetypesList,
 } from '@/mechanisms/freetypes-manager';
+import { AF } from '@/copy';
 import { FreetypeFieldInput } from './FreetypeFieldInput';
+
+const F = AF.editor.freetype;
 
 export const DEFAULT_POST_TYPE = 'Default';
 
@@ -52,9 +55,9 @@ export function FreetypeFields({
   }
 
   return (
-    <div className="m-editor-freetype" aria-label="Vrye tipe">
+    <div className="m-editor-freetype" aria-label={F.aria}>
       {SHOW_POST_TYPE_SELECTOR && (
-        <LbFormField label="Plasing-tipe" htmlFor="editor-post-type">
+        <LbFormField label={F.postType} htmlFor="editor-post-type">
           <select
             id="editor-post-type"
             className="m-editor-composer__select"
@@ -74,7 +77,7 @@ export function FreetypeFields({
             }}
             disabled={loading}
           >
-            <option value={DEFAULT_POST_TYPE}>Standaard (teks / inbed / poll)</option>
+            <option value={DEFAULT_POST_TYPE}>{AF.freetypes.standardOptionShort}</option>
             {freetypes.map((ft) => (
               <option key={ft._id ?? ft.name} value={ft.name}>
                 {ft.name}
@@ -86,8 +89,7 @@ export function FreetypeFields({
 
       {!SHOW_POST_TYPE_SELECTOR && !isDefault && activeFreetype && (
         <LbAlert variant="info" className="mb-3">
-          Hierdie plasing gebruik die vrye tipe &ldquo;{activeFreetype.name}&rdquo;. Jy kan die
-          velde hieronder wysig.
+          {F.usingType(activeFreetype.name)}
         </LbAlert>
       )}
 
@@ -100,7 +102,7 @@ export function FreetypeFields({
       {loading && !freetypes.length && (
         <div className="mt-3 flex justify-center py-4">
           <LbSpinner tone="dark" />
-          <span className="sr-only">Laai vrye tipes…</span>
+          <span className="sr-only">{F.loading}</span>
         </div>
       )}
 
@@ -108,8 +110,7 @@ export function FreetypeFields({
         <div className="m-editor-freetype__fields mt-4 space-y-3">
           {fields.length === 0 ? (
             <LbAlert variant="info">
-              Geen redigeerbare velde in hierdie sjabloon gevind nie. Kontroleer $veranderlikes in
-              die vrye tipe-sjabloon.
+              {F.noFields}
             </LbAlert>
           ) : (
             fields.map((field) => (

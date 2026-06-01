@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
@@ -37,11 +38,11 @@ export function UserEditModal({
     <LbModal
       open={open}
       onClose={onClose}
-      title={isNew ? 'Nuwe gebruiker' : `Wysig: ${editing.display_name ?? editing.username}`}
+      title={isNew ? AF.users.newUser : AF.users.editUser(editing.display_name ?? editing.username)}
       className="max-w-2xl"
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <LbFormField label="Voornaam" htmlFor="user-first-name">
+        <LbFormField label={AF.auth.firstName} htmlFor="user-first-name">
           <LbInput
             id="user-first-name"
             className={inputClass}
@@ -49,7 +50,7 @@ export function UserEditModal({
             onChange={(e) => onChange({ first_name: e.target.value })}
           />
         </LbFormField>
-        <LbFormField label="Van" htmlFor="user-last-name">
+        <LbFormField label={AF.auth.lastName} htmlFor="user-last-name">
           <LbInput
             id="user-last-name"
             className={inputClass}
@@ -57,7 +58,7 @@ export function UserEditModal({
             onChange={(e) => onChange({ last_name: e.target.value })}
           />
         </LbFormField>
-        <LbFormField label="Gebruikersnaam" htmlFor="user-username">
+        <LbFormField label={AF.auth.username} htmlFor="user-username">
           <LbInput
             id="user-username"
             className={inputClass}
@@ -66,7 +67,7 @@ export function UserEditModal({
             onChange={(e) => onChange({ username: e.target.value })}
           />
         </LbFormField>
-        <LbFormField label="E-pos" htmlFor="user-email">
+        <LbFormField label={AF.users.email} htmlFor="user-email">
           <LbInput
             id="user-email"
             type="email"
@@ -93,7 +94,7 @@ export function UserEditModal({
             </LbButton>
           </div>
         ) : null}
-        <LbFormField label="Telefoon" htmlFor="user-phone">
+        <LbFormField label={AF.auth.phone} htmlFor="user-phone">
           <LbInput
             id="user-phone"
             className={inputClass}
@@ -135,14 +136,14 @@ export function UserEditModal({
           ) : null}
         </div>
         {form.user_type !== 'administrator' ? (
-          <LbFormField label="Rol" htmlFor="user-role" className="sm:col-span-2">
+          <LbFormField label={AF.users.role} htmlFor="user-role" className="sm:col-span-2">
             <select
               id="user-role"
               className={inputClass}
               value={form.role}
               onChange={(e) => onChange({ role: e.target.value })}
             >
-              <option value="">Kies rol…</option>
+              <option value="">{AF.auth.chooseRole}</option>
               {roles.map((role) => (
                 <option key={role._id} value={role._id}>
                   {role.name}
@@ -153,7 +154,7 @@ export function UserEditModal({
         ) : null}
         {form.is_author ? (
           <>
-            <LbFormField label="Aftekening" htmlFor="user-sign-off">
+            <LbFormField label={AF.auth.signOff} htmlFor="user-sign-off">
               <LbInput
                 id="user-sign-off"
                 className={inputClass}
@@ -161,7 +162,7 @@ export function UserEditModal({
                 onChange={(e) => onChange({ sign_off: e.target.value })}
               />
             </LbFormField>
-            <LbFormField label="Byline" htmlFor="user-byline">
+            <LbFormField label={AF.auth.byline} htmlFor="user-byline">
               <LbInput
                 id="user-byline"
                 className={inputClass}
@@ -169,7 +170,7 @@ export function UserEditModal({
                 onChange={(e) => onChange({ byline: e.target.value })}
               />
             </LbFormField>
-            <LbFormField label="Biografie" htmlFor="user-bio" className="sm:col-span-2">
+            <LbFormField label={AF.auth.biography} htmlFor="user-bio" className="sm:col-span-2">
               <textarea
                 id="user-bio"
                 className={`${inputClass} min-h-[5rem]`}
@@ -182,10 +183,10 @@ export function UserEditModal({
       </div>
       <div className="mt-6 flex justify-end gap-2">
         <LbButton type="button" variant="secondary" onClick={onClose} disabled={saving}>
-          Kanselleer
+          {AF.common.cancel}
         </LbButton>
         <LbButton type="button" variant="primary" onClick={onSave} disabled={saving}>
-          {saving ? 'Stoor…' : 'Stoor'}
+          {saving ? AF.common.saving : AF.common.save}
         </LbButton>
       </div>
     </LbModal>

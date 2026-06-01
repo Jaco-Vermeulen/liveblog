@@ -8,6 +8,9 @@ import {
   usesSplitInningsPanel,
 } from './scorecardDisplay';
 import type { ScorecardBody, ScorecardPlayerRow, ScorecardScorer, ScorecardTeam } from './scorecardTypes';
+import { AF } from '@/copy';
+
+const SC = AF.editor.scorecard;
 
 export function escapeScorecardHtml(value: string): string {
   return value
@@ -271,9 +274,9 @@ export function buildScorecardLayoutHtml(
 
   const scoreline =
     `<div class="${p}__scoreline">` +
-    renderTeamColumn(body.home, 'home', 'Tuisspan', homeScore, cricketLayout, p) +
+    renderTeamColumn(body.home, 'home', SC.homeTeam, homeScore, cricketLayout, p) +
     centerHtml +
-    renderTeamColumn(body.away, 'away', 'Wêreldspan', awayScore, cricketLayout, p) +
+    renderTeamColumn(body.away, 'away', SC.awayTeam, awayScore, cricketLayout, p) +
     `</div>`;
 
   const players = renderPlayersPanel(body, p, preset);

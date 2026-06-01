@@ -4,6 +4,7 @@ import { LbAlert, LbButton, LbFormField, LbInput, LbPanelCard, LbSpinner } from 
 import { useProfile } from '../hooks/useProfile';
 import { ChangePasswordModal } from './ChangePasswordModal';
 import { ProfileAvatar } from './ProfileAvatar';
+import { AF } from '@/copy';
 import { ProfileToolbar } from './ProfileToolbar';
 
 const inputClass =
@@ -46,7 +47,7 @@ export function ProfilePage() {
     return (
       <LbContentContainer size="lg" centered className="py-16">
         <LbSpinner tone="dark" />
-        <p className="mt-3 text-sm text-mar-muted">Laai profiel…</p>
+        <p className="mt-3 text-sm text-mar-muted">{AF.auth.loadingProfile}</p>
       </LbContentContainer>
     );
   }
@@ -68,7 +69,7 @@ export function ProfilePage() {
         </LbAlert>
       )}
 
-      <LbPanelCard title="My profiel" padding="md" className="mb-6">
+      <LbPanelCard title={AF.auth.myProfile} padding="md" className="mb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <ProfileAvatar
             user={user}
@@ -80,7 +81,7 @@ export function ProfilePage() {
             <h1 className="m-0 text-xl font-bold text-mar-text">{displayName}</h1>
             <p className="m-0 text-sm text-mar-muted">@{user.username}</p>
             <p className="m-0 mt-1 text-sm text-mar-muted">
-              Lid sedert {formatMemberSince(user._created)}
+              {AF.auth.memberSince(formatMemberSince(user._created))}
             </p>
           </div>
         </div>
@@ -95,7 +96,7 @@ export function ProfilePage() {
             }`}
             onClick={() => setTab('general')}
           >
-            Algemeen
+            {AF.auth.tabGeneralShort}
           </button>
           {form.is_author && (
             <button
@@ -107,7 +108,7 @@ export function ProfilePage() {
               }`}
               onClick={() => setTab('author')}
             >
-              Outeur
+              {AF.auth.tabAuthorShort}
             </button>
           )}
         </div>
@@ -121,9 +122,9 @@ export function ProfilePage() {
         }}
       >
         {tab === 'general' && (
-          <LbPanelCard title="Algemene inligting" padding="md">
+          <LbPanelCard title={AF.auth.generalInfo} padding="md">
             <div className="grid gap-4 md:grid-cols-2">
-              <LbFormField label="Voornaam" htmlFor="profile-first">
+              <LbFormField label={AF.auth.firstName} htmlFor="profile-first">
                 <LbInput
                   id="profile-first"
                   className={inputClass}
@@ -132,7 +133,7 @@ export function ProfilePage() {
                   onChange={(e) => updateForm({ first_name: e.target.value })}
                 />
               </LbFormField>
-              <LbFormField label="Van" htmlFor="profile-last">
+              <LbFormField label={AF.auth.lastName} htmlFor="profile-last">
                 <LbInput
                   id="profile-last"
                   className={inputClass}
@@ -141,7 +142,7 @@ export function ProfilePage() {
                   onChange={(e) => updateForm({ last_name: e.target.value })}
                 />
               </LbFormField>
-              <LbFormField label="Gebruikersnaam" htmlFor="profile-username">
+              <LbFormField label={AF.auth.username} htmlFor="profile-username">
                 <LbInput
                   id="profile-username"
                   className={inputClass}
@@ -149,7 +150,7 @@ export function ProfilePage() {
                   disabled
                 />
               </LbFormField>
-              <LbFormField label="E-pos" htmlFor="profile-email">
+              <LbFormField label={AF.auth.email} htmlFor="profile-email">
                 <LbInput
                   id="profile-email"
                   type="email"
@@ -159,7 +160,7 @@ export function ProfilePage() {
                   onChange={(e) => updateForm({ email: e.target.value })}
                 />
               </LbFormField>
-              <LbFormField label="Telefoon" htmlFor="profile-phone">
+              <LbFormField label={AF.auth.phone} htmlFor="profile-phone">
                 <LbInput
                   id="profile-phone"
                   className={inputClass}
@@ -170,18 +171,18 @@ export function ProfilePage() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-mar-border pt-4">
-              <span className="text-sm font-semibold text-mar-text">Wagwoord</span>
+              <span className="text-sm font-semibold text-mar-text">{AF.auth.passwordSection}</span>
               <LbButton type="button" variant="secondary" onClick={() => setPasswordOpen(true)}>
-                Verander wagwoord
+                {AF.auth.changePasswordBtn}
               </LbButton>
             </div>
           </LbPanelCard>
         )}
 
         {tab === 'author' && form.is_author && (
-          <LbPanelCard title="Outeurinligting" padding="md">
+          <LbPanelCard title={AF.auth.authorInfo} padding="md">
             <div className="grid gap-4">
-              <LbFormField label="Aftekening" htmlFor="profile-sign-off">
+              <LbFormField label={AF.auth.signOff} htmlFor="profile-sign-off">
                 <LbInput
                   id="profile-sign-off"
                   className={inputClass}
@@ -189,7 +190,7 @@ export function ProfilePage() {
                   onChange={(e) => updateForm({ sign_off: e.target.value })}
                 />
               </LbFormField>
-              <LbFormField label="Byline" htmlFor="profile-byline">
+              <LbFormField label={AF.auth.byline} htmlFor="profile-byline">
                 <LbInput
                   id="profile-byline"
                   className={inputClass}
@@ -197,7 +198,7 @@ export function ProfilePage() {
                   onChange={(e) => updateForm({ byline: e.target.value })}
                 />
               </LbFormField>
-              <LbFormField label="Biografie" htmlFor="profile-bio">
+              <LbFormField label={AF.auth.biography} htmlFor="profile-bio">
                 <textarea
                   id="profile-bio"
                   className={`${inputClass} min-h-[120px] resize-y`}
@@ -212,10 +213,10 @@ export function ProfilePage() {
         {isDirty && (
           <div className="flex justify-end gap-2">
             <LbButton type="button" variant="secondary" onClick={cancel}>
-              Herstel
+              {AF.auth.reset}
             </LbButton>
             <LbButton type="submit" variant="primary" disabled={saving}>
-              {saving ? 'Stoor…' : 'Stoor'}
+              {saving ? AF.common.saving : AF.common.save}
             </LbButton>
           </div>
         )}

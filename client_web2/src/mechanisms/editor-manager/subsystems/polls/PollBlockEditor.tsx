@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import type { PollBody } from '@/mechanisms/liveblog-api';
+import { AF } from '@/copy';
 import { buildPollActiveUntil, parsePollDuration } from './pollCalculations';
+
+const P = AF.editor.poll;
 
 export interface PollBlockEditorProps {
   pollBody: PollBody | null;
@@ -80,25 +83,25 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
 
   return (
     <div className="m-poll-editor">
-      <LbFormField label="Vraag" htmlFor="poll-question">
+      <LbFormField label={P.question} htmlFor="poll-question">
         <input
           id="poll-question"
           className="m-editor-composer__input w-full"
           value={question}
           onChange={(e) => updateQuestion(e.target.value)}
-          placeholder="Poll-vraag"
+          placeholder={P.questionPlaceholder}
         />
       </LbFormField>
 
       <fieldset className="mt-3 space-y-2">
-        <legend className="text-sm font-medium text-mar-muted">Antwoorde</legend>
+        <legend className="text-sm font-medium text-mar-muted">{P.answers}</legend>
         {answers.map((answer, index) => (
           <div key={index} className="flex gap-2">
             <input
               className="m-editor-composer__input flex-1"
               value={answer.option}
               onChange={(e) => updateAnswer(index, e.target.value)}
-              placeholder={`Antwoord ${index + 1}`}
+              placeholder={P.answerN(index + 1)}
             />
             {answers.length > 2 && (
               <LbButton type="button" variant="ghost" onClick={() => removeAnswer(index)}>
@@ -108,12 +111,12 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
           </div>
         ))}
         <LbButton type="button" variant="secondary" onClick={addAnswer}>
-          + Antwoord
+          {P.addAnswer}
         </LbButton>
       </fieldset>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <LbFormField label="Dae" htmlFor="poll-days">
+        <LbFormField label={P.days} htmlFor="poll-days">
           <input
             id="poll-days"
             type="number"
@@ -127,7 +130,7 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
             }}
           />
         </LbFormField>
-        <LbFormField label="Ure" htmlFor="poll-hours">
+        <LbFormField label={P.hours} htmlFor="poll-hours">
           <input
             id="poll-hours"
             type="number"
@@ -141,7 +144,7 @@ export function PollBlockEditor({ pollBody, onChange }: PollBlockEditorProps) {
             }}
           />
         </LbFormField>
-        <LbFormField label="Minute" htmlFor="poll-minutes">
+        <LbFormField label={P.minutes} htmlFor="poll-minutes">
           <input
             id="poll-minutes"
             type="number"

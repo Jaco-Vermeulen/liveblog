@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LbAlert, LbButton, LbFormField, LbInput, LbModal } from '@/components/ui';
+import { AF } from '@/copy';
 
 type ChangePasswordModalProps = {
   open: boolean;
@@ -39,7 +40,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
       reset();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie wagwoord verander nie');
+      setError(err instanceof Error ? err.message : AF.auth.errors.changePassword);
     } finally {
       setSaving(false);
     }
@@ -49,14 +50,14 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
     <LbModal
       open={open}
       onClose={handleClose}
-      title="Verander wagwoord"
+      title={AF.auth.changePassword}
       footer={
         <>
           <LbButton type="button" variant="secondary" onClick={handleClose}>
-            Kanselleer
+            {AF.common.cancel}
           </LbButton>
           <LbButton type="button" variant="primary" disabled={!canSave} onClick={() => void handleSave()}>
-            {saving ? 'Stoor…' : 'Stoor wagwoord'}
+            {saving ? AF.common.saving : AF.auth.savePassword}
           </LbButton>
         </>
       }
@@ -67,7 +68,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
         </LbAlert>
       )}
       <div className="grid gap-4">
-        <LbFormField label="Huidige wagwoord" htmlFor="pwd-old">
+        <LbFormField label={AF.auth.currentPassword} htmlFor="pwd-old">
           <LbInput
             id="pwd-old"
             type="password"
@@ -76,7 +77,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
             onChange={(e) => setOldPassword(e.target.value)}
           />
         </LbFormField>
-        <LbFormField label="Nuwe wagwoord" htmlFor="pwd-new">
+        <LbFormField label={AF.auth.newPassword} htmlFor="pwd-new">
           <LbInput
             id="pwd-new"
             type="password"
@@ -85,7 +86,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
             onChange={(e) => setNewPassword(e.target.value)}
           />
         </LbFormField>
-        <LbFormField label="Bevestig nuwe wagwoord" htmlFor="pwd-confirm">
+        <LbFormField label={AF.auth.confirmNewPassword} htmlFor="pwd-confirm">
           <LbInput
             id="pwd-confirm"
             type="password"
@@ -94,7 +95,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: ChangePasswordM
             onChange={(e) => setConfirm(e.target.value)}
           />
           {mismatch && (
-            <p className="m-0 text-sm text-mar-orange">Wagwoorde stem nie ooreen nie.</p>
+            <p className="m-0 text-sm text-mar-orange">{AF.auth.passwordsMismatch}</p>
           )}
         </LbFormField>
       </div>

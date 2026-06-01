@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import { getAllBlogAnalytics, type BlogAnalyticsRow } from '@/mechanisms/liveblog-api';
 
 export function useBlogAnalytics(blogId: string | undefined) {
@@ -14,7 +15,7 @@ export function useBlogAnalytics(blogId: string | undefined) {
       const data = await getAllBlogAnalytics(blogId);
       setRows(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie analise laai nie.');
+      setError(err instanceof Error ? err.message : AF.analytics.errors.load);
     } finally {
       setLoading(false);
     }

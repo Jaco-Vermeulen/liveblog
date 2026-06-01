@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
 import type { FreetypeField } from '@/mechanisms/freetypes-manager';
@@ -50,7 +51,7 @@ export function FreetypeFieldInput({ field, value, onChange }: FreetypeFieldInpu
           rows={3}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="HTML of inbed-kode"
+          placeholder={AF.editor.freetype.htmlPlaceholder}
         />
       ) : (
         <LbInput

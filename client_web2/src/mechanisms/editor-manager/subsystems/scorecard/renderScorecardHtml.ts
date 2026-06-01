@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import type { ScorecardBody } from './scorecardTypes';
 import { buildScorecardLayoutHtml, escapeScorecardHtml } from './scorecardLayoutHtml';
 
@@ -10,7 +11,7 @@ export function renderScorecardHtml(body: ScorecardBody): string {
   const { scoreline, players, meta, cricketClass } = buildScorecardLayoutHtml(body, 'lb');
 
   return (
-    `<div class="lb-scorecard-card${cricketClass}${bgClass}"${bgStyle} role="region" aria-label="Skoorbord">` +
+    `<div class="lb-scorecard-card${cricketClass}${bgClass}"${bgStyle} role="region" aria-label="${escapeScorecardHtml(AF.editor.scorecard.ariaLabel)}">` +
     '<div class="lb-scorecard-card__overlay" aria-hidden="true"></div>' +
     scoreline +
     players +

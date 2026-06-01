@@ -22,16 +22,9 @@ import {
   LbLoadingScreen,
   LbSpinner,
 } from '@/components/ui';
+import { AF, AF_LOGIN_ERRORS } from '@/copy';
 import { getLoginErrorCode } from '../context/AuthProvider';
 import { useAuth } from '../hooks/useAuth';
-
-const ERROR_MESSAGES: Record<string, string> = {
-  '401': 'Ongeldige gebruikersnaam of wagwoord.',
-  '403': 'Rekening gesuspendeer.',
-  '404': 'Gebruiker nie gevind nie.',
-  network: 'Kan nie die bediener bereik nie.',
-  unknown: 'Aanmelding het misluk. Probeer asseblief weer.',
-};
 
 export function LoginPage() {
   const { state, login } = useAuth();
@@ -46,7 +39,7 @@ export function LoginPage() {
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
   if (state.isLoading) {
-    return <LbLoadingScreen message="Laai sessie…" />;
+    return <LbLoadingScreen message={AF.common.loadingSession} />;
   }
 
   if (state.isAuthenticated) {
@@ -75,7 +68,7 @@ export function LoginPage() {
             <LbBrandLogo />
             <LbBrandTitle>Maroela Media</LbBrandTitle>
             <LbBrandTagline>
-              Regstreekse blog — betroubaar, vinnig, Afrikaans
+              {AF.app.taglineLogin}
             </LbBrandTagline>
             <LbBrandOrnament />
             <LbBrandCopy>
@@ -88,12 +81,12 @@ export function LoginPage() {
           <LbContentContainer size="sm" centered className="py-12 sm:py-16">
             <LbAuthCard
               showLogo
-              eyebrow="Liveblog Admin"
-              title="Welkom terug"
-              subtitle="Meld aan by jou werkspasie"
+              eyebrow={AF.app.title}
+              title={AF.auth.welcomeBack}
+              subtitle={AF.auth.signInSubtitle}
             >
               <LbAuthForm name="loginForm" onSubmit={handleSubmit} noValidate>
-                <LbFormField label="Gebruikersnaam" htmlFor="login-username" variant="login">
+                <LbFormField label={AF.auth.username} htmlFor="login-username" variant="login">
                   <LbInput
                     id="login-username"
                     name="username"
@@ -108,7 +101,7 @@ export function LoginPage() {
                   />
                 </LbFormField>
 
-                <LbFormField label="Wagwoord" htmlFor="login-password" variant="login">
+                <LbFormField label={AF.auth.password} htmlFor="login-password" variant="login">
                   <LbInput
                     id="login-password"
                     name="password"
@@ -127,13 +120,13 @@ export function LoginPage() {
                     to="/reset-password"
                     className="font-semibold text-mar-teal hover:underline"
                   >
-                    Wagwoord vergeet?
+                    {AF.auth.forgotPassword}
                   </Link>
                 </p>
 
                 {errorCode ? (
                   <LbAlert variant="error">
-                    {ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.unknown}
+                    {AF_LOGIN_ERRORS[errorCode] ?? AF_LOGIN_ERRORS.unknown}
                   </LbAlert>
                 ) : null}
 
@@ -144,7 +137,7 @@ export function LoginPage() {
                   disabled={isSubmitting}
                   className="min-h-[3.25rem] w-full rounded-xl text-base font-bold sm:text-lg"
                 >
-                  {isSubmitting ? <LbSpinner /> : 'Meld aan'}
+                  {isSubmitting ? <LbSpinner /> : AF.common.signIn}
                 </LbButton>
               </LbAuthForm>
             </LbAuthCard>

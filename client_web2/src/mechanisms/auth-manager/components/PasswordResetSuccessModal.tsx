@@ -1,4 +1,5 @@
 import { LbButton, LbModal } from '@/components/ui';
+import { AF } from '@/copy';
 
 export type PasswordResetSuccessKind = 'email-sent' | 'password-set';
 
@@ -14,15 +15,14 @@ const COPY: Record<
   { title: string; body: string; primaryLabel: string }
 > = {
   'email-sent': {
-    title: 'E-pos gestuur',
-    body:
-      "Indien hierdie e-pos by ons geregistreer is, sal jy binnekort 'n skakel ontvang om jou wagwoord te stel.",
-    primaryLabel: 'Verstaan',
+    title: AF.auth.emailSentTitle,
+    body: AF.auth.emailSentBody,
+    primaryLabel: AF.common.understand,
   },
   'password-set': {
-    title: 'Wagwoord gestel',
-    body: 'Jou wagwoord is gestel. Jy kan nou aanmeld.',
-    primaryLabel: 'Gaan na aanmelding',
+    title: AF.auth.passwordSetTitle,
+    body: AF.auth.passwordSetBody,
+    primaryLabel: AF.auth.goToSignIn,
   },
 };
 

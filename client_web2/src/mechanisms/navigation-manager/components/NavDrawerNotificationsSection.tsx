@@ -3,6 +3,7 @@ import { Bell } from 'lucide-react';
 import { LbSpinner } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '../context/NotificationsProvider';
+import { AF } from '@/copy';
 import { NotificationListItem } from './NotificationListItem';
 
 type NavDrawerNotificationsSectionProps = {
@@ -41,9 +42,9 @@ export function NavDrawerNotificationsSection({
           ) : null}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold leading-snug">Kennisgewings</span>
+          <span className="block text-sm font-semibold leading-snug">{AF.nav.notifications}</span>
           <span className="mt-0.5 block text-[11px] font-normal leading-snug text-white/55">
-            {unread > 0 ? `${unread} ongelees` : 'Aktiwiteit op jou blogs'}
+            {unread > 0 ? AF.nav.notificationsUnread(unread) : AF.nav.notificationsActivity}
           </span>
         </span>
       </button>
@@ -53,7 +54,7 @@ export function NavDrawerNotificationsSection({
           {loading && items === null ? (
             <div className="flex flex-col items-center py-8">
               <LbSpinner tone="light" />
-              <p className="m-0 mt-2 text-xs text-white/60">Laai…</p>
+              <p className="m-0 mt-2 text-xs text-white/60">{AF.common.loading}</p>
             </div>
           ) : null}
 
@@ -63,7 +64,7 @@ export function NavDrawerNotificationsSection({
 
           {!loading && !error && items?.length === 0 ? (
             <p className="m-0 px-3 py-4 text-sm text-white/60">
-              Alles lyk goed tot dusver.
+              {AF.nav.notificationsEmpty}
             </p>
           ) : null}
 

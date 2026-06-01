@@ -1,3 +1,5 @@
+import { AF } from '@/copy';
+
 export type EmbedProviderId =
   | 'twitter'
   | 'facebook'
@@ -10,10 +12,12 @@ export interface EmbedProviderMatch {
   label: string;
 }
 
+const E = AF.editor.embed.providers;
+
 const PROVIDERS: Array<{ id: EmbedProviderId; label: string; patterns: RegExp[] }> = [
   {
     id: 'twitter',
-    label: 'Twitter',
+    label: E.twitter,
     patterns: [
       /https?:\/\/(?:www|mobile\.)?twitter\.com\/(?:#!\/)?[^/]+\/status(?:es)?\/\d+/i,
       /https?:\/\/t\.co\/[a-zA-Z0-9]+/i,
@@ -21,17 +25,17 @@ const PROVIDERS: Array<{ id: EmbedProviderId; label: string; patterns: RegExp[] 
   },
   {
     id: 'facebook',
-    label: 'Facebook',
+    label: E.facebook,
     patterns: [/https?:\/\/(www\.)?facebook\.com\/.*/i],
   },
   {
     id: 'instagram',
-    label: 'Instagram',
+    label: E.instagram,
     patterns: [/(?:https?:\/\/)?(?:www\.)?(?:instagr(?:\.am|am\.com))\/p\/.+/i],
   },
   {
     id: 'picture',
-    label: 'Picture',
+    label: E.picture,
     patterns: [
       /(?:[^:/?#]+:)?(?:\/\/([^/?#]*))?([^?#]*\.(?:jpg|jpeg|gif|png))(?:\?([^#]*))?(?:#(.*))?/i,
     ],
@@ -41,7 +45,7 @@ const PROVIDERS: Array<{ id: EmbedProviderId; label: string; patterns: RegExp[] 
 export function detectEmbedProvider(url: string): EmbedProviderMatch {
   const trimmed = url.trim();
   if (!trimmed) {
-    return { id: 'generic', label: 'Embed' };
+    return { id: 'generic', label: E.generic };
   }
 
   for (const provider of PROVIDERS) {
@@ -55,6 +59,6 @@ export function detectEmbedProvider(url: string): EmbedProviderMatch {
     const label = hostname.split('.')[0];
     return { id: 'generic', label: label.charAt(0).toUpperCase() + label.slice(1) };
   } catch {
-    return { id: 'generic', label: 'Embed' };
+    return { id: 'generic', label: E.generic };
   }
 }

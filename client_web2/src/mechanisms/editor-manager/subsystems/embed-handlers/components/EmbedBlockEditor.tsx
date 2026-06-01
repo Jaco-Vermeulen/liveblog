@@ -1,4 +1,7 @@
+import { AF } from '@/copy';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+const E = AF.editor.embed;
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
@@ -143,7 +146,7 @@ export function EmbedBlockEditor({ url, embedMeta, onChange }: EmbedBlockEditorP
     <div className="m-embed-block-editor">
       {urlInputVisible ? (
         <>
-          <LbFormField label="URL of inbedkode" htmlFor="embed-url-input">
+          <LbFormField label={E.urlOrCodeLabel} htmlFor="embed-url-input">
             <input
               id="embed-url-input"
               type="text"
@@ -163,12 +166,10 @@ export function EmbedBlockEditor({ url, embedMeta, onChange }: EmbedBlockEditorP
                   scheduleResolve(url, true);
                 }
               }}
-              placeholder="https:// of plak inbed-HTML"
+              placeholder={E.urlPlaceholder}
             />
           </LbFormField>
-          <p className="m-embed-block-editor__hint">
-            Plak of tik &apos;n skakel — die inbedding word outomaties opgelos.
-          </p>
+          <p className="m-embed-block-editor__hint">{E.urlHint}</p>
         </>
       ) : (
         <div className="m-embed-block-editor__url-bar">
@@ -178,7 +179,7 @@ export function EmbedBlockEditor({ url, embedMeta, onChange }: EmbedBlockEditorP
             variant="ghost"
             onClick={() => setUrlInputVisible(true)}
           >
-            Verander URL
+            {E.changeUrl}
           </LbButton>
         </div>
       )}
@@ -186,7 +187,7 @@ export function EmbedBlockEditor({ url, embedMeta, onChange }: EmbedBlockEditorP
       {isResolving && (
         <div className="m-embed-block-editor__loading">
           <LbSpinner />
-          <span>Laai inbedding…</span>
+          <span>{E.loading}</span>
         </div>
       )}
 

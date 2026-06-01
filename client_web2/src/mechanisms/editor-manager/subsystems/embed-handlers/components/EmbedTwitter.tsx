@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { TwitterEmbed } from 'react-social-media-embed';
 
@@ -62,7 +63,7 @@ export function EmbedTwitter({ url, linkText }: EmbedTwitterProps) {
       {layoutReady ? (
         <TwitterEmbed key={trimmed} url={trimmed} linkText={linkText} width="100%" />
       ) : (
-        <span className="text-sm text-[var(--color-mar-muted)]">Laai X-inbedding…</span>
+        <span className="text-sm text-[var(--color-mar-muted)]">{AF.editor.embed.loadingX}</span>
       )}
     </div>
   );

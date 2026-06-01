@@ -1,4 +1,7 @@
+import { AF } from '@/copy';
 import { LbButton } from '@/components/ui/LbButton';
+
+const O = AF.editor.output;
 import { LbModal } from '@/components/ui/LbModal';
 import type { Blog, Output } from '@/mechanisms/liveblog-api';
 
@@ -32,14 +35,11 @@ export function OutputEmbedCodeModal({ open, blog, output, onClose }: OutputEmbe
     <LbModal
       open={open}
       onClose={onClose}
-      title={output ? `Inbed-kode: ${output.name}` : 'Inbed-kode'}
+      title={output ? O.embedCodeFor(output.name) : O.embedCode}
       className="max-w-2xl"
     >
       {!publicUrl && (
-        <p className="text-mar-muted text-sm">
-          Geen publieke URL vir hierdie uitset nog nie. Publiseer die blog om inbed-URL&apos;s te
-          genereer.
-        </p>
+        <p className="text-mar-muted text-sm">{O.noPublicUrl}</p>
       )}
       {snippet && (
         <>

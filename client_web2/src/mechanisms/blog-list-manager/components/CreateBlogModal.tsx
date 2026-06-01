@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
@@ -41,10 +42,10 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
           setThemes(items);
           if (items[0]) setThemeName(items[0].name);
         })
-        .catch(() => setError('Kon nie temas laai nie.')),
+        .catch(() => setError(AF.blogs.loadThemesError)),
       listUsers()
         .then((res) => setUsers(res._items))
-        .catch(() => setError('Kon nie gebruikers laai nie.')),
+        .catch(() => setError(AF.blogs.loadUsersError)),
     ]).finally(() => {
       setLoadingThemes(false);
       setLoadingUsers(false);
@@ -94,18 +95,18 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
       onCreated();
       handleClose();
     } catch {
-      setError('Kon nie blog skep nie. Probeer weer.');
+      setError(AF.blogs.createError);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <LbModal open={open} onClose={handleClose} title="Skep nuwe blog">
+    <LbModal open={open} onClose={handleClose} title={AF.blogs.createModalTitle}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {error && <LbAlert variant="error">{error}</LbAlert>}
 
-        <LbFormField label="Titel" htmlFor="create-blog-title">
+        <LbFormField label={AF.blogs.titleField} htmlFor="create-blog-title">
           <LbInput
             id="create-blog-title"
             value={title}
@@ -115,7 +116,7 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
           />
         </LbFormField>
 
-        <LbFormField label="Beskrywing" htmlFor="create-blog-description">
+        <LbFormField label={AF.blogs.description} htmlFor="create-blog-description">
           <textarea
             id="create-blog-description"
             className="min-h-[100px] w-full rounded-lg border border-mar-border bg-mar-input px-3 py-2 text-mar-text"
@@ -124,7 +125,7 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
           />
         </LbFormField>
 
-        <LbFormField label="Omslagbeeld" htmlFor="create-blog-cover">
+        <LbFormField label={AF.blogs.coverImage} htmlFor="create-blog-cover">
           <input
             id="create-blog-cover"
             type="file"
@@ -142,7 +143,7 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
           excludeUserId={state.user?._id}
         />
 
-        <LbFormField label="Tema" htmlFor="create-blog-theme">
+        <LbFormField label={AF.blogs.theme} htmlFor="create-blog-theme">
           {loadingThemes ? (
             <LbSpinner tone="dark" />
           ) : (

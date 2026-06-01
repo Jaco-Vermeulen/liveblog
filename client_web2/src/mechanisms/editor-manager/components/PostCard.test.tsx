@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { AF } from '@/copy';
 import type { Post } from '@/mechanisms/liveblog-api';
 import { PostCard } from './PostCard';
 
@@ -31,10 +32,10 @@ describe('PostCard', () => {
     expect(screen.getByRole('button', { name: 'Speld vas' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Beklemtoon' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Wysig' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Verwyder' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: AF.common.remove })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Publiseer' })).not.toBeInTheDocument();
     expect(screen.queryByText('Wysig')).not.toBeInTheDocument();
-    expect(screen.queryByText('Verwyder')).not.toBeInTheDocument();
+    expect(screen.queryByText(AF.common.remove)).not.toBeInTheDocument();
   });
 
   it('shows publish icon when post is not open', () => {

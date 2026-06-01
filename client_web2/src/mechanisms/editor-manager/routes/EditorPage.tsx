@@ -19,6 +19,7 @@ import { useEditorLiveblogSettings } from '../hooks/useEditorLiveblogSettings';
 import { useTimeline } from '../hooks/useTimeline';
 import { applyPostsNotification } from '../services/applyPostsNotification';
 import { createDualTimelineHandlers } from '../services/dualTimelineHandlers';
+import { AF } from '@/copy';
 import type { EditorPanel } from '../types';
 
 export function EditorPage() {
@@ -91,23 +92,27 @@ export function EditorPage() {
         setPreviewRefreshToken((prev) => prev + 1);
       }
       setActionMessage(
-        composerApi.composer.scheduleEnabled ? 'Plasing geskeduleer.' : 'Plasing gepubliseer.',
+        composerApi.composer.scheduleEnabled
+          ? AF.editor.messages.postScheduled
+          : AF.editor.messages.postPublished,
       );
     } catch (err) {
       const detail = err instanceof LiveblogApiError ? err.message : null;
-      setActionMessage(detail ? `Kon nie plasing stoor nie: ${detail}` : 'Kon nie plasing stoor nie.');
+      setActionMessage(
+        detail ? AF.editor.errors.savePostDetail(detail) : AF.editor.errors.savePost,
+      );
     }
   };
 
   const handleDelete = async (post: Parameters<typeof postsApi.deletePost>[0]) => {
-    if (!window.confirm('Verwyder hierdie plasing?')) return;
+    if (!window.confirm(AF.editor.confirmDeletePost)) return;
     try {
       await postsApi.deletePost(post);
       mainTimelineApi.removePost(post._id);
       pinnedTimelineApi.removePost(post._id);
       setPreviewRefreshToken((prev) => prev + 1);
     } catch {
-      setActionMessage('Kon nie plasing verwyder nie.');
+      setActionMessage(AF.editor.errors.deletePost);
     }
   };
 
@@ -117,20 +122,20 @@ export function EditorPage() {
       await Promise.all([mainTimelineApi.fetchNewPage(), pinnedTimelineApi.fetchNewPage()]);
       setPreviewRefreshToken((prev) => prev + 1);
     } catch {
-      setActionMessage('Kon nie plasing publiseer nie.');
+      setActionMessage(AF.editor.errors.publishPost);
     }
   };
 
   const handleUnpublish = async (post: Parameters<typeof postsApi.unpublishPost>[0]) => {
-    if (!window.confirm('Ontpubliseer hierdie plasing na konsepte?')) return;
+    if (!window.confirm(AF.editor.confirmUnpublish)) return;
     try {
       await postsApi.unpublishPost(post);
       mainTimelineApi.removePost(post._id);
       pinnedTimelineApi.removePost(post._id);
       setPreviewRefreshToken((prev) => prev + 1);
-      setActionMessage('Plasing ontpubliseer.');
+      setActionMessage(AF.editor.messages.postUnpublished);
     } catch {
-      setActionMessage('Kon nie plasing ontpubliseer nie.');
+      setActionMessage(AF.editor.errors.unpublishPost);
     }
   };
 
@@ -139,7 +144,7 @@ export function EditorPage() {
       const updated = await postsApi.togglePostPin(post);
       timelineHandlers.updatePost(updated);
     } catch {
-      setActionMessage('Kon nie plasing se speldstatus wysig nie.');
+      setActionMessage(AF.editor.errors.pinPost);
     }
   };
 
@@ -151,7 +156,7 @@ export function EditorPage() {
       mainTimelineApi.updatePost(updated);
       pinnedTimelineApi.updatePost(updated);
     } catch {
-      setActionMessage('Kon nie plasing se beklemtoning wysig nie.');
+      setActionMessage(AF.editor.errors.highlightPost);
     }
   };
 
@@ -195,13 +200,13 @@ export function EditorPage() {
   const previewPosts = [...pinnedTimelineApi.posts, ...mainTimelineApi.posts];
 
   if (isLoading || !blog) {
-    return <LbLoadingScreen message="Laai blog…" />;
+    return <LbLoadingScreen message={AF.editor.loadingBlog} />;
   }
 
   if (error && !(error instanceof LiveblogApiError && error.status === 404)) {
     return (
       <LbAlert variant="error">
-        {error instanceof Error ? error.message : 'Kon nie blog laai nie.'}
+        {error instanceof Error ? error.message : AF.editor.loadBlogError}
       </LbAlert>
     );
   }

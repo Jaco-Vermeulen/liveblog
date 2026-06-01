@@ -1,6 +1,7 @@
 import { Link2, Plus, Search } from 'lucide-react';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbInput } from '@/components/ui/LbInput';
+import { AF } from '@/copy';
 import { useCanCreateBlog } from '../hooks/useBlogPermissions';
 
 export interface BlogListToolbarProps {
@@ -23,8 +24,8 @@ export function BlogListToolbar({
   return (
     <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-2xl font-bold text-mar-text">Regstreekse blogs</h1>
-        <p className="text-sm text-mar-muted">{total} blog(s)</p>
+        <h1 className="text-2xl font-bold text-mar-text">{AF.blogs.title}</h1>
+        <p className="text-sm text-mar-muted">{AF.blogs.count(total)}</p>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 sm:max-w-xl sm:flex-row sm:items-center">
@@ -35,24 +36,24 @@ export function BlogListToolbar({
           />
           <LbInput
             type="search"
-            placeholder="Soek blogs…"
+            placeholder={AF.blogs.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
-            aria-label="Soek blogs"
+            aria-label={AF.blogs.searchAria}
           />
         </div>
 
         <div className="flex shrink-0 gap-2">
-          <LbButton type="button" variant="secondary" onClick={onEmbedClick} title="Bloglys-inbed">
+          <LbButton type="button" variant="secondary" onClick={onEmbedClick} title={AF.blogs.embedList}>
             <Link2 className="h-4 w-4" aria-hidden />
-            <span className="sr-only">Inbed</span>
+            <span className="sr-only">{AF.blogs.embedShort}</span>
           </LbButton>
 
           {canCreate && (
             <LbButton type="button" variant="accent" onClick={onCreateClick}>
               <Plus className="h-4 w-4" aria-hidden />
-              Skep blog
+              {AF.blogs.createBlog}
             </LbButton>
           )}
         </div>

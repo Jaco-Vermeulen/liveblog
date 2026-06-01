@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   listAdvertisementCollections,
   listAdvertisements,
@@ -47,7 +48,7 @@ export function useAdvertisingManager() {
         await loadAdverts();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie advertensies laai nie.');
+      setError(err instanceof Error ? err.message : AF.advertising.errors.load);
     } finally {
       setLoading(false);
     }
@@ -101,13 +102,13 @@ export function useAdvertisingManager() {
     saveAdvert,
     saveCollection,
     removeAdvert: async (ad: Advertisement) => {
-      if (!window.confirm(`Verwyder "${ad.name}"?`)) return;
+      if (!window.confirm(AF.advertising.confirmDeleteAd(ad.name))) return;
       await removeAdvertisement(ad);
       setMessage('Advertensie verwyder.');
       await loadAdverts();
     },
     removeCollection: async (col: AdvertisementCollection) => {
-      if (!window.confirm(`Verwyder versameling "${col.name}"?`)) return;
+      if (!window.confirm(AF.advertising.confirmDeleteCollection(col.name))) return;
       await removeAdvertisementCollection(col);
       setMessage('Versameling verwyder.');
       await loadCollections();

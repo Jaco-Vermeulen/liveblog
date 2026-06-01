@@ -2,6 +2,7 @@ import { LbButton } from '@/components/ui/LbButton';
 import { LbSpinner } from '@/components/ui/LbSpinner';
 import type { Post } from '@/mechanisms/liveblog-api';
 import type { TimelineState } from '../types';
+import { AF } from '@/copy';
 import { PostCard } from './PostCard';
 import { ThemedPostCard } from './ThemedPostCard';
 
@@ -48,16 +49,16 @@ export function Timeline({
       : 'm-editor-timeline';
 
   return (
-    <section className={sectionClass} aria-label="Tydlyn">
+    <section className={sectionClass} aria-label={AF.editor.timelineSection}>
       {timeline.isLoading && posts.length === 0 ? (
         <div className="m-editor-timeline__loading">
           <LbSpinner />
-          <span>Laai plasings…</span>
+          <span>{AF.editor.loadingPosts}</span>
         </div>
       ) : null}
 
       {!timeline.isLoading && posts.length === 0 ? (
-        <p className="m-editor-timeline__empty">Geen plasings vir hierdie paneel nie.</p>
+        <p className="m-editor-timeline__empty">{AF.editor.noPosts}</p>
       ) : null}
 
       <ul className="m-editor-timeline__list">
@@ -102,7 +103,7 @@ export function Timeline({
             onClick={onLoadMore}
             disabled={timeline.isLoading}
           >
-            {timeline.isLoading ? 'Laai…' : 'Laai meer'}
+            {timeline.isLoading ? AF.common.loading : AF.editor.loadMore}
           </LbButton>
         </div>
       )}

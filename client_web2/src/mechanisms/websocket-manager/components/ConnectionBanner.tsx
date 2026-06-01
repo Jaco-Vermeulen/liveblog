@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LiveblogWsEvent } from '../events';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -54,7 +55,7 @@ export function ConnectionBanner() {
   if (showReconnectSuccess) {
     return (
       <LbAlert variant="info" className="mb-4">
-        Gekoppel aan kennisgewing-bediener!
+        {AF.ws.connected}
       </LbAlert>
     );
   }
@@ -62,7 +63,7 @@ export function ConnectionBanner() {
   if (showDisconnectWarning) {
     return (
       <LbAlert variant="warning" className="mb-4">
-        Ontkoppel van kennisgewing-bediener, probeer weer koppel…
+        {AF.ws.disconnected}
       </LbAlert>
     );
   }

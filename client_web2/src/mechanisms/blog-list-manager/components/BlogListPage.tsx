@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
+import { AF } from '@/copy';
 import type { Blog } from '@/mechanisms/liveblog-api';
 import { useBlogActions } from '../hooks/useBlogActions';
 import { useBlogList } from '../hooks/useBlogList';
@@ -84,7 +85,7 @@ export function BlogListPage() {
 
       {(error || actionError) && (
         <LbAlert variant="error" className="mb-4">
-          {actionError ?? (error instanceof Error ? error.message : 'Kon nie blogs laai nie.')}
+          {actionError ?? (error instanceof Error ? error.message : AF.blogs.loadError)}
         </LbAlert>
       )}
 

@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { api } from '../client';
 import { LiveblogApiError } from '../client';
 import type { PasswordResetRequest } from '../types';
@@ -28,18 +29,18 @@ export function completePasswordReset(token: string, password: string): Promise<
 
 export function passwordResetErrorMessage(err: unknown): string {
   if (!(err instanceof LiveblogApiError)) {
-    return err instanceof Error ? err.message : 'Kon nie wagwoord-herstel voltooi nie.';
+    return err instanceof Error ? err.message : AF.auth.errors.resetComplete;
   }
   const body = err.body as { _message?: string; _issues?: Record<string, string> } | undefined;
   const msg = body?._message ?? '';
   if (err.status === 400 && /invalid email/i.test(msg)) {
-    return 'Geen rekening met hierdie e-posadres nie.';
+    return AF.auth.errors.noAccountEmail;
   }
   if (err.status === 401 || /invalid token/i.test(msg)) {
-    return 'Hierdie skakel is ongeldig of het verval. Vra \'n nuwe herstel-e-pos aan.';
+    return AF.auth.errors.invalidResetToken;
   }
   if (err.status === 403) {
-    return 'Hierdie rekening is nie aktief nie. Kontak die administrateur.';
+    return AF.auth.errors.accountInactive;
   }
   return msg || err.message;
 }

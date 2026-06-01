@@ -9,6 +9,7 @@ import {
   Pencil,
   Radio,
 } from 'lucide-react';
+import { AF } from '@/copy';
 import type { EditorPanel } from '../types';
 
 export interface EditorPanelConfig {
@@ -19,18 +20,38 @@ export interface EditorPanelConfig {
   enabled: boolean;
 }
 
+const P = AF.editor.panels_config;
+
 export const EDITOR_PANELS: EditorPanelConfig[] = [
-  { id: 'editor', label: 'Redigeerder', shortLabel: 'Redigeer', icon: Pencil, enabled: true },
-  { id: 'timeline', label: 'Tydlyn', shortLabel: 'TL', icon: LayoutList, enabled: true },
-  { id: 'contributions', label: 'Bydraes', shortLabel: 'Bydraes', icon: Inbox, enabled: true },
-  { id: 'scheduled', label: 'Geskeduleer', shortLabel: 'Skedule', icon: CalendarClock, enabled: true },
-  { id: 'drafts', label: 'Konsepte', shortLabel: 'Konsepte', icon: Archive, enabled: true },
-  { id: 'comments', label: 'Kommentaar', shortLabel: 'Kommentaar', icon: MessageCircle, enabled: true },
-  { id: 'ingest', label: 'Ingest', shortLabel: 'Inname', icon: Download, enabled: false },
+  { id: 'editor', label: P.editor, shortLabel: P.editorShort, icon: Pencil, enabled: true },
+  { id: 'timeline', label: P.timeline, shortLabel: P.timelineShort, icon: LayoutList, enabled: true },
+  {
+    id: 'contributions',
+    label: P.contributions,
+    shortLabel: P.contributions,
+    icon: Inbox,
+    enabled: true,
+  },
+  {
+    id: 'scheduled',
+    label: P.scheduled,
+    shortLabel: P.scheduledShort,
+    icon: CalendarClock,
+    enabled: true,
+  },
+  { id: 'drafts', label: P.drafts, shortLabel: P.drafts, icon: Archive, enabled: true },
+  {
+    id: 'comments',
+    label: P.comments,
+    shortLabel: P.comments,
+    icon: MessageCircle,
+    enabled: true,
+  },
+  { id: 'ingest', label: P.ingest, shortLabel: P.ingestShort, icon: Download, enabled: false },
   {
     id: 'incoming-syndication',
-    label: 'Sindikasie',
-    shortLabel: 'Sindikasie',
+    label: P.syndication,
+    shortLabel: P.syndication,
     icon: Radio,
     enabled: false,
   },

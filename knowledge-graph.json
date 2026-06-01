@@ -39,7 +39,12 @@
       "url": "http://localhost:4010/docs/"
     },
     "legacy_client": "client/ (AngularJS — legacy branch / host-only, not Docker compose)",
-    "design_tokens": "Maroela — style-guide mechanism, portal.css reference"
+    "design_tokens": "Maroela — style-guide mechanism, portal.css reference",
+    "i18n": {
+      "locale": "af-ZA",
+      "copy_module": "client_web2/src/copy/af.ts",
+      "exports": ["AF", "AF_LOGIN_ERRORS"]
+    }
   },
   "docker": {
     "compose_file": "docker-compose.yml",

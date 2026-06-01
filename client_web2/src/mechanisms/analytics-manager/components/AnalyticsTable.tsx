@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { AF } from '@/copy';
 import type { BlogAnalyticsRow } from '@/mechanisms/liveblog-api';
 
 const PAGE_SIZE = 25;
@@ -80,7 +81,7 @@ export function AnalyticsTable({ rows }: AnalyticsTableProps) {
           {pageRows.length === 0 ? (
             <tr>
               <td colSpan={2} className="py-6 text-mar-muted">
-                Geen analise-data nie.
+                {AF.analytics.noData}
               </td>
             </tr>
           ) : (

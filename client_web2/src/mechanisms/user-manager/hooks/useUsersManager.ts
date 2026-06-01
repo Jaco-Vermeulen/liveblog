@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   createUser,
   disableUser,
@@ -46,7 +47,7 @@ export function useUsersManager() {
       setUsers(userRes._items);
       setRoles(roleRes._items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie gebruikers laai nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.load);
     } finally {
       setLoading(false);
     }
@@ -77,7 +78,7 @@ export function useUsersManager() {
       setForm(userToForm(full));
       setModalOpen(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie gebruiker laai nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.loadOne);
     } finally {
       setSaving(false);
     }
@@ -121,7 +122,7 @@ export function useUsersManager() {
       } else if (editing._etag) {
         const patch = formToAdminPatch(form, editing);
         if (!Object.keys(patch).length) {
-          setMessage('Geen veranderinge om te stoor nie.');
+          setMessage(AF.users.errors.noChanges);
           closeModal();
           return;
         }
@@ -131,7 +132,7 @@ export function useUsersManager() {
       closeModal();
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie stoor nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.save);
     } finally {
       setSaving(false);
     }
@@ -147,7 +148,7 @@ export function useUsersManager() {
       setMessage(nextActive ? 'Gebruiker geaktiveer.' : 'Gebruiker gedeaktiveer.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie status wysig nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.status);
     } finally {
       setSaving(false);
     }
@@ -165,7 +166,7 @@ export function useUsersManager() {
       setMessage('Gebruiker gedeaktiveer.');
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie gebruiker deaktiveer nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.deactivate);
     } finally {
       setSaving(false);
     }
@@ -185,7 +186,7 @@ export function useUsersManager() {
     try {
       const full = user._etag ? user : await getUser(user._id);
       if (!full._etag) {
-        setError('Kon nie gebruiker laai nie.');
+        setError(AF.users.errors.loadOne);
         return;
       }
       await updateUser(
@@ -208,7 +209,7 @@ export function useUsersManager() {
       }
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie gebruiker heraktiveer nie.');
+      setError(err instanceof Error ? err.message : AF.users.errors.reactivate);
     } finally {
       setSaving(false);
     }

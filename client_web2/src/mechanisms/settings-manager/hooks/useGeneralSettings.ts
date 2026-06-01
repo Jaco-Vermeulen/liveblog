@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   listGlobalPreferences,
   listLanguages,
@@ -37,7 +38,7 @@ export function useGeneralSettings() {
       setForm(mapPreferencesToForm(prefs._items, themeItems, languageItems._items));
       setIsDirty(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie instellings laai nie.');
+      setError(err instanceof Error ? err.message : AF.settings.errors.load);
     } finally {
       setLoading(false);
     }
@@ -74,10 +75,10 @@ export function useGeneralSettings() {
         ),
       );
       setIsDirty(false);
-      setSaveMessage('Instellings suksesvol gestoor.');
+      setSaveMessage(AF.settings.saveSuccess);
       await load();
     } catch {
-      setError('Kon nie instellings stoor nie. Probeer later weer.');
+      setError(AF.settings.errors.save);
     } finally {
       setSaving(false);
     }

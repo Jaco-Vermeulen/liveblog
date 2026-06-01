@@ -2,6 +2,7 @@ import { LbAlert } from '@/components/ui/LbAlert';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbSpinner } from '@/components/ui/LbSpinner';
+import { AF } from '@/copy';
 import { useInstanceSettings } from '../hooks/useInstanceSettings';
 import { useInstanceSettingsRemoteSync } from '../hooks/useInstanceSettingsRemoteSync';
 import { JsonEditor } from './JsonEditor';
@@ -28,7 +29,7 @@ export function InstanceSettingsPage() {
     return (
       <LbContentContainer size="lg" centered className="py-16">
         <LbSpinner tone="dark" />
-        <p className="mt-3 text-sm text-mar-muted">Laai instansie-instellings…</p>
+        <p className="mt-3 text-sm text-mar-muted">{AF.settings.loadingInstance}</p>
       </LbContentContainer>
     );
   }

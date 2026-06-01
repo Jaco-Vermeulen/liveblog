@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
@@ -86,7 +87,7 @@ export function AdvertisingManagerPage() {
                   Wysig
                 </LbButton>
                 <LbButton type="button" variant="secondary" onClick={() => void mgr.removeAdvert(ad)}>
-                  Verwyder
+                  {AF.common.remove}
                 </LbButton>
               </div>
             </li>
@@ -106,7 +107,7 @@ export function AdvertisingManagerPage() {
                   variant="secondary"
                   onClick={() => void mgr.removeCollection(col)}
                 >
-                  Verwyder
+                  {AF.common.remove}
                 </LbButton>
               </div>
             </li>
@@ -135,7 +136,7 @@ export function AdvertisingManagerPage() {
                 })
               }
             >
-              Stoor
+              {AF.common.save}
             </LbButton>
           </>
         }
@@ -193,7 +194,7 @@ export function AdvertisingManagerPage() {
                 })
               }
             >
-              Stoor
+              {AF.common.save}
             </LbButton>
           </>
         }

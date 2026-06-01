@@ -1,5 +1,6 @@
 import { LbContentContainer } from '@/components/layout';
 import { LbPanelCard } from '@/components/ui';
+import { AF } from '@/copy';
 
 type PlaceholderPageProps = {
   title: string;
@@ -12,13 +13,13 @@ export function PlaceholderPage({ title, description, mechanism }: PlaceholderPa
   return (
     <LbContentContainer size="lg" centered={false} className="py-8">
       <LbPanelCard
-        eyebrow={mechanism ?? 'Coming soon'}
+        eyebrow={mechanism ?? AF.common.comingSoonEyebrow}
         title={title}
-        subtitle={description ?? 'Hierdie afdeling word in ’n volgende fase geïmplementeer.'}
+        subtitle={description ?? AF.placeholder.defaultDescription}
         padding="md"
       >
         <p className="m-0 text-sm text-mar-muted">
-          Navigasie en dop is reeds bedraad — inhoud volg per mechanism README in{' '}
+          {AF.placeholder.trackingNote}{' '}
           <code className="rounded bg-mar-beige px-1 text-mar-teal-dark">plans/mechanisms/</code>.
         </p>
       </LbPanelCard>

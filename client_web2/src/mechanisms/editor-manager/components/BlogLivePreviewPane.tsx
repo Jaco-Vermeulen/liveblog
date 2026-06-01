@@ -9,6 +9,9 @@ import type { PreviewDeviceMode, PreviewDeviceOrientation } from '../types';
 import { PreviewBlogHeader } from './PreviewBlogHeader';
 import { PreviewDeviceFrame } from './PreviewDeviceFrame';
 import { ThemeStylesheetLoader } from './ThemeStylesheetLoader';
+import { AF } from '@/copy';
+
+const P = AF.editor.preview;
 
 export interface BlogLivePreviewPaneProps {
   blog: Blog;
@@ -103,63 +106,63 @@ export function BlogLivePreviewPane({
     `m-editor-preview__seg-btn${active ? ' m-editor-preview__seg-btn--active' : ''}`;
 
   return (
-    <section className={shellClass} aria-label="Lewendige blog-voorskou">
+    <section className={shellClass} aria-label={P.aria}>
       {stylesheetUrls.length > 0 ? <ThemeStylesheetLoader urls={stylesheetUrls} /> : null}
 
       <header className="m-editor-preview__toolbar">
         <div className="m-editor-preview__toolbar-start">
-          <span className="m-editor-preview__toolbar-label">Lewendige voorskou</span>
+          <span className="m-editor-preview__toolbar-label">{P.label}</span>
           <span className="m-editor-preview__toolbar-hint">
             {themeLoading
-              ? 'Laai tema…'
+              ? P.loadingTheme
               : theme?.label
-                ? `Regte tema: ${theme.label} — redigeer op plasings`
-                : 'Regte tema — redigeer op plasings'}
+                ? P.themeHint(theme.label)
+                : P.themeHintDefault}
           </span>
         </div>
 
-        <div className="m-editor-preview__device-group" role="group" aria-label="Toestel">
+        <div className="m-editor-preview__device-group" role="group" aria-label={P.device}>
           <button
             type="button"
             className={seg(deviceMode === 'desktop')}
             onClick={() => setDeviceMode('desktop')}
-            title="Desktop"
+            title={P.desktop}
             aria-pressed={deviceMode === 'desktop'}
           >
             <Monitor className="h-3.5 w-3.5" aria-hidden />
-            <span className="m-editor-preview__device-label">Desktop</span>
+            <span className="m-editor-preview__device-label">{P.desktop}</span>
           </button>
           <button
             type="button"
             className={seg(deviceMode === 'tablet')}
             onClick={() => setDeviceMode('tablet')}
-            title="Tablet"
+            title={P.tablet}
             aria-pressed={deviceMode === 'tablet'}
           >
             <Tablet className="h-3.5 w-3.5" aria-hidden />
-            <span className="m-editor-preview__device-label">Tablet</span>
+            <span className="m-editor-preview__device-label">{P.tablet}</span>
           </button>
           <button
             type="button"
             className={seg(deviceMode === 'mobile')}
             onClick={() => setDeviceMode('mobile')}
-            title="Foon"
+            title={P.phone}
             aria-pressed={deviceMode === 'mobile'}
           >
             <Smartphone className="h-3.5 w-3.5" aria-hidden />
-            <span className="m-editor-preview__device-label">Foon</span>
+            <span className="m-editor-preview__device-label">{P.phone}</span>
           </button>
         </div>
 
         {showOrientation ? (
-          <div className="m-editor-preview__device-group" role="group" aria-label="Orientasie">
+          <div className="m-editor-preview__device-group" role="group" aria-label={P.orientation}>
             <button
               type="button"
               className={seg(orientation === 'portrait')}
               onClick={() => setOrientation('portrait')}
               aria-pressed={orientation === 'portrait'}
             >
-              Portret
+              {P.portrait}
             </button>
             <button
               type="button"
@@ -168,7 +171,7 @@ export function BlogLivePreviewPane({
               aria-pressed={orientation === 'landscape'}
             >
               <RotateCw className="h-3 w-3 inline" aria-hidden />
-              Landskap
+              {P.landscape}
             </button>
           </div>
         ) : null}
@@ -181,7 +184,7 @@ export function BlogLivePreviewPane({
             className="m-editor-preview__live-link"
           >
             <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-            <span>Maak blog oop</span>
+            <span>{P.openBlog}</span>
           </a>
         ) : null}
       </header>

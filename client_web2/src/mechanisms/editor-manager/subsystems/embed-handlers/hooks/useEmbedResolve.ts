@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { AF } from '@/copy';
 import { resolveEmbed, IframelyError } from '../resolveEmbed';
 import { normalizeEmbedInput } from '../services/normalizeEmbedInput';
 import type { EmbedMeta } from '../types';
@@ -46,7 +47,7 @@ export function useEmbedResolve(initialMeta?: EmbedMeta | null): UseEmbedResolve
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Kon nie inbedding laai nie';
+            : AF.editor.embed.loadError;
       setError(message);
       return null;
     } finally {

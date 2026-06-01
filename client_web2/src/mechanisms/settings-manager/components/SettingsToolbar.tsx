@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { LbButton } from '@/components/ui/LbButton';
+import { AF } from '@/copy';
 
 type SettingsToolbarProps = {
   onSave(): void;
@@ -21,7 +22,7 @@ export function SettingsToolbar({ onSave, saving, saveDisabled }: SettingsToolba
         disabled={saveDisabled || saving}
         onClick={onSave}
       >
-        {saving ? 'Stoor…' : 'Stoor'}
+        {saving ? AF.common.saving : AF.common.save}
       </LbButton>
     </div>
   );

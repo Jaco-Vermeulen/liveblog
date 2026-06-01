@@ -1,4 +1,7 @@
+import { AF } from '@/copy';
 import type { ScorecardBody, ScorecardVariant } from './scorecardTypes';
+
+const P = AF.editor.scorecard.presets;
 
 export interface ScorecardPresetConfig {
   label: string;
@@ -14,10 +17,10 @@ export interface ScorecardPresetConfig {
 
 export const SCORECARD_PRESETS: Record<ScorecardVariant, ScorecardPresetConfig> = {
   rugby: {
-    label: 'Rugby',
-    scorersLabel: 'Doelskoppe',
-    bowlersLabel: 'Boulers',
-    scorerDetailLabel: 'Min',
+    label: P.rugby,
+    scorersLabel: P.goalScorers,
+    bowlersLabel: P.bowlers,
+    scorerDetailLabel: P.minute,
     showBowlers: false,
     showScorerStat: false,
     showTeamExtras: false,
@@ -25,10 +28,10 @@ export const SCORECARD_PRESETS: Record<ScorecardVariant, ScorecardPresetConfig> 
     scoreNumericOnly: true,
   },
   cricket: {
-    label: 'Krieket',
-    scorersLabel: 'Kolwers',
-    bowlersLabel: 'Boulers',
-    scorerDetailLabel: "O's",
+    label: P.cricket,
+    scorersLabel: P.batters,
+    bowlersLabel: P.bowlers,
+    scorerDetailLabel: P.overs,
     showBowlers: true,
     showScorerStat: true,
     showTeamExtras: true,
@@ -36,10 +39,10 @@ export const SCORECARD_PRESETS: Record<ScorecardVariant, ScorecardPresetConfig> 
     scoreNumericOnly: false,
   },
   custom: {
-    label: 'Pasgemaak',
-    scorersLabel: 'Spelers',
-    bowlersLabel: 'Boulers',
-    scorerDetailLabel: 'Stat',
+    label: P.custom,
+    scorersLabel: P.players,
+    bowlersLabel: P.bowlers,
+    scorerDetailLabel: P.stat,
     showBowlers: true,
     showScorerStat: true,
     showTeamExtras: true,

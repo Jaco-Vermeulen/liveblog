@@ -9,6 +9,7 @@ import {
 import { getEnvFeatureFlags } from '@/lib/config/resolveFeatureFlags';
 import { usePrivileges } from '@/mechanisms/auth-manager';
 import { useInstanceFeatures } from '@/mechanisms/settings-manager';
+import { AF } from '@/copy';
 import { afrikaanseDatum } from '../utils/afrikaanseDatum';
 import {
   getVisibleAdminItems,
@@ -26,13 +27,13 @@ type NavMenuProps = {
 };
 
 const ADMIN_SUBTITLES: Partial<Record<string, string>> = {
-  '/users': 'Gebruikers, rolle & toegang',
-  '/settings/general': 'Algemeen & instansie',
-  '/themes': 'Temas vir regstreekse blogs',
-  '/freetypes': 'Pasgemaakte veldtipes',
-  '/advertising': 'Advertensie-instellings',
-  '/marketplace': 'Markplek-integrasie',
-  '/syndication': 'Sindikasie na eksterne stelsels',
+  '/users': AF.nav.usersSubtitle,
+  '/settings/general': AF.nav.settingsSubtitle,
+  '/themes': AF.nav.themesSubtitle,
+  '/freetypes': AF.nav.freetypesSubtitle,
+  '/advertising': AF.nav.advertisingSubtitle,
+  '/marketplace': AF.nav.marketplaceSubtitle,
+  '/syndication': AF.nav.syndicationSubtitle,
 };
 
 function renderAdminItem(item: NavItem, onNav: () => void) {
@@ -104,7 +105,7 @@ export function NavMenu({ open }: NavMenuProps) {
       footer={
         <div className="space-y-1.5">
           <p className="m-0 text-sm font-bold text-white">Maroela Media</p>
-          <p className="m-0 text-xs text-white/60">Regstreekse blog — admin</p>
+          <p className="m-0 text-xs text-white/60">{AF.app.taglineAdmin}</p>
         </div>
       }
     >
@@ -114,11 +115,11 @@ export function NavMenu({ open }: NavMenuProps) {
         <NavDrawerNotificationsSection onNavigate={onNav} />
       </LbSideNavGroup>
 
-      <LbSideNavGroup title="Hoof">
+      <LbSideNavGroup title={AF.nav.main}>
         <NavDrawerExpandableSection
           sectionPath="/liveblog"
-          label="Regstreekse blog"
-          subtitle="Blogs, aktief, geargiveer & verwyder"
+          label={AF.nav.liveblog}
+          subtitle={AF.nav.liveblogSubtitle}
           icon={<BookOpen className="h-[18px] w-[18px] text-white/90" strokeWidth={2} />}
           subItems={liveblogSubNav}
           onNavigate={onNav}
@@ -126,7 +127,7 @@ export function NavMenu({ open }: NavMenuProps) {
       </LbSideNavGroup>
 
       {adminItems.length > 0 ? (
-        <LbSideNavGroup title="Admin">
+        <LbSideNavGroup title={AF.nav.admin}>
           {adminItems.map((item) => renderAdminItem(item, onNav))}
         </LbSideNavGroup>
       ) : null}

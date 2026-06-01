@@ -17,7 +17,10 @@ import {
   Undo2,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { AF } from '@/copy';
 import { normalizeRichTextHtml } from './richTextHtml';
+
+const R = AF.editor.richText;
 
 const MAX_UNDO = 100;
 
@@ -72,7 +75,7 @@ export function RichTextBlockEditor({
   value,
   onChange,
   onBlur,
-  placeholder = 'Skryf jou plasing…',
+  placeholder = AF.editor.writePost,
   id,
 }: RichTextBlockEditorProps) {
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -187,7 +190,7 @@ export function RichTextBlockEditor({
   );
 
   const insertLink = useCallback(() => {
-    const url = window.prompt('Voer URL in');
+    const url = window.prompt(R.linkUrlPrompt);
     if (!url?.trim()) return;
     applyEditorCommand('createLink', url.trim());
   }, [applyEditorCommand]);
@@ -263,70 +266,70 @@ export function RichTextBlockEditor({
 
   return (
     <div className="m-rich-text-editor">
-      <div className="m-rich-text-editor__toolbar" role="toolbar" aria-label="Teksformatering">
-          <ToolbarGroup label="Font">
-            <ToolbarBtn title="Vet" onClick={() => applyEditorCommand('bold', undefined, true)}>
+      <div className="m-rich-text-editor__toolbar" role="toolbar" aria-label={R.toolbar}>
+          <ToolbarGroup label={R.font}>
+            <ToolbarBtn title={R.bold} onClick={() => applyEditorCommand('bold', undefined, true)}>
               <Bold className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Skuins" onClick={() => applyEditorCommand('italic', undefined, true)}>
+            <ToolbarBtn title={R.italic} onClick={() => applyEditorCommand('italic', undefined, true)}>
               <Italic className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Onderstreep" onClick={() => applyEditorCommand('underline', undefined, true)}>
+            <ToolbarBtn title={R.underline} onClick={() => applyEditorCommand('underline', undefined, true)}>
               <Underline className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>
-          <ToolbarGroup label="Style">
-            <ToolbarBtn title="Opskrif 2" variant="text" onClick={() => applyEditorCommand('formatBlock', 'H2')}>
+          <ToolbarGroup label={R.style}>
+            <ToolbarBtn title={R.h2} variant="text" onClick={() => applyEditorCommand('formatBlock', 'H2')}>
               H2
             </ToolbarBtn>
-            <ToolbarBtn title="Opskrif 3" variant="text" onClick={() => applyEditorCommand('formatBlock', 'H3')}>
+            <ToolbarBtn title={R.h3} variant="text" onClick={() => applyEditorCommand('formatBlock', 'H3')}>
               H3
             </ToolbarBtn>
-            <ToolbarBtn title="Paragraaf" onClick={() => applyEditorCommand('formatBlock', 'P')}>
+            <ToolbarBtn title={R.paragraph} onClick={() => applyEditorCommand('formatBlock', 'P')}>
               <Type className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>
-          <ToolbarGroup label="Paragraaf">
-            <ToolbarBtn title="Bulletlys" onClick={() => applyEditorCommand('insertUnorderedList')}>
+          <ToolbarGroup label={R.paragraphGroup}>
+            <ToolbarBtn title={R.bulletList} onClick={() => applyEditorCommand('insertUnorderedList')}>
               <List className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Genommerde lys" onClick={() => applyEditorCommand('insertOrderedList')}>
+            <ToolbarBtn title={R.numberedList} onClick={() => applyEditorCommand('insertOrderedList')}>
               <ListOrdered className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Aanhaling" onClick={() => applyEditorCommand('formatBlock', 'BLOCKQUOTE')}>
+            <ToolbarBtn title={R.quote} onClick={() => applyEditorCommand('formatBlock', 'BLOCKQUOTE')}>
               <Quote className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>
-          <ToolbarGroup label="Belyn">
-            <ToolbarBtn title="Links" onClick={() => applyAlignment('left')}>
+          <ToolbarGroup label={R.align}>
+            <ToolbarBtn title={R.left} onClick={() => applyAlignment('left')}>
               <AlignLeft className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Middel" onClick={() => applyAlignment('center')}>
+            <ToolbarBtn title={R.center} onClick={() => applyAlignment('center')}>
               <AlignCenter className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Regs" onClick={() => applyAlignment('right')}>
+            <ToolbarBtn title={R.right} onClick={() => applyAlignment('right')}>
               <AlignRight className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Belyn beide kante" onClick={() => applyAlignment('justify')}>
+            <ToolbarBtn title={R.justify} onClick={() => applyAlignment('justify')}>
               <AlignJustify className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>
-          <ToolbarGroup label="Wysig">
-            <ToolbarBtn title="Skakel" onClick={insertLink}>
+          <ToolbarGroup label={R.edit}>
+            <ToolbarBtn title={R.link} onClick={insertLink}>
               <Link2 className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Verwyder skakel" onClick={() => applyEditorCommand('unlink')}>
+            <ToolbarBtn title={R.unlink} onClick={() => applyEditorCommand('unlink')}>
               <Link2Off className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Vee formatering uit" onClick={() => applyEditorCommand('removeFormat')}>
+            <ToolbarBtn title={R.clearFormat} onClick={() => applyEditorCommand('removeFormat')}>
               <RemoveFormatting className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>
-          <ToolbarGroup label="Geskiedenis">
-            <ToolbarBtn title="Ontdoen" onClick={applyUndo}>
+          <ToolbarGroup label={R.history}>
+            <ToolbarBtn title={R.undo} onClick={applyUndo}>
               <Undo2 className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
-            <ToolbarBtn title="Herdoen" onClick={applyRedo}>
+            <ToolbarBtn title={R.redo} onClick={applyRedo}>
               <Redo2 className="m-rich-text-editor__icon" aria-hidden />
             </ToolbarBtn>
           </ToolbarGroup>

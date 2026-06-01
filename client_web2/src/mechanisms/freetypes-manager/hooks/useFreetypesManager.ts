@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   checkFreetypeUsed,
   listFreetypes,
@@ -31,7 +32,7 @@ export function useFreetypesManager() {
       );
       setFreetypes(items as (Freetype & { isUsed?: boolean })[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie vrye tipes laai nie.');
+      setError(err instanceof Error ? err.message : AF.freetypes.errors.load);
     } finally {
       setLoading(false);
     }
@@ -59,37 +60,37 @@ export function useFreetypesManager() {
   const save = async () => {
     const templateCheck = validateFreetypeTemplate(dialog.template);
     if (!templateCheck.valid) {
-      setError('Sjabloon moet minstens een $veranderlike bevat.');
+      setError(AF.freetypes.validation.templateVars);
       return;
     }
     if (!validateFreetypeName(dialog.name, freetypes, editing?._id)) {
-      setError('Vrye tipe name moet uniek wees.');
+      setError(AF.freetypes.validation.uniqueName);
       return;
     }
     setSaving(true);
     setError(null);
     try {
       await saveFreetype(editing, { name: dialog.name, template: dialog.template });
-      setMessage(editing ? 'Vrye tipe opgedateer.' : 'Vrye tipe geskep.');
+      setMessage(editing ? AF.freetypes.messages.updated : AF.freetypes.messages.created);
       closeDialog();
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie stoor nie.');
+      setError(err instanceof Error ? err.message : AF.freetypes.errors.save);
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (freetype: Freetype) => {
-    if (!window.confirm(`Verwyder vrye tipe "${freetype.name}"?`)) return;
+    if (!window.confirm(AF.freetypes.confirmDelete(freetype.name))) return;
     setSaving(true);
     setError(null);
     try {
       await removeFreetype(freetype);
-      setMessage('Vrye tipe verwyder.');
+      setMessage(AF.freetypes.messages.removed);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie verwyder nie.');
+      setError(err instanceof Error ? err.message : AF.freetypes.errors.delete);
     } finally {
       setSaving(false);
     }

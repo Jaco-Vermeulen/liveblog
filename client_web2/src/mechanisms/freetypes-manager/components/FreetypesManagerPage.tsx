@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
@@ -53,7 +54,7 @@ export function FreetypesManagerPage() {
       ) : (
         <ul className="divide-y divide-mar-border rounded border border-mar-border bg-mar-panel">
           {freetypes.length === 0 ? (
-            <li className="p-6 text-sm text-mar-muted">Geen vrye tipes nie.</li>
+            <li className="p-6 text-sm text-mar-muted">{AF.freetypes.none}</li>
           ) : (
             freetypes.map((ft) => (
               <li key={ft._id} className="flex flex-wrap items-center justify-between gap-2 p-4">
@@ -68,7 +69,7 @@ export function FreetypesManagerPage() {
                     Wysig
                   </LbButton>
                   <LbButton type="button" variant="secondary" onClick={() => void remove(ft)}>
-                    Verwyder
+                    {AF.common.remove}
                   </LbButton>
                 </div>
               </li>
@@ -87,7 +88,7 @@ export function FreetypesManagerPage() {
               Kanselleer
             </LbButton>
             <LbButton type="button" variant="primary" disabled={saving} onClick={() => void save()}>
-              Stoor
+              {AF.common.save}
             </LbButton>
           </>
         }

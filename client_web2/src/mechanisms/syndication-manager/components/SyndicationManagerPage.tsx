@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
@@ -61,7 +62,7 @@ export function SyndicationManagerPage() {
               <li key={p._id} className="flex justify-between gap-2 p-4">
                 <span className="font-medium">{p.name}</span>
                 <LbButton type="button" variant="secondary" onClick={() => void syn.removeProducer(p)}>
-                  Verwyder
+                  {AF.common.remove}
                 </LbButton>
               </li>
             ))}
@@ -70,7 +71,7 @@ export function SyndicationManagerPage() {
       ) : (
         <ul className="divide-y divide-mar-border rounded border border-mar-border bg-mar-panel">
           {syn.consumers.length === 0 ? (
-            <li className="p-4 text-sm text-mar-muted">Geen verbruikers nie.</li>
+            <li className="p-4 text-sm text-mar-muted">{AF.syndication.noConsumers}</li>
           ) : (
             syn.consumers.map((c) => (
               <li key={c._id} className="p-4">

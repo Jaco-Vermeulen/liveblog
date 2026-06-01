@@ -20,6 +20,7 @@ import {
 } from '../subsystems/blog-settings-rail';
 import { OutputEmbedCodeModal, OutputModal } from '../subsystems/output-modal';
 import { EditorChromeActions } from '../components/EditorChromeActions';
+import { AF } from '@/copy';
 import { canAccessBlogSettings } from '../services/blogSecurity';
 
 export function SettingsPage() {
@@ -54,9 +55,9 @@ export function SettingsPage() {
     setMessage(null);
     try {
       await updateBlog(buildBlogPatchFromForm(blog, general.form));
-      setMessage('Instellings gestoor.');
+      setMessage(AF.editor.settings.saved);
     } catch {
-      setMessage('Kon nie instellings stoor nie.');
+      setMessage(AF.editor.settings.errors.save);
     }
   };
 
@@ -66,17 +67,17 @@ export function SettingsPage() {
   };
 
   const handleRemoveOutput = async (output: Output) => {
-    if (!window.confirm('Verwyder hierdie uitsetkanaal?')) return;
+    if (!window.confirm(AF.editor.settings.confirmDeleteOutput)) return;
     try {
       await settings.removeOutput(output);
-      setMessage('Uitset verwyder.');
+      setMessage(AF.editor.settings.outputRemoved);
     } catch {
-      setMessage('Kon nie uitset verwyder nie.');
+      setMessage(AF.editor.settings.errors.deleteOutput);
     }
   };
 
   if (isLoading || !blog || !general.form) {
-    return <LbLoadingScreen message="Laai blog-instellings…" />;
+    return <LbLoadingScreen message={AF.editor.settings.loadingBlog} />;
   }
 
   return (
@@ -87,13 +88,13 @@ export function SettingsPage() {
           <Link
             to={`/liveblog/edit/${blog._id}`}
             className="m-editor-chrome__icon-btn m-editor-chrome__home"
-            title="Terug na redigeerder"
-            aria-label="Terug na redigeerder"
+            title={AF.editor.settings.backToEditor}
+            aria-label={AF.editor.settings.backToEditor}
           >
             <ArrowLeft className="h-5 w-5" aria-hidden />
           </Link>
           <div>
-            <h1 className="m-editor-chrome__title">Blog-instellings</h1>
+            <h1 className="m-editor-chrome__title">{AF.routes.blogSettings}</h1>
             <p className="m-editor-chrome__subtitle">{blog.title}</p>
           </div>
         </div>

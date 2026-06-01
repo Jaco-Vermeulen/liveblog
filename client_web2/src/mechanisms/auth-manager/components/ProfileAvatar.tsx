@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { LbButton } from '@/components/ui/LbButton';
 import type { LiveblogUser } from '@/mechanisms/liveblog-api';
+import { AF } from '@/copy';
 import { userAvatarUrl } from '@/mechanisms/liveblog-api';
 
 type ProfileAvatarProps = {
@@ -63,7 +64,7 @@ export function ProfileAvatar({ user, displayName, uploading, onUpload }: Profil
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
       >
-        {uploading ? 'Laai op…' : 'Verander foto'}
+        {uploading ? AF.auth.uploading : AF.auth.changePhoto}
       </LbButton>
     </div>
   );

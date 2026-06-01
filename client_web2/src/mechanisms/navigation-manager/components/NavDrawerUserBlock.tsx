@@ -1,6 +1,7 @@
 import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { AF } from '@/copy';
 import { useAuth } from '@/mechanisms/auth-manager';
 
 type NavDrawerUserBlockProps = {
@@ -11,7 +12,7 @@ type NavDrawerUserBlockProps = {
 export function NavDrawerUserBlock({ className }: NavDrawerUserBlockProps) {
   const { state, logout } = useAuth();
   const navigate = useNavigate();
-  const name = state.user?.display_name ?? state.user?.username ?? 'Gebruiker';
+  const name = state.user?.display_name ?? state.user?.username ?? AF.common.user;
   const initial = name.charAt(0).toUpperCase();
 
   return (
@@ -33,7 +34,7 @@ export function NavDrawerUserBlock({ className }: NavDrawerUserBlockProps) {
             onClick={() => navigate('/profile')}
           >
             <User className="h-3.5 w-3.5" strokeWidth={2} />
-            Profiel
+            {AF.common.profile}
           </button>
         </div>
       </div>
@@ -46,7 +47,7 @@ export function NavDrawerUserBlock({ className }: NavDrawerUserBlockProps) {
         }}
       >
         <LogOut className="h-3.5 w-3.5 text-mar-orange" strokeWidth={2} />
-        Teken uit
+        {AF.common.signOut}
       </button>
     </div>
   );

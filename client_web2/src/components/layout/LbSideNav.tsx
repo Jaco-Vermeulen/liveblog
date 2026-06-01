@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
+import { AF } from '@/copy';
 import { cn } from '@/lib/utils';
 import { lbNavPanelWidthClass } from './nav-tokens';
 
@@ -41,7 +42,7 @@ export function LbSideNav({
   return (
     <nav
       id="lb-main-menu"
-      aria-label="Hoofnavigasie"
+      aria-label={AF.nav.mainNav}
       className={cn(
         'fixed bottom-0 top-0 z-50 flex flex-col',
         lbNavPanelWidthClass,
@@ -68,7 +69,7 @@ export function LbSideNav({
               type="button"
               className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/20 text-white hover:bg-black/35 lg:hidden"
               onClick={onClose}
-              aria-label="Sluit menu"
+              aria-label={AF.nav.closeMenu}
             >
               <LbCloseIcon />
             </button>
@@ -106,7 +107,7 @@ export function LbSideNavMasthead({
             type="button"
             className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/25 bg-black/20 hover:bg-black/35 lg:hidden"
             onClick={onClose}
-            aria-label="Sluit menu"
+            aria-label={AF.nav.closeMenu}
           >
             <LbCloseIcon />
           </button>

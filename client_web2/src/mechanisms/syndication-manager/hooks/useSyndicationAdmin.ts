@@ -8,6 +8,7 @@ import {
   type SyndicationConsumer,
   type SyndicationProducer,
 } from '@/mechanisms/liveblog-api';
+import { AF } from '@/copy';
 
 export type SyndicationTab = 'producers' | 'consumers';
 
@@ -37,7 +38,7 @@ export function useSyndicationAdmin() {
       setProducers(prod._items);
       setConsumers(cons._items);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie sindikasie laai nie.');
+      setError(err instanceof Error ? err.message : AF.syndication.errors.load);
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export function useSyndicationAdmin() {
     if (!nameDraft.trim()) return;
     await saveSyndicationProducer(null, { name: nameDraft.trim() });
     setNameDraft('');
-    setMessage('Produseerder geskep.');
+    setMessage(AF.syndication.messages.producerCreated);
     await refresh();
   };
 
@@ -67,9 +68,9 @@ export function useSyndicationAdmin() {
     setNameDraft,
     addProducer,
     removeProducer: async (p: SyndicationProducer) => {
-      if (!window.confirm(`Verwyder produseerder "${p.name}"?`)) return;
+      if (!window.confirm(AF.syndication.confirmDeleteProducer(p.name))) return;
       await removeSyndicationProducer(p);
-      setMessage('Produseerder verwyder.');
+      setMessage(AF.syndication.messages.producerRemoved);
       await refresh();
     },
   };

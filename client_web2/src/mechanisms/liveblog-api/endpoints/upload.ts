@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { logger } from '@/mechanisms/request-logger';
 import { LiveblogApiError, resolveUrl } from '../client';
 
@@ -47,7 +48,7 @@ export async function uploadUserAvatar(file: File): Promise<string> {
     }
 
     if (!data._id) {
-      throw new LiveblogApiError('Geen upload-ID teruggekry nie', res.status, data);
+      throw new LiveblogApiError(AF.upload.noUploadId, res.status, data);
     }
 
     return data._id;

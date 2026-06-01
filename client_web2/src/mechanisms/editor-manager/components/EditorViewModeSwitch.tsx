@@ -1,10 +1,11 @@
 import { Columns2, Eye, Pencil } from 'lucide-react';
+import { AF } from '@/copy';
 import type { EditorViewMode } from '../types';
 
 const MODES: { id: EditorViewMode; label: string; short: string; icon: typeof Pencil }[] = [
-  { id: 'edit', label: 'Redigeer', short: 'Redigeer', icon: Pencil },
-  { id: 'split', label: 'Verdeelde aansig', short: 'Verdeel', icon: Columns2 },
-  { id: 'preview', label: 'Voorskou alleen', short: 'Voorskou', icon: Eye },
+  { id: 'edit', label: AF.editor.viewEdit, short: AF.editor.viewEdit, icon: Pencil },
+  { id: 'split', label: AF.editor.viewSplit, short: AF.editor.viewSplitShort, icon: Columns2 },
+  { id: 'preview', label: AF.editor.viewPreview, short: AF.editor.viewPreviewShort, icon: Eye },
 ];
 
 export interface EditorViewModeSwitchProps {
@@ -17,7 +18,7 @@ export function EditorViewModeSwitch({ mode, onChange, disabled = false }: Edito
   return (
     <div
       role="group"
-      aria-label="Redigeer-uitleg"
+      aria-label={AF.editor.viewLayout}
       className="m-editor-view-switch"
     >
       {MODES.map((item) => {

@@ -1,4 +1,7 @@
+import { AF } from '@/copy';
 import { Plus, Trash2 } from 'lucide-react';
+
+const SC = AF.editor.scorecard;
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
@@ -29,11 +32,11 @@ function sanitizeScore(value: string, numericOnly: boolean): string {
 }
 
 const SIDE_DISPLAY_OPTIONS: { value: ScorecardTeamSideDisplay; label: string }[] = [
-  { value: 'auto', label: 'Outo (volg kolfspan)' },
-  { value: 'batters', label: 'Kolwers / batsmen' },
-  { value: 'bowlers', label: 'Boulers' },
-  { value: 'both', label: 'Beide' },
-  { value: 'none', label: 'Versteek op kaart' },
+  { value: 'auto', label: SC.sideDisplay.auto },
+  { value: 'batters', label: SC.sideDisplay.batters },
+  { value: 'bowlers', label: SC.sideDisplay.bowlers },
+  { value: 'both', label: SC.sideDisplay.both },
+  { value: 'none', label: SC.sideDisplay.none },
 ];
 
 function TeamFields({
@@ -111,7 +114,7 @@ function TeamFields({
       <legend className="m-scorecard-editor__team-legend">{label}</legend>
 
       {showSideDisplay ? (
-        <LbFormField label="Wys op kaart" htmlFor={`sc-${side}-display`}>
+        <LbFormField label={SC.showOnCard} htmlFor={`sc-${side}-display`}>
           <select
             id={`sc-${side}-display`}
             className="m-editor-composer__select"
@@ -127,27 +130,27 @@ function TeamFields({
         </LbFormField>
       ) : null}
 
-      <LbFormField label="Span naam" htmlFor={`sc-${side}-name`}>
+      <LbFormField label={SC.teamName} htmlFor={`sc-${side}-name`}>
         <LbInput
           id={`sc-${side}-name`}
           value={team.name}
           onChange={(e) => onChange({ ...team, name: e.target.value })}
-          placeholder="bv. Springbokke"
+          placeholder={SC.teamNamePlaceholder}
         />
       </LbFormField>
 
-      <LbFormField label="Telling" htmlFor={`sc-${side}-score`}>
+      <LbFormField label={SC.score} htmlFor={`sc-${side}-score`}>
         <LbInput
           id={`sc-${side}-score`}
           value={team.score}
           onChange={(e) => onChange({ ...team, score: sanitizeScore(e.target.value, preset.scoreNumericOnly) })}
-          placeholder={preset.scoreNumericOnly ? '0' : "bv. 245/8"}
+          placeholder={preset.scoreNumericOnly ? '0' : SC.scorePlaceholderCricket}
           inputMode={preset.scoreNumericOnly ? 'numeric' : 'text'}
           className={preset.scoreNumericOnly ? 'max-w-[5rem]' : undefined}
         />
       </LbFormField>
 
-      <LbFormField label="Logo" htmlFor={`sc-${side}-logo-file`}>
+      <LbFormField label={SC.teamLogo} htmlFor={`sc-${side}-logo-file`}>
         <div className="flex flex-wrap items-center gap-2">
           <LbButton
             type="button"
@@ -155,7 +158,7 @@ function TeamFields({
             disabled={uploading}
             onClick={() => document.getElementById(`sc-${side}-logo-file`)?.click()}
           >
-            {uploading ? 'Laai op…' : 'Laai logo op'}
+            {uploading ? AF.common.uploading : SC.uploadLogo}
           </LbButton>
           {team.logoUrl ? (
             <img src={team.logoUrl} alt="" className="h-12 w-12 rounded border border-mar-border object-contain" />
@@ -176,31 +179,31 @@ function TeamFields({
 
       {preset.showTeamExtras ? (
         <div className="m-scorecard-editor__scorers">
-          <p className="m-scorecard-editor__scorers-label">Span statistieke</p>
+          <p className="m-scorecard-editor__scorers-label">{SC.teamStats}</p>
           <p className="m-scorecard-editor__scorers-hint">
             Bv. Etiket &quot;Overs&quot; en waarde &quot;50.0&quot; vir innings-overs onder die span se naam op die kaart.
           </p>
           {extrasRows.map((extra, index) => (
             <div key={index} className="m-scorecard-editor__scorer-row">
               <LbInput
-                aria-label="Etiket"
+                aria-label={SC.labelField}
                 value={extra.label}
                 onChange={(e) => updateExtra(index, { label: e.target.value })}
-                placeholder="bv. Overs"
+                placeholder={SC.labelPlaceholder}
                 className="min-w-0 flex-1"
               />
               <LbInput
-                aria-label="Waarde"
+                aria-label={SC.valueField}
                 value={extra.value}
                 onChange={(e) => updateExtra(index, { value: e.target.value })}
-                placeholder="bv. 50.2"
+                placeholder={SC.valuePlaceholder}
                 className="min-w-0 flex-1"
               />
               <button
                 type="button"
                 className="m-editor-composer__block-remove"
                 onClick={() => removeExtra(index)}
-                aria-label="Verwyder statistiek"
+                aria-label={SC.removeStat}
               >
                 <Trash2 className="h-4 w-4" aria-hidden />
               </button>
@@ -224,10 +227,10 @@ function TeamFields({
           <div key={index} className="m-scorecard-editor__scorer-row">
             {preset.showScorerStat ? (
               <LbInput
-                aria-label="Stat"
+                aria-label={SC.statField}
                 value={scorer.stat}
                 onChange={(e) => updateScorer(index, { stat: e.target.value.slice(0, 8) })}
-                placeholder="Runs"
+                placeholder={SC.runsPlaceholder}
                 className="w-16"
               />
             ) : null}
@@ -246,10 +249,10 @@ function TeamFields({
               className="w-16"
             />
             <LbInput
-              aria-label="Speler"
+              aria-label={SC.playerField}
               value={scorer.name}
               onChange={(e) => updateScorer(index, { name: e.target.value })}
-              placeholder="Speler naam"
+              placeholder={SC.playerNamePlaceholder}
               className="min-w-0 flex-1"
             />
             <button
@@ -257,7 +260,7 @@ function TeamFields({
               className="m-editor-composer__block-remove"
               onClick={() => removeScorer(index)}
               disabled={team.scorers.length <= 1}
-              aria-label="Verwyder speler"
+              aria-label={SC.removePlayer}
             >
               <Trash2 className="h-4 w-4" aria-hidden />
             </button>
@@ -275,17 +278,17 @@ function TeamFields({
           {team.bowlers.map((bowler, index) => (
             <div key={index} className="m-scorecard-editor__scorer-row">
               <LbInput
-                aria-label="Syfers"
+                aria-label={SC.figuresField}
                 value={bowler.figures}
                 onChange={(e) => updateBowler(index, { figures: e.target.value.slice(0, 12) })}
-                placeholder="bv. 4/32"
+                placeholder={SC.figuresPlaceholder}
                 className="w-20"
               />
               <LbInput
-                aria-label="Bouler"
+                aria-label={SC.bowlerField}
                 value={bowler.name}
                 onChange={(e) => updateBowler(index, { name: e.target.value })}
-                placeholder="Bouler naam"
+                placeholder={SC.bowlerNamePlaceholder}
                 className="min-w-0 flex-1"
               />
               <button
@@ -293,7 +296,7 @@ function TeamFields({
                 className="m-editor-composer__block-remove"
                 onClick={() => removeBowler(index)}
                 disabled={team.bowlers.length <= 1}
-                aria-label="Verwyder bouler"
+                aria-label={SC.removeBowler}
               >
                 <Trash2 className="h-4 w-4" aria-hidden />
               </button>
@@ -327,13 +330,11 @@ export function ScorecardBlockEditor({
 
   return (
     <div className="m-scorecard-editor">
-      <p className="m-scorecard-editor__hint">
-        Vul die wedstryd in — die kaart hieronder is presies hoe lesers dit op die blog sal sien.
-      </p>
+      <p className="m-scorecard-editor__hint">{SC.hint}</p>
 
       <ScorecardCard body={body} preview />
 
-      <LbFormField label="Tipe wedstryd" htmlFor="sc-variant">
+      <LbFormField label={SC.matchType} htmlFor="sc-variant">
         <select
           id="sc-variant"
           className="m-editor-composer__select"
@@ -347,16 +348,13 @@ export function ScorecardBlockEditor({
           ))}
         </select>
         {body.variant === 'cricket' ? (
-          <p className="mt-1 text-xs text-mar-muted">
-            Krieket: telling onder elke span (bv. 245/8). Stel <strong>Huidige oor</strong> en kies watter span kolf —
-            kolwers verskyn by die kolfspan, boulers by die ander kant.
-          </p>
+          <p className="mt-1 text-xs text-mar-muted">{SC.cricketHint}</p>
         ) : null}
       </LbFormField>
 
       {(body.variant === 'cricket' || body.variant === 'custom') && (
         <div className="m-scorecard-editor__labels-grid">
-          <LbFormField label="Huidige oor" htmlFor="sc-current-over">
+          <LbFormField label={SC.currentOver} htmlFor="sc-current-over">
             <LbInput
               id="sc-current-over"
               value={body.currentOver}
@@ -364,22 +362,22 @@ export function ScorecardBlockEditor({
               placeholder="bv. 32.4"
             />
           </LbFormField>
-          <LbFormField label="Kolfspan" htmlFor="sc-batting-side">
+          <LbFormField label={SC.battingSide} htmlFor="sc-batting-side">
             <select
               id="sc-batting-side"
               className="m-editor-composer__select"
               value={body.battingSide}
               onChange={(e) => patch({ battingSide: e.target.value as 'home' | 'away' })}
             >
-              <option value="home">Tuisspan kolf</option>
-              <option value="away">Wêreldspan kolf</option>
+              <option value="home">{SC.homeBatting}</option>
+              <option value="away">{SC.awayBatting}</option>
             </select>
           </LbFormField>
         </div>
       )}
 
       <div className="m-scorecard-editor__labels-grid">
-        <LbFormField label="Opskrif spelerslys" htmlFor="sc-scorers-label">
+        <LbFormField label={SC.scorersHeading} htmlFor="sc-scorers-label">
           <LbInput
             id="sc-scorers-label"
             value={body.scorersLabel}
@@ -388,7 +386,7 @@ export function ScorecardBlockEditor({
           />
         </LbFormField>
         {(preset.showBowlers || body.variant === 'custom') && (
-          <LbFormField label="Opskrif boulers" htmlFor="sc-bowlers-label">
+          <LbFormField label={SC.bowlersHeading} htmlFor="sc-bowlers-label">
             <LbInput
               id="sc-bowlers-label"
               value={body.bowlersLabel}
@@ -397,7 +395,7 @@ export function ScorecardBlockEditor({
             />
           </LbFormField>
         )}
-        <LbFormField label="Etiket detailkolom" htmlFor="sc-detail-label">
+        <LbFormField label={SC.detailColumnLabel} htmlFor="sc-detail-label">
           <LbInput
             id="sc-detail-label"
             value={body.scorerDetailLabel}
@@ -409,7 +407,7 @@ export function ScorecardBlockEditor({
 
       <div className="m-scorecard-editor__grid">
         <TeamFields
-          label="Tuisspan"
+          label={SC.homeTeam}
           side="home"
           team={body.home}
           preset={preset}
@@ -422,7 +420,7 @@ export function ScorecardBlockEditor({
           uploading={uploadingSide === 'home'}
         />
         <TeamFields
-          label="Wêreldspan"
+          label={SC.awayTeam}
           side="away"
           team={body.away}
           preset={preset}
@@ -437,34 +435,38 @@ export function ScorecardBlockEditor({
       </div>
 
       <LbFormField
-        label={body.variant === 'cricket' ? 'Wedstrydstatus' : 'Rust / kwarte telling'}
+        label={body.variant === 'cricket' ? SC.matchStatusCricket : SC.matchStatusRugby}
         htmlFor="sc-quarters"
       >
         <LbInput
           id="sc-quarters"
           value={body.matchQuarters}
           onChange={(e) => patch({ matchQuarters: e.target.value })}
-          placeholder={body.variant === 'cricket' ? 'bv. 2de beurt · Dag 3' : 'bv. HT 1–0 of FINAL'}
+          placeholder={
+            body.variant === 'cricket'
+              ? SC.matchStatusPlaceholderCricket
+              : SC.matchStatusPlaceholderRugby
+          }
         />
       </LbFormField>
 
-      <LbFormField label="Wedstryd-inligting" htmlFor="sc-info">
+      <LbFormField label={SC.matchInfo} htmlFor="sc-info">
         <LbInput
           id="sc-info"
           value={body.matchInfo}
           onChange={(e) => patch({ matchInfo: e.target.value })}
-          placeholder="bv. Loftus Versfeld · 72 000 toeskouers"
+          placeholder={SC.matchInfoPlaceholder}
         />
       </LbFormField>
 
-      <LbFormField label="Agtergrondbeeld (opsioneel)" htmlFor="sc-bg-file">
+      <LbFormField label={SC.backgroundOptional} htmlFor="sc-bg-file">
         <LbButton
           type="button"
           variant="secondary"
           disabled={uploadingSide === 'background'}
           onClick={() => document.getElementById('sc-bg-file')?.click()}
         >
-          {uploadingSide === 'background' ? 'Laai op…' : 'Laai agtergrond op'}
+          {uploadingSide === 'background' ? AF.common.uploading : SC.uploadBackground}
         </LbButton>
         <input
           id="sc-bg-file"

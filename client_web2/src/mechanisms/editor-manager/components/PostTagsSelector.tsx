@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 import { LbFormField } from '@/components/ui/LbFormField';
+import { AF } from '@/copy';
+
+const T = AF.editor.tags;
 
 export interface PostTagsSelectorProps {
   availableTags: string[];
@@ -40,9 +43,9 @@ export function PostTagsSelector({
 
   if (isLoading) {
     return (
-      <LbFormField label="Etikette" htmlFor="post-tags-status">
+      <LbFormField label={T.label} htmlFor="post-tags-status">
         <p id="post-tags-status" className="m-0 text-sm text-mar-muted">
-          Laai etikette…
+          {T.loading}
         </p>
       </LbFormField>
     );
@@ -50,16 +53,16 @@ export function PostTagsSelector({
 
   if (!availableTags.length) {
     return (
-      <LbFormField label="Etikette" htmlFor="post-tags-status">
+      <LbFormField label={T.label} htmlFor="post-tags-status">
         <p id="post-tags-status" className="m-0 text-sm text-mar-muted">
-          Geen globale etikette nie. Voeg etikette by onder Instellings → Algemeen.
+          {T.noneGlobal}
         </p>
       </LbFormField>
     );
   }
 
   return (
-    <LbFormField label="Etikette" htmlFor="post-tags-select">
+    <LbFormField label={T.label} htmlFor="post-tags-select">
       <div className="space-y-2">
         {selectedTags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
@@ -73,7 +76,7 @@ export function PostTagsSelector({
                   <button
                     type="button"
                     className="text-mar-muted hover:text-mar-orange"
-                    aria-label={`Verwyder ${tag}`}
+                    aria-label={T.remove(tag)}
                     onClick={() => removeTag(tag)}
                   >
                     ×
@@ -83,7 +86,7 @@ export function PostTagsSelector({
             ))}
           </div>
         ) : (
-          <p className="m-0 text-xs text-mar-muted">Geen etikette gekies nie.</p>
+          <p className="m-0 text-xs text-mar-muted">{T.noneSelected}</p>
         )}
 
         {canAddMore && remaining.length > 0 && !disabled ? (

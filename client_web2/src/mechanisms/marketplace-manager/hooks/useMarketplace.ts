@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import { useSearchParams } from 'react-router-dom';
 import {
   listMarketplaceBlogs,
@@ -64,7 +65,7 @@ export function useMarketplace() {
       setLanguages(languageData._items);
       await loadBlogs(filters);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie markplek laai nie.');
+      setError(err instanceof Error ? err.message : AF.marketplace.errors.load);
     } finally {
       setLoading(false);
     }

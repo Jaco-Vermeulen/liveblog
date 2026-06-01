@@ -1,6 +1,7 @@
 import { EyeOff, Pencil, Pin, Send, Star, Trash2 } from 'lucide-react';
 import type { Post, PostItem } from '@/mechanisms/liveblog-api';
 import { EmbedHtml, PostItemEmbed } from '../subsystems/embed-handlers';
+import { AF } from '@/copy';
 import { isRichTextHtml } from '../subsystems/rich-text-editor';
 
 export interface PostCardProps {
@@ -57,7 +58,7 @@ export function PostCard({
   const mainItem = post.mainItem?.item;
 
   function renderBody(item: PostItem | undefined) {
-    if (!item) return '(Geen inhoud)';
+    if (!item) return AF.editor.noContent;
     if (item.group_type === 'freetype' && item.text) {
       return <EmbedHtml html={item.text} className="m-editor-post-card__freetype" />;
     }
@@ -71,7 +72,7 @@ export function PostCard({
       item.text ??
       (item.meta?.url != null ? String(item.meta.url) : '') ??
       '';
-    if (!text) return '(Geen inhoud)';
+    if (!text) return AF.editor.noContent;
     if (isRichTextHtml(text)) {
       return <EmbedHtml html={text} className="m-editor-post-card__rich-text" />;
     }
@@ -80,11 +81,11 @@ export function PostCard({
 
   const statusLabel =
     post.post_status === 'draft'
-      ? 'Konsep'
+      ? AF.editor.postStatus.draft
       : post.post_status === 'submitted'
-        ? 'Bydrae'
+        ? AF.editor.postStatus.submitted
         : post.post_status === 'scheduled'
-          ? 'Geskeduleer'
+          ? AF.editor.postStatus.scheduled
           : null;
 
   const author = authorLabel(post);
@@ -113,15 +114,15 @@ export function PostCard({
     <div
       className={isLive ? 'lb-post__actions' : 'm-editor-post-card__actions'}
       role="toolbar"
-      aria-label="Plasing-aksies"
+      aria-label={AF.editor.postActions}
     >
             {allowPinHighlight && onTogglePin && (
               <button
                 type="button"
                 className={`${isLive ? 'lb-post__action' : 'm-editor-post-card__action'}${post.sticky ? ` ${isLive ? 'lb-post__action--active' : 'm-editor-post-card__action--active'}` : ''}`}
                 onClick={onTogglePin}
-                title={post.sticky ? 'Ontspeld' : 'Speld vas'}
-                aria-label={post.sticky ? 'Ontspeld' : 'Speld vas'}
+                title={post.sticky ? AF.editor.unpin : AF.editor.pin}
+                aria-label={post.sticky ? AF.editor.unpin : AF.editor.pin}
                 aria-pressed={post.sticky}
               >
                 <Pin aria-hidden />
@@ -132,8 +133,8 @@ export function PostCard({
                 type="button"
                 className={`${isLive ? 'lb-post__action' : 'm-editor-post-card__action'}${post.lb_highlight ? ` ${isLive ? 'lb-post__action--active' : 'm-editor-post-card__action--active'}` : ''}`}
                 onClick={onToggleHighlight}
-                title={post.lb_highlight ? 'Verwyder beklemtoning' : 'Beklemtoon'}
-                aria-label={post.lb_highlight ? 'Verwyder beklemtoning' : 'Beklemtoon'}
+                title={post.lb_highlight ? AF.editor.removeHighlight : AF.editor.highlight}
+                aria-label={post.lb_highlight ? AF.editor.removeHighlight : AF.editor.highlight}
                 aria-pressed={post.lb_highlight}
               >
                 <Star aria-hidden />
@@ -144,8 +145,8 @@ export function PostCard({
                 type="button"
                 className={isLive ? 'lb-post__action' : 'm-editor-post-card__action'}
                 onClick={onEdit}
-                title="Wysig"
-                aria-label="Wysig"
+                title={AF.common.edit}
+                aria-label={AF.common.edit}
               >
                 <Pencil aria-hidden />
               </button>
@@ -155,8 +156,8 @@ export function PostCard({
                 type="button"
                 className={isLive ? 'lb-post__action' : 'm-editor-post-card__action'}
                 onClick={onPublish}
-                title="Publiseer"
-                aria-label="Publiseer"
+                title={AF.common.publish}
+                aria-label={AF.common.publish}
               >
                 <Send aria-hidden />
               </button>
@@ -166,8 +167,8 @@ export function PostCard({
                 type="button"
                 className={isLive ? 'lb-post__action' : 'm-editor-post-card__action'}
                 onClick={onUnpublish}
-                title="Ontpubliseer"
-                aria-label="Ontpubliseer"
+                title={AF.common.unpublish}
+                aria-label={AF.common.unpublish}
               >
                 <EyeOff aria-hidden />
               </button>
@@ -181,8 +182,8 @@ export function PostCard({
                     : 'm-editor-post-card__action m-editor-post-card__action--danger'
                 }
                 onClick={onDelete}
-                title="Verwyder"
-                aria-label="Verwyder"
+                title={AF.common.remove}
+                aria-label={AF.common.remove}
               >
                 <Trash2 aria-hidden />
               </button>

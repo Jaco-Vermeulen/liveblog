@@ -19,6 +19,7 @@ import { FreetypeFields } from '../subsystems/freetype-fields';
 import { PollBlockEditor } from '../subsystems/polls';
 import { RichTextBlockEditor } from '../subsystems/rich-text-editor';
 import { ScorecardBlockEditor, type ScorecardBody } from '../subsystems/scorecard';
+import { AF } from '@/copy';
 import type { ComposerState, EditorPostType, SirTrevorBlockType } from '../types';
 import { PostTagsSelector } from './PostTagsSelector';
 
@@ -27,11 +28,11 @@ const BLOCK_TYPES: {
   label: string;
   icon: typeof Type;
 }[] = [
-  { type: 'Text', label: 'Teks', icon: Type },
-  { type: 'Image', label: 'Beeld', icon: ImageIcon },
-  { type: 'Embed', label: 'Inbed', icon: Link2 },
-  { type: 'Poll', label: 'Poll', icon: BarChart2 },
-  { type: 'Scorecard', label: 'Skoorbord', icon: Trophy },
+  { type: 'Text', label: AF.editor.blocks.text, icon: Type },
+  { type: 'Image', label: AF.editor.blocks.image, icon: ImageIcon },
+  { type: 'Embed', label: AF.editor.blocks.embed, icon: Link2 },
+  { type: 'Poll', label: AF.editor.blocks.poll, icon: BarChart2 },
+  { type: 'Scorecard', label: AF.editor.blocks.scorecard, icon: Trophy },
 ];
 
 export interface PostComposerProps {
@@ -99,22 +100,22 @@ export function PostComposer({
   tagsLoading = false,
   onTagsChange,
 }: PostComposerProps) {
-  const publishLabel = composer.scheduleEnabled ? 'Skeduleer' : 'Publiseer';
+  const publishLabel = composer.scheduleEnabled ? AF.common.schedule : AF.common.publish;
 
   return (
-    <section className="m-editor-composer" aria-label="Plasing-samesteller">
+    <section className="m-editor-composer" aria-label={AF.editor.composer}>
       <header className="m-editor-composer__header">
         <h2 className="m-editor-composer__title">
-          {isEditing ? 'Wysig plasing' : 'Nuwe plasing'}
+          {isEditing ? AF.editor.editPost : AF.editor.newPost}
         </h2>
         <p className="m-editor-composer__hint">{blog.title}</p>
       </header>
 
       {isEditing && (
         <LbAlert variant="info" className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span>Wysig bestaande plasing. Wysigings word by stoor op die tydlyn toegepas.</span>
+          <span>{AF.editor.editPostHint}</span>
           <LbButton type="button" variant="secondary" onClick={onCancelEdit}>
-            Kanselleer
+            {AF.common.cancel}
           </LbButton>
         </LbAlert>
       )}
@@ -127,15 +128,15 @@ export function PostComposer({
       />
 
       {!isFreetypeMode && (
-        <div className="m-editor-composer__toolbar" role="toolbar" aria-label="Blok-tipes">
+        <div className="m-editor-composer__toolbar" role="toolbar" aria-label={AF.editor.blockTypes}>
           {BLOCK_TYPES.map(({ type, label, icon: Icon }) => (
             <button
               key={type}
               type="button"
               className="m-editor-composer__tool-btn"
               onClick={() => onAddBlock(type)}
-              title={`Voeg ${label} by`}
-              aria-label={`Voeg ${label} by`}
+              title={AF.editor.addBlock(label)}
+              aria-label={AF.editor.addBlock(label)}
             >
               <Icon className="h-4 w-4" aria-hidden />
               <span className="m-editor-composer__tool-label">{label}</span>
@@ -155,20 +156,26 @@ export function PostComposer({
                 <div className="m-editor-composer__block-head">
                   <span className="m-editor-composer__block-label">
                     {block.type === 'Text'
-                      ? 'Teks'
+                      ? AF.editor.blocks.text
                       : block.type === 'Quote'
-                        ? 'Aanhaling'
-                        : block.type === 'Scorecard'
-                          ? 'Skoorbord'
-                          : block.type}
+                        ? AF.editor.blocks.quote
+                        : block.type === 'Image'
+                          ? AF.editor.blocks.image
+                          : block.type === 'Embed'
+                            ? AF.editor.blocks.embed
+                            : block.type === 'Poll'
+                              ? AF.editor.blocks.poll
+                              : block.type === 'Scorecard'
+                                ? AF.editor.blocks.scorecard
+                                : block.type}
                   </span>
                   {composer.blocks.length > 1 && (
                     <button
                       type="button"
                       className="m-editor-composer__block-remove"
                       onClick={() => onRemoveBlock(index)}
-                      title="Verwyder blok"
-                      aria-label="Verwyder blok"
+                      title={AF.editor.removeBlock}
+                      aria-label={AF.editor.removeBlock}
                     >
                       <X className="h-4 w-4" aria-hidden />
                     </button>
@@ -181,10 +188,10 @@ export function PostComposer({
                   value={String(block.data.text ?? '')}
                   onChange={(text) => onUpdateBlock(index, { text })}
                   onBlur={() => onRemoveBlockIfEmpty(index)}
-                  placeholder="Skryf jou plasing…"
+                  placeholder={AF.editor.writePost}
                 />
               ) : block.type === 'Image' ? (
-                <LbFormField label="Beeld-URL" htmlFor={`block-image-${index}`}>
+                <LbFormField label={AF.editor.imageUrl} htmlFor={`block-image-${index}`}>
                   <div className="mb-2">
                     <LbButton
                       type="button"
@@ -194,7 +201,9 @@ export function PostComposer({
                         document.getElementById(`block-image-file-${index}`)?.click()
                       }
                     >
-                      {imageUploadingIndex === index ? 'Laai op…' : 'Laai beeld op'}
+                      {imageUploadingIndex === index
+                        ? AF.editor.uploadingImage
+                        : AF.editor.uploadImage}
                     </LbButton>
                     <input
                       id={`block-image-file-${index}`}
@@ -265,13 +274,13 @@ export function PostComposer({
         </div>
       )}
 
-      <div className="m-editor-composer__options" role="toolbar" aria-label="Plasing-opsies">
+      <div className="m-editor-composer__options" role="toolbar" aria-label={AF.editor.postOptions}>
         <button
           type="button"
           className={`m-editor-composer__option-btn${composer.sticky ? ' m-editor-composer__option-btn--active' : ''}`}
           onClick={() => onStickyChange(!composer.sticky)}
-          title={composer.sticky ? 'Ontspeld' : 'Speld vas'}
-          aria-label={composer.sticky ? 'Ontspeld' : 'Speld vas'}
+          title={composer.sticky ? AF.editor.unpin : AF.editor.pin}
+          aria-label={composer.sticky ? AF.editor.unpin : AF.editor.pin}
           aria-pressed={composer.sticky}
         >
           <Pin className="h-4 w-4" aria-hidden />
@@ -280,8 +289,8 @@ export function PostComposer({
           type="button"
           className={`m-editor-composer__option-btn${composer.highlight ? ' m-editor-composer__option-btn--active' : ''}`}
           onClick={() => onHighlightChange(!composer.highlight)}
-          title={composer.highlight ? 'Verwyder beklemtoning' : 'Beklemtoon'}
-          aria-label={composer.highlight ? 'Verwyder beklemtoning' : 'Beklemtoon'}
+          title={composer.highlight ? AF.editor.removeHighlight : AF.editor.highlight}
+          aria-label={composer.highlight ? AF.editor.removeHighlight : AF.editor.highlight}
           aria-pressed={composer.highlight}
         >
           <Star className="h-4 w-4" aria-hidden />
@@ -290,8 +299,8 @@ export function PostComposer({
           type="button"
           className={`m-editor-composer__option-btn${composer.scheduleEnabled ? ' m-editor-composer__option-btn--active' : ''}`}
           onClick={() => onScheduleEnabledChange(!composer.scheduleEnabled)}
-          title="Skeduleer plasing"
-          aria-label="Skeduleer plasing"
+          title={AF.editor.schedulePost}
+          aria-label={AF.editor.schedulePost}
           aria-pressed={composer.scheduleEnabled}
         >
           <CalendarClock className="h-4 w-4" aria-hidden />
@@ -299,7 +308,7 @@ export function PostComposer({
       </div>
 
       {composer.scheduleEnabled && (
-        <LbFormField label="Publiseer op" htmlFor="composer-schedule">
+        <LbFormField label={AF.editor.publishAt} htmlFor="composer-schedule">
           <LbInput
             id="composer-schedule"
             type="datetime-local"
@@ -321,11 +330,11 @@ export function PostComposer({
       <footer className="m-editor-composer__actions">
         {!isEditing && (
           <LbButton type="button" variant="secondary" onClick={onSaveDraft} disabled={isSubmitting}>
-            Stoor konsep
+            {AF.editor.saveDraft}
           </LbButton>
         )}
         <LbButton type="button" variant="primary" onClick={onSubmit} disabled={!canSubmit || isSubmitting}>
-          {isSubmitting ? 'Stoor…' : publishLabel}
+          {isSubmitting ? AF.common.saving : publishLabel}
         </LbButton>
       </footer>
     </section>

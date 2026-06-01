@@ -6,7 +6,10 @@ import {
   usesCricketScoreLayout,
   usesSplitInningsPanel,
 } from './scorecardDisplay';
+import { AF } from '@/copy';
 import type { ScorecardBody, ScorecardPlayerRow, ScorecardScorer } from './scorecardTypes';
+
+const SC = AF.editor.scorecard;
 
 export interface ScorecardCardProps {
   body: ScorecardBody;
@@ -147,8 +150,8 @@ export function ScorecardCard({ body, preview = false }: ScorecardCardProps) {
   const preset = presetConfigForBody(body);
   const cricketLayout = usesCricketScoreLayout(body);
   const splitPanel = usesSplitInningsPanel(body);
-  const homeName = displayName(body.home.name, preview, 'Tuisspan');
-  const awayName = displayName(body.away.name, preview, 'Wêreldspan');
+  const homeName = displayName(body.home.name, preview, SC.homeTeam);
+  const awayName = displayName(body.away.name, preview, SC.awayTeam);
   const homeScore = displayScore(body.home.score, preview);
   const awayScore = displayScore(body.away.score, preview);
   const status = body.matchQuarters.trim();
@@ -182,7 +185,7 @@ export function ScorecardCard({ body, preview = false }: ScorecardCardProps) {
     <div
       className={cardClass}
       style={hasBg ? { backgroundImage: `url(${body.backgroundUrl})` } : undefined}
-      aria-label="Skoorbord"
+      aria-label={SC.ariaLabel}
     >
       <div className="m-scorecard-card__overlay" />
 
@@ -209,7 +212,7 @@ export function ScorecardCard({ body, preview = false }: ScorecardCardProps) {
           ) : null}
         </div>
 
-        <div className="m-scorecard-card__result" aria-label={`Telling ${homeScore} teen ${awayScore}`}>
+        <div className="m-scorecard-card__result" aria-label={SC.scoreAria(homeScore, awayScore)}>
           {!cricketLayout ? (
             <div className="m-scorecard-card__result-scores">
               <span className="m-scorecard-card__score">{homeScore}</span>

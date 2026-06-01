@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import type { BlogState, BlogTabName } from './types';
 
 export const DEFAULT_PAGE_SIZE = 25;
@@ -6,17 +7,17 @@ export const BLOG_STATES: Record<BlogTabName, BlogState> = {
   active: {
     name: 'active',
     code: 'open',
-    label: 'Aktiewe blogs',
+    label: AF.blogs.states.active,
   },
   archived: {
     name: 'archived',
     code: 'closed',
-    label: 'Geargiveerde blogs',
+    label: AF.blogs.states.archived,
   },
   deleted: {
     name: 'deleted',
     code: 'deleted',
-    label: 'Verwyderde blogs',
+    label: AF.blogs.states.deleted,
   },
 };
 

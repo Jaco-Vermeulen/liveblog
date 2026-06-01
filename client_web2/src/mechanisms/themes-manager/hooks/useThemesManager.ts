@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   downloadTheme,
   getDefaultThemePreference,
@@ -34,7 +35,7 @@ export function useThemesManager() {
       setHierarchy(getHierarchyFromThemes(items));
       setGlobalTheme(defaultPref);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie temas laai nie.');
+      setError(err instanceof Error ? err.message : AF.themes.errors.load);
     } finally {
       setLoading(false);
     }

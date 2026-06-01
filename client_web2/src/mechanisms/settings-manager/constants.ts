@@ -1,3 +1,5 @@
+import { AF } from '@/copy';
+
 /** Keys persisted via global_preferences (legacy allowedKeys). */
 export const SETTINGS_KEYS = {
   language: 'language',
@@ -12,13 +14,13 @@ export const SETTINGS_KEYS = {
 export const ALLOWED_SETTINGS_KEYS = Object.values(SETTINGS_KEYS);
 
 export const PRIVACY_STATUSES = [
-  { value: 'private', label: 'Private' },
-  { value: 'public', label: 'Public' },
-  { value: 'unlisted', label: 'Unlisted' },
+  { value: 'private', label: AF.settings.privacy.private },
+  { value: 'public', label: AF.settings.privacy.public },
+  { value: 'unlisted', label: AF.settings.privacy.unlisted },
 ] as const;
 
 export const QUOTATION_MARKS_OPTIONS = [
-  { value: 'af', label: 'Afrikaans' },
-  { value: 'en', label: 'English' },
-  { value: 'de', label: 'Deutsch' },
+  { value: 'af', label: AF.settings.languages.af },
+  { value: 'en', label: AF.settings.languages.en },
+  { value: 'de', label: AF.settings.languages.de },
 ] as const;

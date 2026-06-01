@@ -7,6 +7,7 @@ import { getBlog } from '@/mechanisms/liveblog-api';
 import { useEffect, useState } from 'react';
 import { useBlogAnalytics } from '../hooks/useBlogAnalytics';
 import { downloadAnalyticsCsv } from '../utils/exportCsv';
+import { AF } from '@/copy';
 import { AnalyticsTable } from './AnalyticsTable';
 
 export function BlogAnalyticsPage() {
@@ -23,7 +24,7 @@ export function BlogAnalyticsPage() {
   if (!blogId) {
     return (
       <LbContentContainer>
-        <LbAlert variant="error">Blog-ID ontbreek.</LbAlert>
+        <LbAlert variant="error">{AF.analytics.missingId}</LbAlert>
       </LbContentContainer>
     );
   }
@@ -32,12 +33,12 @@ export function BlogAnalyticsPage() {
     <LbContentContainer size="full" className="py-6">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="m-0 text-xl font-semibold text-mar-text">Blog-analise</h1>
+          <h1 className="m-0 text-xl font-semibold text-mar-text">{AF.analytics.title}</h1>
           {blogTitle && <p className="m-0 mt-1 text-sm text-mar-muted">{blogTitle}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
           <LbButton type="button" variant="secondary" onClick={() => navigate(`/liveblog/edit/${blogId}`)}>
-            Klaar
+            {AF.analytics.done}
           </LbButton>
           <LbButton
             type="button"
@@ -45,10 +46,10 @@ export function BlogAnalyticsPage() {
             disabled={loading || rows.length === 0}
             onClick={() => downloadAnalyticsCsv(rows, blogId)}
           >
-            Laai CSV af
+            {AF.analytics.exportCsv}
           </LbButton>
           <Link to={`/liveblog/edit/${blogId}`} className="sr-only">
-            Terug na redigeerder
+            {AF.analytics.backToEditor}
           </Link>
         </div>
       </header>
@@ -62,7 +63,7 @@ export function BlogAnalyticsPage() {
       {loading ? (
         <div className="flex flex-col items-center py-16">
           <LbSpinner tone="dark" />
-          <p className="mt-3 text-sm text-mar-muted">Laai analise…</p>
+          <p className="mt-3 text-sm text-mar-muted">{AF.analytics.loading}</p>
         </div>
       ) : (
         <AnalyticsTable rows={rows} />

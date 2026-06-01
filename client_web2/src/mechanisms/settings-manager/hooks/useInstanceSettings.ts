@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AF } from '@/copy';
 import {
   getInstanceSettingsDocument,
   saveInstanceSettings,
@@ -28,7 +29,7 @@ export function useInstanceSettings() {
       setIsDirty(false);
       setParseError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kon nie instansie-instellings laai nie.');
+      setError(err instanceof Error ? err.message : AF.settings.errors.loadInstance);
     } finally {
       setLoading(false);
     }
@@ -70,14 +71,14 @@ export function useInstanceSettings() {
     try {
       await saveInstanceSettings(parsed);
       setIsDirty(false);
-      setSaveMessage('Instansie-instellings suksesvol gestoor.');
+      setSaveMessage(AF.settings.instanceSaveSuccess);
       await load();
     } catch (err) {
       if (err instanceof LiveblogApiError && err.body && typeof err.body === 'object') {
         const body = err.body as { _issues?: { settings?: string }; _message?: string };
-        setError(body._issues?.settings ?? body._message ?? 'Kon nie stoor nie.');
+        setError(body._issues?.settings ?? body._message ?? AF.users.errors.save);
       } else {
-        setError('Kon nie instansie-instellings stoor nie.');
+        setError(AF.settings.errors.saveInstance);
       }
     } finally {
       setSaving(false);

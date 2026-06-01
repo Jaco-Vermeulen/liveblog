@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbContentContainer } from '@/components/layout/LbContentContainer';
@@ -76,7 +77,7 @@ export function MarketplaceManagerPage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-lg font-semibold">Aktiewe blogs</h2>
                 {mp.blogs.length === 0 ? (
-                  <p className="text-sm text-mar-muted">Geen blogs nie.</p>
+                  <p className="text-sm text-mar-muted">{AF.marketplace.noBlogs}</p>
                 ) : (
                   <ul className="divide-y divide-mar-border rounded border border-mar-border bg-mar-panel">
                     {mp.blogs.map((blog) => (
@@ -90,7 +91,7 @@ export function MarketplaceManagerPage() {
                           variant="secondary"
                           onClick={() => mp.setEmbedModalBlog(blog)}
                         >
-                          Inbed
+                          {AF.marketplace.embed}
                         </LbButton>
                       </li>
                     ))}
@@ -100,7 +101,7 @@ export function MarketplaceManagerPage() {
               <section>
                 <h2 className="mb-3 text-lg font-semibold">Komende blogs</h2>
                 {mp.forthcoming.length === 0 ? (
-                  <p className="text-sm text-mar-muted">Geen komende blogs nie.</p>
+                  <p className="text-sm text-mar-muted">{AF.marketplace.noUpcoming}</p>
                 ) : (
                   <ul className="divide-y divide-mar-border rounded border border-mar-border bg-mar-panel">
                     {mp.forthcoming.map((blog) => (
@@ -120,16 +121,16 @@ export function MarketplaceManagerPage() {
       <LbModal
         open={mp.embedModalBlog !== null}
         onClose={() => mp.setEmbedModalBlog(null)}
-        title="Inbed kode"
+        title={AF.marketplace.embedModalTitle}
         footer={
           <LbButton type="button" variant="secondary" onClick={() => mp.setEmbedModalBlog(null)}>
-            Sluit
+            {AF.common.close}
           </LbButton>
         }
       >
         {mp.embedModalBlog && (
           <p className="text-sm text-mar-muted">
-            Inbed vir <strong>{mp.embedModalBlog.title}</strong> — volledige voorbeeld volg in Phase 6+.
+            {AF.marketplace.embedModalBody(mp.embedModalBlog.title)}
           </p>
         )}
       </LbModal>

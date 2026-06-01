@@ -11,6 +11,7 @@ import {
   LbSplitLayout,
 } from '@/components/layout';
 import { LbAlert, LbAuthCard, LbButton } from '@/components/ui';
+import { AF } from '@/copy';
 
 /** Route stub for legacy `/secure-login/` deep links. */
 export function SecureLoginPage() {
@@ -20,21 +21,21 @@ export function SecureLoginPage() {
         brand={
           <LbBrandPanel>
             <LbBrandLogo />
-            <LbBrandTitle>Maroela Media</LbBrandTitle>
-            <LbBrandTagline>Regstreekse blog</LbBrandTagline>
+            <LbBrandTitle>{AF.app.brand}</LbBrandTitle>
+            <LbBrandTagline>{AF.app.tagline}</LbBrandTagline>
             <LbBrandOrnament />
           </LbBrandPanel>
         }
       >
         <LbMainPanel>
           <LbContentContainer size="sm" centered className="py-12 sm:py-16">
-            <LbAuthCard title="Veilige aanmelding">
+            <LbAuthCard title={AF.auth.secureSignIn}>
               <LbAlert variant="info" className="mb-4">
-                Gebruik die gewone aanmeldbladsy vir toegang tot Regstreekse blog.
+                {AF.auth.secureLoginHint}
               </LbAlert>
               <Link to="/login">
                 <LbButton type="button" variant="accent" className="w-full">
-                  Gaan na aanmelding
+                  {AF.auth.goToSignIn}
                 </LbButton>
               </Link>
             </LbAuthCard>

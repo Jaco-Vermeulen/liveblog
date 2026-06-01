@@ -10,6 +10,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
+import { AF } from '@/copy';
 import type { NavItem, SubNavItem } from './types';
 
 export const NAV_BREAKPOINT_PX = 1024;
@@ -20,21 +21,21 @@ export function isExpansionNavEnabled(): boolean {
 }
 
 export const liveblogSubNav: SubNavItem[] = [
-  { path: '/liveblog', label: 'Alle blogs', end: true },
-  { path: '/liveblog/active', label: 'Aktief' },
-  { path: '/liveblog/archived', label: 'Geargiveer' },
-  { path: '/liveblog/deleted', label: 'Verwyder' },
+  { path: '/liveblog', label: AF.nav.allBlogs, end: true },
+  { path: '/liveblog/active', label: AF.nav.active },
+  { path: '/liveblog/archived', label: AF.nav.archived },
+  { path: '/liveblog/deleted', label: AF.nav.deleted },
 ];
 
 export const settingsSubNav: SubNavItem[] = [
-  { path: '/settings/general', label: 'Algemeen', end: true },
-  { path: '/settings/instance-settings', label: 'Instansie-instellings' },
+  { path: '/settings/general', label: AF.nav.general, end: true },
+  { path: '/settings/instance-settings', label: AF.nav.instanceSettings },
 ];
 
 export const mainNavItems: NavItem[] = [
   {
     path: '/liveblog',
-    label: 'Regstreekse blog',
+    label: AF.nav.liveblog,
     icon: BookOpen,
     section: 'main',
     end: false,
@@ -44,7 +45,7 @@ export const mainNavItems: NavItem[] = [
 export const adminNavItems: NavItem[] = [
   {
     path: '/users',
-    label: 'Gebruikersbestuur',
+    label: AF.nav.users,
     icon: Users,
     section: 'admin',
     adminTools: true,
@@ -52,7 +53,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/settings/general',
-    label: 'Liveblog-instellings',
+    label: AF.nav.settings,
     icon: Settings,
     section: 'settings',
     adminTools: true,
@@ -60,7 +61,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/themes',
-    label: 'Temabestuur',
+    label: AF.nav.themes,
     icon: Palette,
     section: 'admin',
     adminTools: true,
@@ -68,7 +69,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/freetypes',
-    label: 'Free types',
+    label: AF.nav.freetypes,
     icon: Puzzle,
     section: 'admin',
     adminTools: true,
@@ -77,7 +78,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/advertising',
-    label: 'Advertising',
+    label: AF.nav.advertising,
     icon: Megaphone,
     section: 'admin',
     adminTools: true,
@@ -86,7 +87,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/marketplace',
-    label: 'Marketplace',
+    label: AF.nav.marketplace,
     icon: ShoppingBag,
     section: 'admin',
     adminTools: true,
@@ -95,7 +96,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     path: '/syndication',
-    label: 'Syndication',
+    label: AF.nav.syndication,
     icon: Radio,
     section: 'admin',
     adminTools: true,
@@ -130,28 +131,28 @@ export function getVisibleAdminItems(
 }
 
 const routeTitles: Record<string, string> = {
-  '/liveblog': 'Regstreekse blog',
-  '/liveblog/active': 'Aktiewe blogs',
-  '/liveblog/archived': 'Geargiveerde blogs',
-  '/liveblog/deleted': 'Verwyderde blogs',
-  '/settings': 'Instellings',
-  '/settings/general': 'Algemene instellings',
-  '/settings/instance-settings': 'Instansie-instellings',
-  '/themes': 'Temabestuur',
-  '/freetypes': 'Free types',
-  '/advertising': 'Advertising',
-  '/marketplace': 'Marketplace',
-  '/syndication': 'Syndication',
-  '/profile': 'Profiel',
-  '/users': 'Gebruikersbestuur',
+  '/liveblog': AF.routes.liveblog,
+  '/liveblog/active': AF.routes.activeBlogs,
+  '/liveblog/archived': AF.routes.archivedBlogs,
+  '/liveblog/deleted': AF.routes.deletedBlogs,
+  '/settings': AF.routes.settings,
+  '/settings/general': AF.routes.generalSettings,
+  '/settings/instance-settings': AF.routes.instanceSettings,
+  '/themes': AF.routes.themes,
+  '/freetypes': AF.routes.freetypes,
+  '/advertising': AF.routes.advertising,
+  '/marketplace': AF.routes.marketplace,
+  '/syndication': AF.routes.syndication,
+  '/profile': AF.routes.profile,
+  '/users': AF.routes.users,
 };
 
 export function getRouteTitle(pathname: string): string {
   if (routeTitles[pathname]) return routeTitles[pathname];
-  if (pathname.startsWith('/liveblog/edit/')) return 'Blog-redigeerder';
-  if (pathname.startsWith('/liveblog/settings/')) return 'Blog-instellings';
-  if (pathname.startsWith('/liveblog/analytics/')) return 'Blog-analise';
-  return 'Liveblog Admin';
+  if (pathname.startsWith('/liveblog/edit/')) return AF.routes.editor;
+  if (pathname.startsWith('/liveblog/settings/')) return AF.routes.blogSettings;
+  if (pathname.startsWith('/liveblog/analytics/')) return AF.routes.analytics;
+  return AF.routes.defaultTitle;
 }
 
 export function getSubNavForPath(pathname: string): SubNavItem[] | null {

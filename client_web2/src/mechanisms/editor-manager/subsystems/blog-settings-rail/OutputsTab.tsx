@@ -1,5 +1,6 @@
 import { LbButton } from '@/components/ui/LbButton';
 import { LbSpinner } from '@/components/ui/LbSpinner';
+import { AF } from '@/copy';
 import type { Output } from '@/mechanisms/liveblog-api';
 
 export interface OutputsTabProps {
@@ -49,7 +50,7 @@ export function OutputsTab({
             </button>
             <div className="flex gap-2">
               <LbButton type="button" variant="ghost" onClick={() => onShowEmbed(output)}>
-                Inbed
+                {AF.editor.output.embed}
               </LbButton>
               <LbButton type="button" variant="ghost" onClick={() => onEdit(output)}>
                 Wysig

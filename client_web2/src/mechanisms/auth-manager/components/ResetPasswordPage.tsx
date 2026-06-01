@@ -19,6 +19,7 @@ import {
   validatePasswordResetToken,
 } from '@/mechanisms/liveblog-api';
 import { readResetPasswordToken } from '../utils/resetPasswordToken';
+import { AF } from '@/copy';
 import {
   PasswordResetSuccessModal,
   type PasswordResetSuccessKind,
@@ -75,11 +76,11 @@ export function ResetPasswordPage() {
     e.preventDefault();
     if (!token) return;
     if (password.length < 8) {
-      setError('Wagwoord moet minstens 8 karakters wees.');
+      setError(AF.auth.passwordMinLength);
       return;
     }
     if (password !== confirm) {
-      setError('Wagwoorde stem nie ooreen nie.');
+      setError(AF.auth.passwordsMismatch);
       return;
     }
 
@@ -97,14 +98,18 @@ export function ResetPasswordPage() {
   }
 
   const cardTitle =
-    step === 'set' ? 'Stel jou wagwoord' : step === 'done' ? 'Wagwoord gestel' : 'Wagwoord vergeet?';
+    step === 'set'
+      ? AF.auth.setPassword
+      : step === 'done'
+        ? AF.auth.passwordSet
+        : AF.auth.resetPassword;
 
   const cardSubtitle =
     step === 'set'
-      ? "Kies 'n nuwe wagwoord vir jou rekening"
+      ? AF.auth.setPasswordHint
       : step === 'done'
-        ? 'Aanmelding is beskikbaar'
-        : "Ons stuur 'n herstelskakel na jou e-pos";
+        ? AF.auth.signInAvailable
+        : AF.auth.resetEmailHint;
 
   return (
     <LbFullscreenShell>
@@ -122,8 +127,8 @@ export function ResetPasswordPage() {
         brand={
           <LbBrandPanel>
             <LbBrandLogo />
-            <LbBrandTitle>Maroela Media</LbBrandTitle>
-            <LbBrandTagline>Regstreekse blog</LbBrandTagline>
+            <LbBrandTitle>{AF.app.brand}</LbBrandTitle>
+            <LbBrandTagline>{AF.app.tagline}</LbBrandTagline>
             <LbBrandOrnament />
           </LbBrandPanel>
         }
@@ -139,7 +144,7 @@ export function ResetPasswordPage() {
 
               {step === 'request' && (
                 <LbAuthForm name="resetRequest" onSubmit={handleRequest} noValidate>
-                  <LbFormField label="E-posadres" htmlFor="reset-email" variant="login">
+                  <LbFormField label={AF.auth.email} htmlFor="reset-email" variant="login">
                     <LbInput
                       id="reset-email"
                       name="email"
@@ -157,14 +162,14 @@ export function ResetPasswordPage() {
                     disabled={busy || !email.trim()}
                     className="min-h-[3.25rem] w-full rounded-xl text-base font-bold"
                   >
-                    {busy ? 'Stuur…' : 'Stuur herstelskakel'}
+                    {busy ? AF.auth.sending : AF.auth.sendResetLink}
                   </LbButton>
                 </LbAuthForm>
               )}
 
               {step === 'set' && (
                 <LbAuthForm name="resetSet" onSubmit={handleSetPassword} noValidate>
-                  <LbFormField label="Nuwe wagwoord" htmlFor="reset-password" variant="login">
+                  <LbFormField label={AF.auth.newPassword} htmlFor="reset-password" variant="login">
                     <LbInput
                       id="reset-password"
                       type="password"
@@ -176,7 +181,7 @@ export function ResetPasswordPage() {
                       onChange={(e) => setPassword(e.target.value)}
                     />
                   </LbFormField>
-                  <LbFormField label="Bevestig wagwoord" htmlFor="reset-confirm" variant="login">
+                  <LbFormField label={AF.auth.confirmPassword} htmlFor="reset-confirm" variant="login">
                     <LbInput
                       id="reset-confirm"
                       type="password"
@@ -193,7 +198,7 @@ export function ResetPasswordPage() {
                     disabled={busy}
                     className="min-h-[3.25rem] w-full rounded-xl text-base font-bold"
                   >
-                    {busy ? 'Stoor…' : 'Stel wagwoord'}
+                    {busy ? AF.common.saving : AF.auth.setPasswordBtn}
                   </LbButton>
                 </LbAuthForm>
               )}
@@ -205,14 +210,14 @@ export function ResetPasswordPage() {
                   className="min-h-[3.25rem] w-full rounded-xl text-base font-bold"
                   onClick={() => navigate('/login', { replace: true })}
                 >
-                  Gaan na aanmelding
+                  {AF.auth.goToSignIn}
                 </LbButton>
               )}
 
               {step !== 'done' && (
                 <p className="mt-4 text-center text-sm">
                   <Link to="/login" className="font-semibold text-mar-teal hover:underline">
-                    Terug na aanmelding
+                    {AF.auth.backToSignIn}
                   </Link>
                 </p>
               )}

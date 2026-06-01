@@ -1,3 +1,4 @@
+import { AF } from '@/copy';
 import { useEffect, useState } from 'react';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
@@ -25,12 +26,12 @@ export function EmbedCodeModal({ open, onClose }: EmbedCodeModalProps) {
     fetchBlogslistEmbedUrl()
       .then((url) => {
         if (!url) {
-          setError('Geen inbed-URL beskikbaar nie.');
+          setError(AF.blogs.embedNoUrl);
           return;
         }
         setSnippet(buildBlogslistIframeSnippet(url));
       })
-      .catch(() => setError('Kon nie inbed-kode laai nie.'))
+      .catch(() => setError(AF.blogs.embedLoadError))
       .finally(() => setLoading(false));
   }, [open]);
 
@@ -40,7 +41,7 @@ export function EmbedCodeModal({ open, onClose }: EmbedCodeModalProps) {
   };
 
   return (
-    <LbModal open={open} onClose={onClose} title="Bloglys-inbed" className="max-w-2xl">
+    <LbModal open={open} onClose={onClose} title={AF.blogs.embedListTitle} className="max-w-2xl">
       {loading && <LbSpinner tone="dark" />}
       {error && <LbAlert variant="error">{error}</LbAlert>}
       {snippet && (

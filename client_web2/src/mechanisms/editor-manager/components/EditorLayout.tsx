@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import type { Blog, LiveblogUser } from '@/mechanisms/liveblog-api';
 import { EDITOR_PANELS } from '../config/editorPanels';
 import type { EditorPanel, EditorViewMode } from '../types';
+import { AF } from '@/copy';
 import { EditorChromeActions } from './EditorChromeActions';
 import { EditorViewModeSwitch } from './EditorViewModeSwitch';
 
@@ -45,8 +46,8 @@ export function EditorLayout({
           <Link
             to="/liveblog"
             className="m-editor-chrome__icon-btn m-editor-chrome__home"
-            title="Terug na blogs"
-            aria-label="Terug na blogs"
+            title={AF.editor.backToBlogs}
+            aria-label={AF.editor.backToBlogs}
           >
             <LayoutGrid className="h-5 w-5" aria-hidden />
           </Link>
@@ -61,7 +62,7 @@ export function EditorLayout({
       </header>
 
       <div className="m-editor-shell">
-        <aside className="m-editor-rail" aria-label="Panele">
+        <aside className="m-editor-rail" aria-label={AF.editor.panels}>
           <ul className="m-editor-rail__list">
             {EDITOR_PANELS.map((item) => {
               const Icon = item.icon;
@@ -72,7 +73,7 @@ export function EditorLayout({
                     className={`m-editor-rail__btn${panel === item.id ? ' m-editor-rail__btn--active' : ''}`}
                     disabled={!item.enabled}
                     onClick={() => item.enabled && onPanelChange(item.id)}
-                    title={item.enabled ? item.label : 'Kom in Phase 6'}
+                    title={item.enabled ? item.label : AF.editor.panelComingSoon}
                     aria-label={item.label}
                     aria-current={panel === item.id ? 'page' : undefined}
                   >
@@ -90,8 +91,8 @@ export function EditorLayout({
             viewMode === 'split' || viewMode === 'edit' ? (
               <div className="m-editor-panel m-editor-panel--compose">
                 <header className="m-editor-panel__head">
-                  <span className="m-editor-panel__title">Redigeer</span>
-                  <span className="m-editor-panel__hint">Nuwe plasing of wysig konsep</span>
+                  <span className="m-editor-panel__title">{AF.editor.editPanel}</span>
+                  <span className="m-editor-panel__hint">{AF.editor.editHint}</span>
                 </header>
                 <div className="m-editor-panel__body">{composer}</div>
               </div>
@@ -109,8 +110,8 @@ export function EditorLayout({
           {showTimeline ? (
             <div className="m-editor-panel m-editor-panel--timeline">
               <header className="m-editor-panel__head">
-                <span className="m-editor-panel__title">Tydlyn</span>
-                <span className="m-editor-panel__hint">Gepubliseerde plasings</span>
+                <span className="m-editor-panel__title">{AF.editor.timeline}</span>
+                <span className="m-editor-panel__hint">{AF.editor.timelineHint}</span>
               </header>
               <div className="m-editor-panel__body m-editor-panel__body--timeline">{timeline}</div>
             </div>

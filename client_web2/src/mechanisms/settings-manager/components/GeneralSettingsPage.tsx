@@ -5,6 +5,7 @@ import { LbSpinner } from '@/components/ui/LbSpinner';
 import { PRIVACY_STATUSES, QUOTATION_MARKS_OPTIONS } from '../constants';
 import { useGeneralSettings } from '../hooks/useGeneralSettings';
 import { SettingsToolbar } from './SettingsToolbar';
+import { AF } from '@/copy';
 import { TagsManager } from './TagsManager';
 
 const selectClass =
@@ -28,7 +29,7 @@ export function GeneralSettingsPage() {
     return (
       <LbContentContainer size="lg" centered className="py-16">
         <LbSpinner tone="dark" />
-        <p className="mt-3 text-sm text-mar-muted">Laai instellings…</p>
+        <p className="mt-3 text-sm text-mar-muted">{AF.settings.loading}</p>
       </LbContentContainer>
     );
   }
@@ -130,7 +131,7 @@ export function GeneralSettingsPage() {
                 })
               }
             />
-            Verstek inbed-hoogte responsief
+            {AF.settings.embedHeightResponsive}
           </label>
           <label className="flex items-center gap-2 text-sm text-mar-text">
             <input
