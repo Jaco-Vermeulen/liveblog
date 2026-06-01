@@ -21,7 +21,12 @@ const postsService = (api, $q, _userList, session) => {
         }
 
         if (angular.isDefined(filters.sticky)) {
-            filter.and.push({ term: { sticky: filters.sticky } });
+            // term sticky:false does not match docs missing sticky in Elasticsearch
+            if (filters.sticky) {
+                filter.and.push({ term: { sticky: true } });
+            } else {
+                filter.and.push({ bool: { must_not: { term: { sticky: true } } } });
+            }
         }
 
         if (filters?.authors?.length > 0) {

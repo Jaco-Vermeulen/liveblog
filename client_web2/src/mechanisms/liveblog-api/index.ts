@@ -122,6 +122,7 @@ export {
 export {
   buildNewPostGroups,
   buildPostsQueryCriteria,
+  buildStickyFilterClause,
   comparePostsBySort,
   createItem,
   enrichPost,

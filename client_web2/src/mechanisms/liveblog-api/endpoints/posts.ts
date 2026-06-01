@@ -19,6 +19,7 @@ import type {
 export type { Post, PostFilters, PostItem, PostItemPayload, TimelineSort } from './postsTypes';
 export {
   buildPostsQueryCriteria,
+  buildStickyFilterClause,
   comparePostsBySort,
   getClientSortKey,
   getClientSortOrder,

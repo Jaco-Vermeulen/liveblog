@@ -370,7 +370,7 @@ vm.getQuery = function(opts) {
       "filtered": {
         "filter": {
           "and": [
-            {"term": {"sticky": false}},
+            {"bool": {"must_not": {"term": {"sticky": true}}}},
             {"term": {"post_status": "open"}},
             {"range": {"_updated": opts.beforeDate ? { "lte": opts.beforeDate } : {"lt": this.vm ? this.vm.timeInitialized : new Date().toISOString()}}}
           ]

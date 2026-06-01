@@ -47,12 +47,20 @@
              * @param {integer} [max_results=self.maxResults] - The maximum number of results to retrieve
              * @returns {promise}
              */
+            function stickyFilterClause(isSticky) {
+                if (isSticky) {
+                    return {term: {sticky: true}};
+                }
+                return {bool: {must_not: {term: {sticky: true}}}};
+            }
+
             function retrievePage(page, opts) {
                 opts = opts || {};
                 opts.tags = opts.tags || $rootScope.tags;
+                var stickyClause = stickyFilterClause(sticky);
                 var query = self.highlight?
-                {filtered: {filter: {and: [{term: {'sticky': sticky}}, {term: {post_status: 'open'}}, {term: {lb_highlight: true}}, {not: {term: {deleted: true}}}]}}}:
-                {filtered: {filter: {and: [{term: {'sticky': sticky}}, {term: {post_status: 'open'}}, {not: {term: {deleted: true}}}]}}}
+                {filtered: {filter: {and: [stickyClause, {term: {post_status: 'open'}}, {term: {lb_highlight: true}}, {not: {term: {deleted: true}}}]}}}:
+                {filtered: {filter: {and: [stickyClause, {term: {post_status: 'open'}}, {not: {term: {deleted: true}}}]}}}
                 // set request parameters
                 var posts_criteria = {
                     source: {

@@ -18,6 +18,7 @@ import { useEditorEmbedRuntime } from '../hooks/useEditorEmbedRuntime';
 import { useEditorLiveblogSettings } from '../hooks/useEditorLiveblogSettings';
 import { useTimeline } from '../hooks/useTimeline';
 import { applyPostsNotification } from '../services/applyPostsNotification';
+import { createDualTimelineHandlers } from '../services/dualTimelineHandlers';
 import type { EditorPanel } from '../types';
 
 export function EditorPage() {
@@ -30,7 +31,8 @@ export function EditorPage() {
   const [previewRefreshToken, setPreviewRefreshToken] = useState(0);
   const { viewMode, setViewMode, resetToEdit } = useEditorViewMode();
 
-  const timelineApi = useTimeline(id ?? '', { panel });
+  const mainTimelineApi = useTimeline(id ?? '', { panel, sticky: false });
+  const pinnedTimelineApi = useTimeline(id ?? '', { panel, sticky: true });
   const postsApi = usePosts(id ?? '');
   const composerApi = usePostComposer(blog);
   const { globalTags, allowMultipleTags, isLoading: tagsSettingsLoading } =
@@ -50,21 +52,32 @@ export function EditorPage() {
     }
   }, [panel, resetToEdit]);
 
+  const timelineHandlers = createDualTimelineHandlers(
+    {
+      removePost: mainTimelineApi.removePost,
+      updatePost: mainTimelineApi.updatePost,
+      addPost: mainTimelineApi.addPost,
+      fetchNewPage: () => mainTimelineApi.fetchNewPage(),
+    },
+    {
+      removePost: pinnedTimelineApi.removePost,
+      updatePost: pinnedTimelineApi.updatePost,
+      addPost: pinnedTimelineApi.addPost,
+      fetchNewPage: () => pinnedTimelineApi.fetchNewPage(),
+    },
+  );
+
   useEditorWebSocket(id ?? '', {
     onPosts: (data) => {
       if (!id) return;
-      applyPostsNotification(data, id, {
-        removePost: timelineApi.removePost,
-        updatePost: timelineApi.updatePost,
-        addPost: timelineApi.addPost,
-        fetchNewPage: () => timelineApi.fetchNewPage(),
-      });
+      applyPostsNotification(data, id, timelineHandlers);
       if (data.created || data.updated || data.deleted || data.scheduled_done) {
         setPreviewRefreshToken((prev) => prev + 1);
       }
     },
     onRemoveTimelinePost: ({ post_id }) => {
-      timelineApi.removePost(post_id);
+      mainTimelineApi.removePost(post_id);
+      pinnedTimelineApi.removePost(post_id);
       setPreviewRefreshToken((prev) => prev + 1);
     },
   });
@@ -73,7 +86,7 @@ export function EditorPage() {
     setActionMessage(null);
     try {
       await composerApi.submit();
-      await timelineApi.fetchNewPage();
+      await Promise.all([mainTimelineApi.fetchNewPage(), pinnedTimelineApi.fetchNewPage()]);
       if (!composerApi.composer.scheduleEnabled) {
         setPreviewRefreshToken((prev) => prev + 1);
       }
@@ -90,7 +103,8 @@ export function EditorPage() {
     if (!window.confirm('Verwyder hierdie plasing?')) return;
     try {
       await postsApi.deletePost(post);
-      timelineApi.removePost(post._id);
+      mainTimelineApi.removePost(post._id);
+      pinnedTimelineApi.removePost(post._id);
       setPreviewRefreshToken((prev) => prev + 1);
     } catch {
       setActionMessage('Kon nie plasing verwyder nie.');
@@ -100,7 +114,7 @@ export function EditorPage() {
   const handlePublish = async (post: Parameters<typeof postsApi.publishPost>[0]) => {
     try {
       await postsApi.publishPost(post);
-      await timelineApi.fetchNewPage();
+      await Promise.all([mainTimelineApi.fetchNewPage(), pinnedTimelineApi.fetchNewPage()]);
       setPreviewRefreshToken((prev) => prev + 1);
     } catch {
       setActionMessage('Kon nie plasing publiseer nie.');
@@ -111,7 +125,8 @@ export function EditorPage() {
     if (!window.confirm('Ontpubliseer hierdie plasing na konsepte?')) return;
     try {
       await postsApi.unpublishPost(post);
-      timelineApi.removePost(post._id);
+      mainTimelineApi.removePost(post._id);
+      pinnedTimelineApi.removePost(post._id);
       setPreviewRefreshToken((prev) => prev + 1);
       setActionMessage('Plasing ontpubliseer.');
     } catch {
@@ -122,7 +137,7 @@ export function EditorPage() {
   const handleTogglePin = async (post: Parameters<typeof postsApi.togglePostPin>[0]) => {
     try {
       const updated = await postsApi.togglePostPin(post);
-      timelineApi.updatePost(updated);
+      timelineHandlers.updatePost(updated);
     } catch {
       setActionMessage('Kon nie plasing se speldstatus wysig nie.');
     }
@@ -133,7 +148,8 @@ export function EditorPage() {
   ) => {
     try {
       const updated = await postsApi.togglePostHighlight(post);
-      timelineApi.updatePost(updated);
+      mainTimelineApi.updatePost(updated);
+      pinnedTimelineApi.updatePost(updated);
     } catch {
       setActionMessage('Kon nie plasing se beklemtoning wysig nie.');
     }
@@ -142,21 +158,41 @@ export function EditorPage() {
   const canEditPosts = blog ? canPublishPost(authState.user, blog) : false;
 
   const timeline = (
+  <>
+    {pinnedTimelineApi.posts.length > 0 ? (
+      <Timeline
+        timeline={pinnedTimelineApi.timeline}
+        posts={pinnedTimelineApi.posts}
+        hasMore={pinnedTimelineApi.hasMore}
+        allowPinHighlight={canEditPosts}
+        variant={viewMode === 'edit' ? 'default' : 'preview'}
+        onPostSelect={composerApi.loadPost}
+        onLoadMore={() => void pinnedTimelineApi.fetchNextPage()}
+        onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
+        onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
+        onUnpublishPost={canEditPosts ? (post) => void handleUnpublish(post) : undefined}
+        onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
+        onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
+      />
+    ) : null}
     <Timeline
-      timeline={timelineApi.timeline}
-      posts={timelineApi.posts}
-      hasMore={timelineApi.hasMore}
+      timeline={mainTimelineApi.timeline}
+      posts={mainTimelineApi.posts}
+      hasMore={mainTimelineApi.hasMore}
       allowPinHighlight={canEditPosts}
       variant={viewMode === 'edit' ? 'default' : 'preview'}
       onPostSelect={composerApi.loadPost}
-      onLoadMore={() => void timelineApi.fetchNextPage()}
+      onLoadMore={() => void mainTimelineApi.fetchNextPage()}
       onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
       onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
       onUnpublishPost={canEditPosts ? (post) => void handleUnpublish(post) : undefined}
       onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
       onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
     />
+  </>
   );
+
+  const previewPosts = [...pinnedTimelineApi.posts, ...mainTimelineApi.posts];
 
   if (isLoading || !blog) {
     return <LbLoadingScreen message="Laai blog…" />;
@@ -191,7 +227,7 @@ export function EditorPage() {
             blog={blog}
             immersive={viewMode === 'preview'}
             refreshToken={previewRefreshToken}
-            posts={timelineApi.posts}
+            posts={previewPosts}
             allowPinHighlight={canEditPosts}
             onPostSelect={composerApi.loadPost}
             onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
@@ -226,7 +262,13 @@ export function EditorPage() {
             onScheduledDatetimeChange={composerApi.setScheduledDateFromLocal}
             onCancelEdit={() => composerApi.reset()}
             onSubmit={() => void handleSubmit()}
-            onSaveDraft={() => void composerApi.saveDraft().then(() => timelineApi.fetchNewPage())}
+            onSaveDraft={() =>
+              void composerApi
+                .saveDraft()
+                .then(() =>
+                  Promise.all([mainTimelineApi.fetchNewPage(), pinnedTimelineApi.fetchNewPage()]),
+                )
+            }
             onStickyChange={composerApi.setSticky}
             onHighlightChange={composerApi.setHighlight}
             globalTags={globalTags}

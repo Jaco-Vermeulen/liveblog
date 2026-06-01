@@ -24,6 +24,17 @@ const TIMELINE_SORTS: Record<TimelineSort, Record<string, Record<string, unknown
 
 const PUBLISHED_DATE_TOLERANCE_MS = 5 * 60 * 1000;
 
+/**
+ * Elasticsearch `term: { sticky: false }` does not match documents where `sticky` is absent.
+ * Legacy posts often lack the field in the index while Mongo still counts them in total_posts.
+ */
+export function buildStickyFilterClause(sticky: boolean): unknown {
+  if (sticky) {
+    return { term: { sticky: true } };
+  }
+  return { bool: { must_not: { term: { sticky: true } } } };
+}
+
 function getPostFilters(filters: PostFilters): PostsQueryCriteria['postFilter'] {
   const operator = filters.scheduled ? 'gte' : 'lte';
   const now = Date.now();
@@ -82,7 +93,7 @@ export function buildPostsQueryCriteria(
   }
 
   if (filters.sticky !== undefined) {
-    and.push({ term: { sticky: filters.sticky } });
+    and.push(buildStickyFilterClause(filters.sticky));
   }
 
   if (filters.authors && filters.authors.length > 0) {

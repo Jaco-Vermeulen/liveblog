@@ -93,7 +93,6 @@ export function useTimeline(
   );
 
   const fetchNewPage = useCallback(async () => {
-    setPages([]);
     await loadPage(1, true);
   }, [loadPage]);
 

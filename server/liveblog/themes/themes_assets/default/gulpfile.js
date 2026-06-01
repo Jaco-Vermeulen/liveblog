@@ -96,7 +96,7 @@ if (match.length > 0) {
     });
   });
 
-  query.query.filtered.filter.and[0].term.sticky = false;
+  query.query.filtered.filter.and[0] = { bool: { must_not: { term: { sticky: true } } } };
   const { postsPerPage } = options.blog.theme_settings;
 
   request.get(`${postsEndpoint}?max_results=${postsPerPage}&source=${JSON.stringify(query)}`, (response) => {

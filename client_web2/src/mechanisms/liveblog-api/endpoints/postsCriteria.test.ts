@@ -16,6 +16,16 @@ describe('buildPostsQueryCriteria', () => {
       term: { sticky: true },
     });
   });
+
+  it('treats missing sticky field as non-sticky when sticky is false', () => {
+    const criteria = buildPostsQueryCriteria({ status: 'open', sticky: false });
+    expect(criteria.source.query.filtered.filter.and).toContainEqual({
+      bool: { must_not: { term: { sticky: true } } },
+    });
+    expect(criteria.source.query.filtered.filter.and).not.toContainEqual({
+      term: { sticky: false },
+    });
+  });
 });
 
 describe('comparePostsBySort', () => {

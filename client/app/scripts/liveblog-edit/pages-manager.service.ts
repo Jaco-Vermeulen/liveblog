@@ -183,7 +183,8 @@ const pagesManagerFactory = (postsService, $q, _, moment, instagramService) => {
             updates.forEach((post) => {
                 const existingPostIndexes = getPostPageIndexes(post);
                 const sameStatus = self.status === post.post_status;
-                const postSticky = post.sticky === sticky;
+                const postIsSticky = post.sticky === true;
+                const matchesListSticky = sticky ? postIsSticky : !postIsSticky;
                 const statusIsOpen = self.status === 'open';
 
                 if (angular.isDefined(existingPostIndexes)) {
@@ -192,13 +193,13 @@ const pagesManagerFactory = (postsService, $q, _, moment, instagramService) => {
                     if (post.deleted) removePost(post);
 
                     if (post.post_status !== self.status || statusIsOpen
-                        && post.sticky !== sticky || self.highlight && !post.lb_highlight) {
+                        && !matchesListSticky || self.highlight && !post.lb_highlight) {
                         removePost(post);
                     } else {
                         updatePost(post);
                         createPagesWithPosts(self.allPosts(), true);
                     }
-                } else if (!post.deleted && sameStatus && (self.status !== 'open' || postSticky)) {
+                } else if (!post.deleted && sameStatus && (self.status !== 'open' || matchesListSticky)) {
                     // post doesn't exist in the list
                     addPost(post);
                 }
