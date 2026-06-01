@@ -55,6 +55,21 @@ function renderTimeline(api_response) {
   });
 
   els.emptyMessage.classList.toggle('mod--displaynone', Boolean(renderedPosts.length));
+
+  // SEO embed: keep server-rendered posts when ES returns nothing (stale index / cache / old bundle).
+  var keepSsrTimeline =
+    !renderedPosts.length &&
+    api_response.requestOpts &&
+    api_response.requestOpts.beforeDate &&
+    !api_response.requestOpts.fromDate &&
+    els.timelineNormal &&
+    els.timelineNormal.querySelectorAll('[data-post-id]').length > 0;
+
+  if (keepSsrTimeline) {
+    console.warn('[liveblog] Elasticsearch returned no posts; keeping server-rendered timeline.');
+    return api_response;
+  }
+
   els.timelineNormal.innerHTML = renderedPosts.length ? renderedPosts.join('') : '';
 
   if (api_response.pendingPosts) {

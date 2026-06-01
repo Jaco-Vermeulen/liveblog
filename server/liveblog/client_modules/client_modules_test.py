@@ -15,6 +15,7 @@ from liveblog.client_modules.client_modules import (
     voting_blueprint,
     convert_posts,
     _get_converted_item,
+    merge_published_date_post_filter,
 )
 from liveblog.posts import utils as post_utils
 
@@ -707,3 +708,26 @@ class ClientModuleTestCase(TestCase):
             self.assertIn(
                 "Error: Option 'Invalid Option' not found", response_data["_error"]
             )
+
+
+class MergePublishedDatePostFilterTestCase(unittest.TestCase):
+    def test_empty_post_filter_gets_or_clause(self):
+        query_source = {}
+        merge_published_date_post_filter(query_source)
+        pf = query_source["post_filter"]
+        self.assertIn("or", pf)
+        filters = pf["or"]["filters"]
+        self.assertTrue(any("range" in f for f in filters))
+        self.assertTrue(any("missing" in f for f in filters))
+
+    def test_repairs_or_plus_bool_corruption(self):
+        query_source = {
+            "post_filter": {
+                "or": {"filters": [{"term": {"sticky": False}}]},
+                "bool": {"must": [{"range": {"published_date": {"lte": "2020-01-01"}}}]},
+            }
+        }
+        merge_published_date_post_filter(query_source)
+        pf = query_source["post_filter"]
+        self.assertIn("or", pf)
+        self.assertNotIn("bool", pf)

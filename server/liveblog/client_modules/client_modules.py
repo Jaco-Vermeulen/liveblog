@@ -45,6 +45,59 @@ CORS(voting_blueprint)
 logger = logging.getLogger(__name__)
 
 
+def _published_date_post_filter_clause():
+    """Exclude scheduled posts; keep docs missing published_date in Elasticsearch."""
+    return {
+        "or": {
+            "filters": [
+                {"range": {"published_date": {"lte": date_to_str(utcnow())}}},
+                {"missing": {"field": "published_date"}},
+            ]
+        }
+    }
+
+
+def merge_published_date_post_filter(query_source):
+    """
+    Normalize post_filter for client_blogs ES queries.
+
+    Older API clients sent post_filter as a separate query param; the theme sent none
+  and the server injected only ``range published_date lte``, which excluded legacy posts.
+    A buggy merge also added ``bool.must`` beside a top-level ``or``, which breaks ES.
+    """
+    clause = _published_date_post_filter_clause()
+    post_filter = query_source.get("post_filter")
+
+    if not post_filter:
+        query_source["post_filter"] = clause
+        return
+
+    # Repair corrupted shape from older server code: { or: ..., bool: { must: [...] } }
+    if "or" in post_filter and "bool" in post_filter:
+        post_filter.pop("bool", None)
+
+    if "or" in post_filter:
+        filters = post_filter["or"].setdefault("filters", [])
+        has_published = any(
+            "range" in item and "published_date" in item.get("range", {})
+            for item in filters
+        )
+        if not has_published:
+            filters.extend(clause["or"]["filters"])
+        return
+
+    if "bool" in post_filter:
+        must = post_filter["bool"].setdefault("must", [])
+        for index, item in enumerate(must):
+            if "range" in item and "published_date" in item.get("range", {}):
+                must[index] = clause
+                return
+        must.append(clause)
+        return
+
+    query_source["post_filter"] = {"bool": {"must": [post_filter, clause]}}
+
+
 class ClientUsersResource(Resource):
     datasource = {
         "source": "users",
@@ -292,19 +345,7 @@ class ClientBlogPostsService(BlogPostsService, AuthorsMixin):
         if blog_posts is None:
             new_args = req.args.copy()
             query_source = json.loads(new_args.get("source", "{}"))
-
-            post_filter = query_source.setdefault("post_filter", {})
-            filter_must = post_filter.setdefault("bool", {}).setdefault("must", [])
-
-            for must_el in filter_must:
-                if "range" in must_el:
-                    must_el["range"]["published_date"] = {"lte": date_to_str(utcnow())}
-                    break
-            else:
-                filter_must.append(
-                    {"range": {"published_date": {"lte": date_to_str(utcnow())}}}
-                )
-
+            merge_published_date_post_filter(query_source)
             new_args["source"] = json.dumps(query_source)
             req.args = new_args
 

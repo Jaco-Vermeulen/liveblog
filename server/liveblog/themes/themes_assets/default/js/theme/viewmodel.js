@@ -401,16 +401,26 @@ vm.getQuery = function(opts) {
     });
   }
 
+  var publishedDateFilter = {
+    or: {
+      filters: [
+        { range: { published_date: { lte: new Date().toISOString() } } },
+        { missing: { field: 'published_date' } }
+      ]
+    }
+  };
+
   if (opts.tags && opts.tags.length > 0) {
     query.post_filter = {
-      "bool": {
-        "must": [{
-          "terms": {
-            "tags": opts.tags
-          }
-        }]
+      bool: {
+        must: [
+          { terms: { tags: opts.tags } },
+          publishedDateFilter
+        ]
       }
     };
+  } else if (!opts.fromDate) {
+    query.post_filter = publishedDateFilter;
   }
 
   if (opts.highlightsOnly === true) {
