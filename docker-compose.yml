@@ -110,6 +110,8 @@ services:
       dockerfile: docker/Dockerfile.server
     container_name: liveblog-server
     environment: *liveblog-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./server/liveblog/themes/themes_assets:/opt/server/liveblog/themes/themes_assets:ro
       - ./server/liveblog/system_themes.py:/opt/server/liveblog/system_themes.py:ro

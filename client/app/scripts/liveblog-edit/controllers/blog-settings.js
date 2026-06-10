@@ -134,16 +134,7 @@ function BlogSettingsController(
         availableLanguages: [],
         original_creator: {},
         availableThemes: [],
-        availableCategories: [
-            '',
-            'Breaking News',
-            'Entertainment',
-            'Business and Finance',
-            'Sport',
-            'Technology',
-            'Politics',
-            'Others',
-        ],
+        availableCategories: [''],
         availablePostlimit: [
             {text: 'No restriction', value: 0},
             {text: 100, value: 100},
@@ -531,6 +522,22 @@ function BlogSettingsController(
                 vm.styleUrl = vm.selectedTheme.public_url + vm.selectedTheme.styles[vm.selectedTheme.styles.length - 1];
             }
         });
+
+    api.global_preferences.query().then((data) => {
+        const pref = data._items.find((item) => item.key === 'blog_categories');
+        const categories = Array.isArray(pref && pref.value) ? pref.value.filter(Boolean) : [];
+        const options = [''];
+
+        categories.forEach((category) => {
+            if (!options.includes(category)) {
+                options.push(category);
+            }
+        });
+        if (vm.newBlog.category && !options.includes(vm.newBlog.category)) {
+            options.push(vm.newBlog.category);
+        }
+        vm.availableCategories = options;
+    });
 
     // after publicUrl and theme is on `vm` object we can compute embeds code.
     $q.all([qPublicUrl, qTheme]).then(() => {

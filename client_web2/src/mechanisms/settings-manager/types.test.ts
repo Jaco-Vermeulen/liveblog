@@ -18,7 +18,7 @@ describe('settings-manager types', () => {
 
   it('builds patch list for all allowed keys', () => {
     const patches = formToPreferencePatches(defaultGeneralSettings());
-    expect(patches).toHaveLength(7);
-    expect(patches.map((p) => p.key)).toContain(SETTINGS_KEYS.youtubePrivacy);
+    expect(patches).toHaveLength(8);
+    expect(patches.map((p) => p.key)).toContain(SETTINGS_KEYS.blogCategories);
   });
 });

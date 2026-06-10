@@ -12,6 +12,7 @@ export interface GeneralSettingsForm {
   language: PreferenceField<string>;
   theme: PreferenceField<string>;
   globalTags: PreferenceField<string[]>;
+  blogCategories: PreferenceField<string[]>;
   allowMultipleTags: PreferenceField<boolean>;
   youtubePrivacy: PreferenceField<'private' | 'public' | 'unlisted'>;
   embedHeightResponsive: PreferenceField<boolean>;
@@ -23,6 +24,7 @@ export function defaultGeneralSettings(): GeneralSettingsForm {
     language: { value: '' },
     theme: { value: '' },
     globalTags: { value: [] },
+    blogCategories: { value: [] },
     allowMultipleTags: { value: true },
     youtubePrivacy: { value: 'unlisted' },
     embedHeightResponsive: { value: true },
@@ -54,6 +56,7 @@ export function mapPreferencesToForm(
   assign(SETTINGS_KEYS.language, 'language', '');
   assign(SETTINGS_KEYS.theme, 'theme', themes[0]?.name ?? '');
   assign(SETTINGS_KEYS.globalTags, 'globalTags', []);
+  assign(SETTINGS_KEYS.blogCategories, 'blogCategories', []);
   assign(SETTINGS_KEYS.allowMultipleTags, 'allowMultipleTags', true);
   assign(SETTINGS_KEYS.youtubePrivacy, 'youtubePrivacy', 'unlisted');
   assign(SETTINGS_KEYS.embedHeightResponsive, 'embedHeightResponsive', true);
@@ -72,6 +75,11 @@ export function formToPreferencePatches(form: GeneralSettingsForm): Array<{
     { key: SETTINGS_KEYS.language, value: form.language.value, record: form.language.record },
     { key: SETTINGS_KEYS.theme, value: form.theme.value, record: form.theme.record },
     { key: SETTINGS_KEYS.globalTags, value: form.globalTags.value, record: form.globalTags.record },
+    {
+      key: SETTINGS_KEYS.blogCategories,
+      value: form.blogCategories.value,
+      record: form.blogCategories.record,
+    },
     {
       key: SETTINGS_KEYS.allowMultipleTags,
       value: form.allowMultipleTags.value,

@@ -59,6 +59,7 @@ export const AF = {
     deleted: 'Verwyderde',
     general: 'Algemeen',
     instanceSettings: 'Instansie-instellings',
+    integrations: 'Integrasies',
     users: 'Gebruikersbestuur',
     usersSubtitle: 'Gebruikers, rolle en toegang',
     settings: 'Liveblog-instellings',
@@ -90,6 +91,7 @@ export const AF = {
     settings: 'Instellings',
     generalSettings: 'Algemene instellings',
     instanceSettings: 'Instansie-instellings',
+    integrations: 'Integrasies',
     themes: 'Temabestuur',
     freetypes: 'Vrye tipes',
     advertising: 'Advertensiebestuur',
@@ -266,6 +268,27 @@ export const AF = {
     blockTypes: 'Bloktipes',
     addBlock: (label: string) => `Voeg ${label} by`,
     removeBlock: 'Verwyder blok',
+    entryTitle: 'Plasingtitel',
+    entryTitlePlaceholder: 'Titel vir die regstreekse blog (opsioneel)',
+    showEntryTitle: 'Gebruik as regstreekse blogtitel',
+    featuredImage: {
+      label: 'Hoofbeeld (nuuskaart / webhook)',
+      shortLabel: 'Hoofbeeld',
+      modalTitle: 'Kies hoofbeeld',
+      hint: 'Kies uit bestaande beelde of laai nuwe op.',
+      blogImage: 'Blog-omslagbeeld',
+      blogImageMissing: 'Blog-omslagbeeld (nog nie gestel nie)',
+      postImage: (n: number) => `Beeld in plasing ${n}`,
+      customUpload: 'Opgeleë beeld',
+      upload: 'Laai nuwe beeld op',
+      uploadShort: 'Nuwe beeld',
+      libraryImage: (name: string) => name,
+      useBlogDefault: 'Gebruik blog-omslag',
+      loading: 'Laai beelde…',
+      loadError: 'Kon nie beelde laai nie',
+    },
+    showEntryTitleHint:
+      'Wanneer geaktiveer, word hierdie titel boaan die publieke blog gewys. Die jongste plasing met hierdie opsie bepaal die titel.',
     writePost: 'Skryf jou plasing…',
     imageUrl: 'Beeld-URL',
     uploadImage: 'Laai beeld op',
@@ -545,9 +568,13 @@ export const AF = {
     quotationMarks: 'Aanhalingstekens (taal)',
     embedHeightResponsive: 'Verstek embed-hoogte responsief',
     globalTags: 'Globale etikette',
+    blogCategories: 'Blog-kategorieë',
     tagPlaceholder: "Voer 'n etiket in",
+    categoryPlaceholder: "Voer 'n kategorie in",
     tagHint:
       "Druk Enter of klik Voeg by. Om 'n bestaande etiket te wysig, verander nie etikette op plasings nie — verwyder en voeg weer by.",
+    categoryHint:
+      'Kategorieë verskyn in die blog-instellings keuselys. Druk Enter of klik Voeg by.',
     instanceJson: 'Instansie-JSON',
     privacy: {
       private: 'Privaat',
@@ -664,6 +691,55 @@ export const AF = {
     },
     confirmDeleteAd: (name: string) => `Verwyder "${name}"?`,
     confirmDeleteCollection: (name: string) => `Verwyder versameling "${name}"?`,
+  },
+
+  integrations: {
+    title: 'Integrasies',
+    subtitle: 'Koppel regstreekse blogs aan eksterne stelsels via webhooks.',
+    errors: {
+      load: 'Kon nie integrasies laai nie.',
+      save: 'Kon nie webhook stoor nie.',
+      remove: 'Kon nie webhook verwyder nie.',
+      test: 'Kon nie webhook toets nie.',
+    },
+    webhooks: {
+      heading: 'Webhooks',
+      description:
+        'Stuur HTTP-versoeke wanneer gebeure in blogs plaasvind. Kies die blog en dataformaat vir die ontvanger.',
+      add: 'Nuwe webhook',
+      addTitle: 'Skep webhook',
+      editTitle: 'Wysig webhook',
+      empty: 'Geen webhooks is nog opgestel nie.',
+      saved: 'Webhook gestoor.',
+      removed: 'Webhook verwyder.',
+      test: 'Toets',
+      testing: 'Besig…',
+      testQueued: (postId: string) =>
+        `Webhook-toets is in die ry geplaas (laaste plasing: ${postId}).`,
+      disabled: 'Gedeaktiveer',
+      allBlogs: 'Alle blogs',
+      newsCardHint:
+        'Stuur WP GraphQL-versoenbare nuuskaart-data (posts.nodes) vir kenmerkkaarte.',
+      fields: {
+        name: 'Naam',
+        destination: 'Bestemmings-URL',
+        destinationHint:
+          'http:// word outomaties bygevoeg. Gebruik 127.0.0.1:3000/... of jou IP — in Docker word localhost outomaties na host.docker.internal herlei.',
+        action: 'Aksie',
+        blog: 'Blog',
+        dataFormat: 'Dataformaat',
+        enabled: 'Aktief',
+      },
+      actions: {
+        post_created: 'Nuwe plasing gepubliseer',
+        post_updated: 'Plasing opgedateer',
+        post_deleted: 'Plasing verwyder',
+      },
+      dataFormats: {
+        news_card: 'Nuuskaart (WP GraphQL)',
+        raw: 'Rou Liveblog-data',
+      },
+    },
   },
 
   marketplace: {

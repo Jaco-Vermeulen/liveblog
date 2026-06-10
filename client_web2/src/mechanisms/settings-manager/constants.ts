@@ -5,6 +5,7 @@ export const SETTINGS_KEYS = {
   language: 'language',
   theme: 'theme',
   globalTags: 'global_tags',
+  blogCategories: 'blog_categories',
   allowMultipleTags: 'allow_multiple_tag_selection',
   youtubePrivacy: 'youtube_privacy_status',
   embedHeightResponsive: 'embed_height_responsive_default',

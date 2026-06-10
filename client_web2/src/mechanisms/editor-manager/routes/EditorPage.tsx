@@ -274,6 +274,11 @@ export function EditorPage() {
                   Promise.all([mainTimelineApi.fetchNewPage(), pinnedTimelineApi.fetchNewPage()]),
                 )
             }
+            onHeadlineChange={composerApi.setHeadline}
+            onShowHeadlineChange={composerApi.setShowHeadline}
+            onFeaturedImageSourceChange={composerApi.setFeaturedImageSource}
+            onUploadFeaturedImage={(file) => void composerApi.uploadFeaturedImage(file)}
+            featuredImageUploading={composerApi.featuredImageUploading}
             onStickyChange={composerApi.setSticky}
             onHighlightChange={composerApi.setHighlight}
             globalTags={globalTags}

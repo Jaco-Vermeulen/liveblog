@@ -34,6 +34,7 @@ from settings import (
 
 from .schema import blogs_schema
 from .utils import can_delete_blog
+from .categories import validate_blog_category
 from .tasks import (
     delete_blog_embeds_on_s3,
     publish_blog_embed_on_s3,
@@ -146,6 +147,9 @@ class BlogService(BaseService):
             if doc["start_date"] is None:
                 doc["start_date"] = utcnow()
 
+            if "category" in doc:
+                doc["category"] = validate_blog_category(doc.get("category"))
+
     def on_created(self, docs):
         for blog in docs:
             blog_id = str(blog["_id"])
@@ -234,6 +238,11 @@ class BlogService(BaseService):
             theme_name = updates["blog_preferences"].get("theme")
             if theme_name:
                 self._update_theme_settings(updates, theme_name)
+
+        if "category" in updates:
+            updates["category"] = validate_blog_category(
+                updates.get("category"), original.get("category")
+            )
 
     def on_updated(self, updates, original):
         original_id = str(original["_id"])

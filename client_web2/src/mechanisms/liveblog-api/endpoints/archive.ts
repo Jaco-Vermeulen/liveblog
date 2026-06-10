@@ -1,5 +1,77 @@
+import { api } from '../client';
 import { logger } from '@/mechanisms/request-logger';
 import { LiveblogApiError, resolveUrl } from '../client';
+import type { EveList } from '../types';
+
+export interface ArchivePictureRenditions {
+  href?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface ArchivePicture {
+  _id: string;
+  type?: string;
+  unique_name?: string;
+  _updated?: string;
+  renditions?: Record<string, ArchivePictureRenditions>;
+}
+
+export interface BlogImageItem {
+  _id: string;
+  text?: string;
+  meta?: {
+    media?: {
+      _id?: string;
+      renditions?: Record<string, ArchivePictureRenditions>;
+    };
+  };
+}
+
+const PICTURE_ARCHIVE_QUERY = {
+  query: {
+    filtered: {
+      filter: {
+        and: [{ term: { type: 'picture' } }],
+      },
+    },
+  },
+};
+
+function blogImageItemsQuery(blogId: string) {
+  return {
+    query: {
+      filtered: {
+        filter: {
+          and: [{ term: { blog: blogId } }, { term: { item_type: 'image' } }],
+        },
+      },
+    },
+  };
+}
+
+/** List uploaded picture media from the server archive (Superdesk media library). */
+export function listArchivePictures(
+  maxResults = 200,
+  page = 1,
+): Promise<EveList<ArchivePicture>> {
+  return api.get<EveList<ArchivePicture>>('/archive', {
+    max_results: maxResults,
+    page,
+    source: JSON.stringify(PICTURE_ARCHIVE_QUERY),
+  });
+}
+
+/** Image blocks already saved on posts in this blog. */
+export function listBlogImageItems(
+  blogId: string,
+  maxResults = 200,
+): Promise<EveList<BlogImageItem>> {
+  return api.get<EveList<BlogImageItem>>('/items', {
+    max_results: maxResults,
+    source: JSON.stringify(blogImageItemsQuery(blogId)),
+  });
+}
 
 export interface ArchiveUploadResponse {
   _id: string;

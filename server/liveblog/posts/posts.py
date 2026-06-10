@@ -158,6 +158,16 @@ class PostsResource(ArchiveResource):
             "repeat_syndication": Resource.rel(
                 "repeat_syndication", embeddable=True, required=False, nullable=True
             ),
+            "headline": {"type": "string", "default": ""},
+            "show_headline": {"type": "boolean", "default": False},
+            "featured_image_url": {"type": "string", "nullable": True},
+            "featured_image_renditions": {
+                "type": "dict",
+                "mapping": {"type": "object", "enabled": False},
+            },
+            "featured_image": Resource.rel(
+                "archive", embeddable=True, nullable=True, type="string"
+            ),
         }
     )
 
@@ -405,6 +415,9 @@ class PostsService(ArchiveService):
                     "Send document to consumers (if syndicated): {}".format(doc["_id"])
                 )
                 out_service.send_syndication_post(doc, action="created")
+                from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+                dispatch_post_webhooks.delay(doc["_id"], "created")
 
             # let's check for posts limits in blog and remove old one if needed
             if blog_id:
@@ -512,6 +525,9 @@ class PostsService(ArchiveService):
             update_post_blog_embed.delay(doc)
             # Syndication.
             out_service.send_syndication_post(original, action="deleted")
+            from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+            dispatch_post_webhooks.delay(original["_id"], "deleted")
             # Push notification.
             _posts = [{"post_id": original.get("_id"), "blog": blog_id}]
             push_notification("posts", deleted=True, posts=_posts)
@@ -537,11 +553,20 @@ class PostsService(ArchiveService):
                     # Post has been saved as contribution/draft, then published.
                     # Syndication will be sent with 'created' action.
                     out_service.send_syndication_post(doc, action="created")
+                    from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+                    dispatch_post_webhooks.delay(doc["_id"], "created")
                 else:
                     out_service.send_syndication_post(doc, action="updated")
+                    from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+                    dispatch_post_webhooks.delay(doc["_id"], "updated")
             # as far as the consumer is concerned, if a post is unpublished, it is effectively deleted
             elif original["post_status"] == "open":
                 out_service.send_syndication_post(doc, action="deleted")
+                from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+                dispatch_post_webhooks.delay(doc["_id"], "deleted")
 
             push_notification("posts", updated=True, posts=posts)
 
@@ -565,6 +590,9 @@ class PostsService(ArchiveService):
         # Syndication
         out_service = get_resource_service("syndication_out")
         out_service.send_syndication_post(doc, action="deleted")
+        from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+        dispatch_post_webhooks.delay(doc["_id"], "deleted")
 
         # Send notifications
         push_notification("posts", deleted=True)

@@ -19,16 +19,27 @@ import {
   scheduleEnabledFromPost,
 } from '../services/composerSchedule';
 import type { ComposerState, EditorPostType, SirTrevorBlock, SirTrevorBlockType } from '../types';
+import {
+  featuredImageSourceFromPost,
+  resolveFeaturedImagePatch,
+  type FeaturedImageSource,
+} from '../services/featuredImage';
 import { usePosts } from './usePosts';
 
 const defaultBlock = (): SirTrevorBlock => ({ type: 'Text', data: { text: '' } });
 
 export function usePostComposer(blog: Blog | undefined) {
   const blogId = blog?._id ?? '';
-  const { savePost, saveDraft } = usePosts(blogId);
+  const { savePost } = usePosts(blogId);
   const { freetypes } = useFreetypesList();
 
   const [blocks, setBlocks] = useState<SirTrevorBlock[]>([defaultBlock()]);
+  const [headline, setHeadline] = useState('');
+  const [showHeadline, setShowHeadline] = useState(false);
+  const [featuredImageSource, setFeaturedImageSource] = useState<FeaturedImageSource>({
+    type: 'blog',
+  });
+  const [featuredImageUploading, setFeaturedImageUploading] = useState(false);
   const [sticky, setSticky] = useState(false);
   const [highlight, setHighlight] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -49,6 +60,9 @@ export function usePostComposer(blog: Blog | undefined) {
 
   const composer: ComposerState = {
     blocks,
+    headline,
+    showHeadline,
+    featuredImageSource,
     sticky,
     highlight,
     tags,
@@ -100,6 +114,9 @@ export function usePostComposer(blog: Blog | undefined) {
           setBlocks(postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()]);
         }
         }
+        setHeadline(post.headline ?? '');
+        setShowHeadline(Boolean(post.show_headline));
+        setFeaturedImageSource(featuredImageSourceFromPost(post));
         setSticky(Boolean(post.sticky));
         setHighlight(Boolean(post.lb_highlight));
         setTags(Array.isArray(post.tags) ? [...post.tags] : []);
@@ -110,6 +127,9 @@ export function usePostComposer(blog: Blog | undefined) {
         setSelectedPostType(DEFAULT_POST_TYPE);
         setFreetypeData({});
         setBlocks([defaultBlock()]);
+        setHeadline('');
+        setShowHeadline(false);
+        setFeaturedImageSource({ type: 'blog' });
         setSticky(false);
         setHighlight(false);
         setTags([]);
@@ -262,6 +282,16 @@ export function usePostComposer(blog: Blog | undefined) {
     setIsDirty(true);
   }, []);
 
+  const setHeadlineAction = useCallback((value: string) => {
+    setHeadline(value);
+    setIsDirty(true);
+  }, []);
+
+  const setShowHeadlineAction = useCallback((value: boolean) => {
+    setShowHeadline(value);
+    setIsDirty(true);
+  }, []);
+
   const setScheduleEnabledAction = useCallback((enabled: boolean) => {
     setScheduleEnabled(enabled);
     if (!enabled) {
@@ -290,6 +320,32 @@ export function usePostComposer(blog: Blog | undefined) {
     return blocksToPostItems(blocks);
   }, [blocks, freetypeData, isFreetypeMode, selectedPostType]);
 
+  const resolveFeaturedPatch = useCallback(
+    () => resolveFeaturedImagePatch(featuredImageSource, blocks) ?? {},
+    [blocks, featuredImageSource],
+  );
+
+  const uploadFeaturedImage = useCallback(async (file: File) => {
+    setFeaturedImageUploading(true);
+    try {
+      const uploaded = await uploadArchiveMedia(file);
+      setFeaturedImageSource({
+        type: 'custom',
+        picture: uploaded.picture,
+        picture_url: uploaded.picture_url,
+        picture_renditions: uploaded.picture_renditions,
+      });
+      setIsDirty(true);
+    } finally {
+      setFeaturedImageUploading(false);
+    }
+  }, []);
+
+  const setFeaturedImageSourceAction = useCallback((source: FeaturedImageSource) => {
+    setFeaturedImageSource(source);
+    setIsDirty(true);
+  }, []);
+
   const resolveSchedulePatch = useCallback(() => {
     if (scheduleEnabled && scheduledDate) {
       return buildPublishSchedulePatch(true, scheduledDate);
@@ -313,6 +369,9 @@ export function usePostComposer(blog: Blog | undefined) {
         sticky,
         lb_highlight: highlight,
         tags,
+        headline: headline.trim(),
+        show_headline: showHeadline,
+        ...resolveFeaturedPatch(),
         ...resolveSchedulePatch(),
       });
       reset();
@@ -322,11 +381,14 @@ export function usePostComposer(blog: Blog | undefined) {
   }, [
     blogId,
     currentPost,
+    headline,
     highlight,
     reset,
     resolveItems,
+    resolveFeaturedPatch,
     resolveSchedulePatch,
     savePost,
+    showHeadline,
     sticky,
     tags,
   ]);
@@ -336,12 +398,33 @@ export function usePostComposer(blog: Blog | undefined) {
     const items = resolveItems();
     setIsSubmitting(true);
     try {
-      await saveDraft(currentPost, items, sticky, highlight, tags);
+      await savePost(items, {
+        post: currentPost,
+        post_status: 'draft',
+        sticky,
+        lb_highlight: highlight,
+        tags,
+        headline: headline.trim(),
+        show_headline: showHeadline,
+        ...resolveFeaturedPatch(),
+      });
       reset();
     } finally {
       setIsSubmitting(false);
     }
-  }, [blogId, currentPost, highlight, reset, resolveItems, saveDraft, sticky, tags]);
+  }, [
+    blogId,
+    currentPost,
+    headline,
+    highlight,
+    reset,
+    resolveFeaturedPatch,
+    resolveItems,
+    savePost,
+    showHeadline,
+    sticky,
+    tags,
+  ]);
 
   const scheduledDatetimeLocal = useMemo(
     () => isoToDatetimeLocal(scheduledDate),
@@ -368,6 +451,11 @@ export function usePostComposer(blog: Blog | undefined) {
     isSubmitting,
     isEditing,
     isFreetypeMode,
+    setHeadline: setHeadlineAction,
+    setShowHeadline: setShowHeadlineAction,
+    setFeaturedImageSource: setFeaturedImageSourceAction,
+    uploadFeaturedImage,
+    featuredImageUploading,
     setSticky,
     setHighlight,
     setTags: setTagsAction,

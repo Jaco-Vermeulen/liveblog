@@ -63,6 +63,15 @@ export function useGeneralSettings() {
     setSaveMessage(null);
   };
 
+  const setBlogCategories = (categories: string[]) => {
+    setForm((prev) => ({
+      ...prev,
+      blogCategories: { ...prev.blogCategories, value: categories },
+    }));
+    setIsDirty(true);
+    setSaveMessage(null);
+  };
+
   const save = async () => {
     setSaving(true);
     setError(null);
@@ -95,6 +104,7 @@ export function useGeneralSettings() {
     saveMessage,
     updateForm,
     setTags,
+    setBlogCategories,
     save,
     reload: load,
   };

@@ -572,9 +572,10 @@ class PostsModuleTestCase(TestCase):
             self.blogs_list[0]["_id"], save=False, safe=True
         )
 
+    @patch("liveblog.posts.tasks.resolve_live_headline", return_value=None)
     @patch("liveblog.posts.tasks.get_resource_service")
     def test_update_post_blog_data(self, *mocks):
-        fake_get_service = mocks[0]
+        fake_get_service = mocks[1]
 
         update_post_blog_data(self.blog_posts[0])
 
@@ -609,6 +610,7 @@ class PostsModuleTestCase(TestCase):
                     "_id": self.blog_posts[0]["_id"],
                 },
                 "total_posts": total_posts,
+                "current_headline": None,
             },
             blog,
         )

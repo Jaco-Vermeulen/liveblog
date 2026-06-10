@@ -23,8 +23,12 @@ export {
   listBlogMembershipRequests,
   requestBlogMembership,
 } from './endpoints/membership';
-export { uploadArchiveMedia } from './endpoints/archive';
-export type { ArchiveUploadResponse } from './endpoints/archive';
+export { uploadArchiveMedia, listArchivePictures, listBlogImageItems } from './endpoints/archive';
+export type {
+  ArchivePicture,
+  ArchiveUploadResponse,
+  BlogImageItem,
+} from './endpoints/archive';
 export { listCollections } from './endpoints/collections';
 export { listConsumers } from './endpoints/consumers';
 export {
@@ -90,6 +94,7 @@ export {
   saveGlobalPreference,
   saveInstanceSettings,
 } from './endpoints/settings';
+export { fetchBlogCategories, preferenceStringArray } from './blogCategories';
 export { getAllBlogAnalytics, getBlogAnalytics } from './endpoints/analytics';
 export {
   checkFreetypeUsed,
@@ -119,6 +124,13 @@ export {
   removeSyndicationProducer,
   saveSyndicationProducer,
 } from './endpoints/syndication';
+export {
+  listWebhooks,
+  removeWebhook,
+  saveWebhook,
+  testWebhook,
+  type WebhookTestResult,
+} from './endpoints/webhooks';
 export {
   buildNewPostGroups,
   buildPostsQueryCriteria,
@@ -189,4 +201,7 @@ export type {
   SyndicationIn,
   SyndicationOut,
   SyndicationProducer,
+  Webhook,
+  WebhookAction,
+  WebhookDataFormat,
 } from './types';

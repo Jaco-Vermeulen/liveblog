@@ -35,6 +35,52 @@ def trailing_slash(url):
     return url
 
 
+def normalize_http_url(url):
+    """Ensure webhook/API urls have a scheme so urlparse and requests work."""
+    url = (url or "").strip()
+    if not url:
+        return url
+    parsed = urllib.parse.urlparse(url)
+    # Python 3.6 urlparse treats "127.0.0.1:3000/path" as scheme=127.0.0.1.
+    if parsed.scheme not in ("http", "https"):
+        url = "http://{}".format(url.lstrip("/"))
+    return url
+
+
+def resolve_webhook_delivery_url(url):
+    """
+    Rewrite localhost targets for Docker delivery.
+
+    Inside a container, 127.0.0.1 is the container itself — not the developer
+    machine where a local webhook receiver usually listens.
+    """
+    import os
+
+    url = trailing_slash(normalize_http_url(url))
+    parsed = urllib.parse.urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host not in ("127.0.0.1", "localhost"):
+        return url
+
+    rewrite_host = os.environ.get("WEBHOOK_LOCALHOST_REWRITE", "host.docker.internal")
+    if not rewrite_host or rewrite_host == host:
+        return url
+
+    port = parsed.port
+    if port:
+        netloc = "{}:{}".format(rewrite_host, port)
+    else:
+        netloc = rewrite_host
+
+    rewritten = urllib.parse.urlunparse(parsed._replace(netloc=netloc))
+    logger.info(
+        "Rewriting webhook delivery url from %s to %s for Docker host access",
+        url,
+        trailing_slash(rewritten),
+    )
+    return trailing_slash(rewritten)
+
+
 def cast_to_object_id(doc, fields):
     """Cast provided document fields to ObjectId."""
     for field in fields:
@@ -380,6 +426,9 @@ def validate_secure_url(value):
     """
     Check if url is secure (https or whitelisted)
     """
+    import ipaddress
+
+    value = normalize_http_url(value)
     parsed = urllib.parse.urlparse(value)
 
     try:
@@ -387,8 +436,20 @@ def validate_secure_url(value):
     except IndexError:
         netloc = parsed.netloc
 
+    try:
+        ipaddress.ip_address(netloc)
+        return parsed.scheme in ("http", "https")
+    except ValueError:
+        pass
+
+    if parsed.scheme == "http":
+        return (
+            netloc in ("localhost", "127.0.0.1", "host.docker.internal")
+            or netloc.endswith(".local")
+        )
+
     return (
         parsed.scheme == "https"
-        or netloc in ("localhost", "127.0.0.1")
+        or netloc in ("localhost", "127.0.0.1", "host.docker.internal")
         or netloc.endswith(".local")
     )

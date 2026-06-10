@@ -11,6 +11,11 @@ const POST_PATCH_KEYS = [
   'deleted',
   'order',
   'tags',
+  'headline',
+  'show_headline',
+  'featured_image',
+  'featured_image_url',
+  'featured_image_renditions',
 ] as const;
 
 export type PostPatchKey = (typeof POST_PATCH_KEYS)[number];

@@ -3,6 +3,7 @@ import {
   listLanguages,
   listSelectableThemes,
   uploadArchiveMedia,
+  fetchBlogCategories,
   type Blog,
   type LanguageOption,
   type Theme,
@@ -12,17 +13,6 @@ import {
   pickBlogEmbedCode,
   resolveBlogPublicUrl,
 } from '../services/blogEmbedCode';
-
-export const BLOG_CATEGORIES = [
-  '',
-  'Breaking News',
-  'Entertainment',
-  'Business and Finance',
-  'Sport',
-  'Technology',
-  'Politics',
-  'Others',
-] as const;
 
 export const POST_LIMIT_OPTIONS = [
   { label: 'Geen beperking', value: 0 },
@@ -122,6 +112,7 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
   const [form, setForm] = useState<BlogGeneralForm | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
+  const [blogCategories, setBlogCategories] = useState<string[]>([]);
   const [metaLoading, setMetaLoading] = useState(true);
 
   useEffect(() => {
@@ -135,12 +126,14 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
   const loadMeta = useCallback(async () => {
     setMetaLoading(true);
     try {
-      const [themeItems, languageItems] = await Promise.all([
+      const [themeItems, languageItems, categoryItems] = await Promise.all([
         listSelectableThemes(),
         listLanguages(),
+        fetchBlogCategories(),
       ]);
       setThemes(themeItems);
       setLanguages(languageItems._items);
+      setBlogCategories(categoryItems);
     } finally {
       setMetaLoading(false);
     }
@@ -181,6 +174,7 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
     form,
     themes,
     languages,
+    blogCategories,
     metaLoading,
     publicUrl,
     embedCode,

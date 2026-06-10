@@ -22,6 +22,8 @@ import { ScorecardBlockEditor, type ScorecardBody } from '../subsystems/scorecar
 import { AF } from '@/copy';
 import type { ComposerState, EditorPostType, SirTrevorBlockType } from '../types';
 import { PostTagsSelector } from './PostTagsSelector';
+import { FeaturedImagePicker } from './FeaturedImagePicker';
+import type { FeaturedImageSource } from '../services/featuredImage';
 
 const BLOCK_TYPES: {
   type: SirTrevorBlockType;
@@ -62,6 +64,11 @@ export interface PostComposerProps {
   onCancelEdit: () => void;
   onSubmit: () => void;
   onSaveDraft: () => void;
+  onHeadlineChange: (headline: string) => void;
+  onShowHeadlineChange: (show: boolean) => void;
+  onFeaturedImageSourceChange: (source: FeaturedImageSource) => void;
+  onUploadFeaturedImage: (file: File) => void;
+  featuredImageUploading?: boolean;
   onStickyChange: (sticky: boolean) => void;
   onHighlightChange: (highlight: boolean) => void;
   globalTags?: string[];
@@ -93,6 +100,11 @@ export function PostComposer({
   onCancelEdit,
   onSubmit,
   onSaveDraft,
+  onHeadlineChange,
+  onShowHeadlineChange,
+  onFeaturedImageSourceChange,
+  onUploadFeaturedImage,
+  featuredImageUploading = false,
   onStickyChange,
   onHighlightChange,
   globalTags = [],
@@ -126,6 +138,40 @@ export function PostComposer({
         onPostTypeChange={onPostTypeChange}
         onFreetypeDataChange={onFreetypeDataChange}
       />
+
+      <LbFormField label={AF.editor.entryTitle} htmlFor="composer-entry-title">
+        <LbInput
+          id="composer-entry-title"
+          type="text"
+          value={composer.headline}
+          placeholder={AF.editor.entryTitlePlaceholder}
+          onChange={(e) => onHeadlineChange(e.target.value)}
+        />
+      </LbFormField>
+
+      <label className="mb-4 flex items-start gap-2 text-sm text-mar-text">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={composer.showHeadline}
+          onChange={(e) => onShowHeadlineChange(e.target.checked)}
+        />
+        <span>
+          <span className="font-medium">{AF.editor.showEntryTitle}</span>
+          <span className="mt-1 block text-mar-text-muted">{AF.editor.showEntryTitleHint}</span>
+        </span>
+      </label>
+
+      {!isFreetypeMode && (
+        <FeaturedImagePicker
+          blog={blog}
+          blocks={composer.blocks}
+          source={composer.featuredImageSource}
+          uploading={featuredImageUploading}
+          onSourceChange={onFeaturedImageSourceChange}
+          onUpload={onUploadFeaturedImage}
+        />
+      )}
 
       {!isFreetypeMode && (
         <div className="m-editor-composer__toolbar" role="toolbar" aria-label={AF.editor.blockTypes}>

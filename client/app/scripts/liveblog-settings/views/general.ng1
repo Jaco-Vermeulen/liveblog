@@ -58,6 +58,17 @@
 
                         <div class="form-group">
                             <div class="lb-group-heading">
+                                <label for="blog_categories" class="sd-line-input__label text-uppercase text-bold">
+                                    Blog Categories
+                                </label>
+                            </div>
+                            <div ng-if="!settingsLoading" render-tags-component
+                                tags="liveblogSettings.blog_categories.value" on-tags-change="onBlogCategoriesChange">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="lb-group-heading">
                                 <label class="sd-line-input__label text-uppercase text-bold">
                                     Multiple tags selection
                                 </label>

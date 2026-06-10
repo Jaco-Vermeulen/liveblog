@@ -1,4 +1,4 @@
-import type { ChangeEvent, FormEvent } from 'react';
+import { useMemo, type ChangeEvent, type FormEvent } from 'react';
 import { AF } from '@/copy';
 import { ExternalLink } from 'lucide-react';
 import { LbButton } from '@/components/ui/LbButton';
@@ -7,7 +7,6 @@ import { LbInput } from '@/components/ui/LbInput';
 import type { LanguageOption, Theme } from '@/mechanisms/liveblog-api';
 import type { BlogGeneralForm } from '../../hooks/useBlogGeneralSettings';
 import {
-  BLOG_CATEGORIES,
   COMMENT_OPTIONS,
   POST_LIMIT_OPTIONS,
 } from '../../hooks/useBlogGeneralSettings';
@@ -19,6 +18,7 @@ export interface GeneralSettingsProps {
   form: BlogGeneralForm;
   themes: Theme[];
   languages: LanguageOption[];
+  blogCategories: string[];
   publicUrl: string;
   embedCode: string;
   metaLoading: boolean;
@@ -34,6 +34,7 @@ export function GeneralSettings({
   form,
   themes,
   languages,
+  blogCategories,
   publicUrl,
   embedCode,
   metaLoading,
@@ -49,6 +50,12 @@ export function GeneralSettings({
     if (file) onUploadImage(file);
     e.target.value = '';
   };
+
+  const categoryOptions = useMemo(() => {
+    const options = new Set(blogCategories);
+    if (form.category) options.add(form.category);
+    return ['', ...Array.from(options).sort((a, b) => a.localeCompare(b, 'af'))];
+  }, [blogCategories, form.category]);
 
   return (
     <form onSubmit={onSubmit} className="m-settings-panel space-y-5">
@@ -203,7 +210,7 @@ export function GeneralSettings({
           value={form.category}
           onChange={(e) => onChange({ category: e.target.value })}
         >
-          {BLOG_CATEGORIES.map((cat) => (
+          {categoryOptions.map((cat) => (
             <option key={cat || 'none'} value={cat}>
               {cat || AF.editor.settings.categoryNone}
             </option>

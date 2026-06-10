@@ -143,6 +143,20 @@ export async function savePostWithItems(
     tags: postPatch.tags ?? existingPost?.tags,
     scheduled: postPatch.scheduled ?? existingPost?.scheduled,
     published_date: postPatch.published_date ?? existingPost?.published_date,
+    headline: postPatch.headline ?? existingPost?.headline ?? '',
+    show_headline: postPatch.show_headline ?? existingPost?.show_headline ?? false,
+    featured_image:
+      postPatch.featured_image !== undefined
+        ? postPatch.featured_image
+        : existingPost?.featured_image,
+    featured_image_url:
+      postPatch.featured_image_url !== undefined
+        ? postPatch.featured_image_url
+        : existingPost?.featured_image_url,
+    featured_image_renditions:
+      postPatch.featured_image_renditions !== undefined
+        ? postPatch.featured_image_renditions
+        : existingPost?.featured_image_renditions,
     ...(savedItems.length > 0 ? { groups: buildNewPostGroups(savedItems) } : {}),
   });
 

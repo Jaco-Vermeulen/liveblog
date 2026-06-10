@@ -20,6 +20,11 @@ export function usePosts(blogId: string) {
         tags?: string[];
         published_date?: string;
         scheduled?: boolean;
+        headline?: string;
+        show_headline?: boolean;
+        featured_image?: string;
+        featured_image_url?: string;
+        featured_image_renditions?: Post['featured_image_renditions'];
       } = {},
     ) => {
       const existing = params.post ?? undefined;
@@ -33,6 +38,11 @@ export function usePosts(blogId: string) {
           tags: params.tags,
           published_date: params.published_date,
           scheduled: params.scheduled,
+          headline: params.headline,
+          show_headline: params.show_headline,
+          featured_image: params.featured_image,
+          featured_image_url: params.featured_image_url,
+          featured_image_renditions: params.featured_image_renditions,
         },
         existing,
       );

@@ -210,7 +210,7 @@ export function BlogLivePreviewPane({
               .join(' ')}
             data-theme={theme?.name ?? 'unknown'}
           >
-            <PreviewBlogHeader blog={blog} />
+            <PreviewBlogHeader blog={blog} posts={posts} />
             {draftSlot}
             <div className="lb-preview-posts">{children}</div>
           </div>

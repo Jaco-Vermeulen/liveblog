@@ -619,6 +619,8 @@ def convert_posts(response_data, blog):
         "post_status",
         "published_date",
         "unpublished_date",
+        "headline",
+        "show_headline",
     ]
 
     for i, post in enumerate(response_data["_items"]):
@@ -644,6 +646,7 @@ def convert_posts(response_data, blog):
     # Add additional blog metadata to response _meta.
     response_data["_meta"]["last_updated_post"] = blog._blog.get("last_updated_post")
     response_data["_meta"]["last_created_post"] = blog._blog.get("last_created_post")
+    response_data["_meta"]["current_headline"] = blog._blog.get("current_headline")
     return response_data
 
 

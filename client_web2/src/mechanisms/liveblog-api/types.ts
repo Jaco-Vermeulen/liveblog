@@ -133,6 +133,7 @@ export interface BlogMember {
 
 export interface Blog extends EveResource {
   title: string;
+  current_headline?: string | null;
   description?: string;
   blog_status: BlogStatusCode;
   picture_url?: string;
@@ -378,4 +379,16 @@ export interface SyndicationIn extends EveResource {
 export interface SyndicationOut extends EveResource {
   blog_id: string;
   consumer_id: string;
+}
+
+export type WebhookAction = 'post_created' | 'post_updated' | 'post_deleted';
+export type WebhookDataFormat = 'news_card' | 'raw';
+
+export interface Webhook extends EveResource {
+  name: string;
+  destination_url: string;
+  action: WebhookAction;
+  blog_id?: string | null;
+  data_format: WebhookDataFormat;
+  enabled: boolean;
 }

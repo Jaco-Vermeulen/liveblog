@@ -36,8 +36,13 @@ export interface SirTrevorBlock {
 
 export type EditorPostType = 'Default' | Freetype;
 
+import type { FeaturedImageSource } from './services/featuredImage';
+
 export interface ComposerState {
   blocks: SirTrevorBlock[];
+  headline: string;
+  showHeadline: boolean;
+  featuredImageSource: FeaturedImageSource;
   sticky: boolean;
   highlight: boolean;
   tags: string[];

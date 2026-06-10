@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
     TAGS,
+    BLOG_CATEGORIES,
     ALLOW_PICK_MULTI_TAGS,
     YOUTUBE_PRIVACY_STATUS,
     EMBED_HEIGHT_RESPONSIVE_DEFAULT,
@@ -13,6 +14,7 @@ const LiveblogSettingsController = ($scope, api, $location, notify, gettext, $q)
         language: {},
         theme: {},
         global_tags: [],
+        blog_categories: [],
         allow_multiple_tag_selection: { value: true }, // multiple tags select is enabled by default
         youtube_privacy_status: { value: 'unlisted' },
         embed_height_responsive_default: { value: true },
@@ -37,6 +39,7 @@ const LiveblogSettingsController = ($scope, api, $location, notify, gettext, $q)
         'language',
         'theme',
         TAGS,
+        BLOG_CATEGORIES,
         ALLOW_PICK_MULTI_TAGS,
         YOUTUBE_PRIVACY_STATUS,
         EMBED_HEIGHT_RESPONSIVE_DEFAULT,
@@ -68,6 +71,12 @@ const LiveblogSettingsController = ($scope, api, $location, notify, gettext, $q)
 
     $scope.onTagsChange = (tags) => {
         $scope.liveblogSettings.global_tags.value = tags;
+        $scope.settingsForm.$setDirty();
+        $scope.$apply();
+    };
+
+    $scope.onBlogCategoriesChange = (categories) => {
+        $scope.liveblogSettings.blog_categories.value = categories;
         $scope.settingsForm.$setDirty();
         $scope.$apply();
     };

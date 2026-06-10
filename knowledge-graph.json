@@ -1,11 +1,27 @@
 {
   "project": "liveblog",
-  "version": "3.93.1",
-  "updated": "2026-06-01",
+  "version": "3.94.0",
+  "updated": "2026-06-09",
+  "webhooks": {
+    "settings_ui": "/settings/integrations",
+    "api": "/api/webhooks",
+    "actions": ["post_created", "post_updated", "post_deleted"],
+    "data_formats": {
+      "news_card": "WP GraphQL-compatible posts.nodes payload for feature cards",
+      "raw": "Liveblog post + items extract (syndication-style)"
+    },
+    "delivery": "Celery task deliver_webhook on post create/update/delete"
+  },
+  "blog_categories": {
+    "storage": "global_preferences key blog_categories",
+    "settings_ui": "/settings/general",
+    "seed": "server/liveblog/prepopulate/data_init/maroela_blog_categories.json (61 Maroela WP categories)",
+    "validation": "BlogService + liveblog/blogs/categories.py"
+  },
   "embeds": {
-    "editor": "Iframely oembed uses key= via setupIframelyPublicKeyProvider on angular.module('iframely') — see iframely-public-key.js (decorators on liveblog.edit do NOT work)",
     "public_timeline": "template-item-embed.html + template-embed-utils.html; loadEmbeds() in default theme JS; GDPR via lb_consent--awaiting templates",
     "child_themes": "maroela extends default (seoTheme); collect_theme_assets must inherit parent scripts (default-*.js) for embed JS to load",
+    "post_headline": "Posts expose headline + show_headline; blog.current_headline caches newest qualifying entry; public embed title uses live headline when set (theme showTitle still controls visibility)",
     "known_fixes": [
       "Timeline posts flicker then vanish: ES term sticky:false excludes docs without sticky field; use bool must_not sticky:true; legacy pagesManager applyUpdates must treat missing sticky as non-sticky",
       "Facebook branch had malformed </div (missing >) — breaks HTML after Facebook embeds",

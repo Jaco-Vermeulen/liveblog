@@ -8,6 +8,7 @@ from superdesk.notification import push_notification
 from celery.exceptions import SoftTimeLimitExceeded
 from liveblog.blogs.tasks import publish_blog_embeds_on_s3
 from liveblog.blogs.utils import is_seo_enabled
+from liveblog.posts.headline import resolve_live_headline
 from eve.io.base import DataLayer
 
 logger = logging.getLogger("superdesk")
@@ -38,6 +39,7 @@ def update_post_blog_data(post, action="created"):
     ).count()
     updates = {
         "total_posts": total_posts,
+        "current_headline": resolve_live_headline(blog_id),
     }
 
     if action in ("updated", "created"):

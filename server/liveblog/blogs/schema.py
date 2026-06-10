@@ -36,16 +36,6 @@ blogs_schema = {
     "market_enabled": {"type": "boolean", "default": False},
     "category": {
         "type": "string",
-        "allowed": [
-            "",
-            "Breaking News",
-            "Entertainment",
-            "Business and Finance",
-            "Sport",
-            "Technology",
-            "Politics",
-            "Others",
-        ],
         "default": "",
     },
     "start_date": {"type": "datetime", "default": None},
@@ -91,4 +81,10 @@ blogs_schema = {
         "mapping": {"type": "object", "enabled": False},
     },
     "json_ld_timezone_offset": {"type": "integer", "default": 0},
+    "current_headline": {
+        "type": "string",
+        "nullable": True,
+        "default": None,
+        "required": False,
+    },
 }

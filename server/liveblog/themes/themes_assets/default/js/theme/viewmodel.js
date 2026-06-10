@@ -7,7 +7,8 @@
 
 var helpers = require('./helpers')
   , view = require('./view')
-  , polls = require('./polls');
+  , polls = require('./polls')
+  , liveTitle = require('./live-title');
 const Permalink = require('./permalink');
 
 const apiHost = LB.api_host.match(/\/$/i) ? LB.api_host : LB.api_host + '/';
@@ -215,6 +216,8 @@ vm.updateViewModel = function(api_response) {
   if (reqOpts.sort) {
     settings.postOrder = reqOpts.sort;
   }
+
+  liveTitle.updateLiveTitle(self.vm._items);
 
   return api_response;
 };

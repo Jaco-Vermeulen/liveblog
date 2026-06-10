@@ -67,6 +67,14 @@ export interface Post extends EveResource {
   items?: Array<{ item: PostItem }>;
   multipleItems?: number | false;
   hasComments?: boolean;
+  headline?: string;
+  show_headline?: boolean;
+  featured_image?: string;
+  featured_image_url?: string;
+  featured_image_renditions?: Record<
+    string,
+    { href?: string; width?: number; height?: number }
+  >;
 }
 
 export interface PostItemPayload {

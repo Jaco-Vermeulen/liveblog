@@ -209,6 +209,7 @@ INSTALLED_APPS = [
     "liveblog.video_upload",
     "liveblog.instance_settings",
     "liveblog.bandwidth",
+    "liveblog.webhooks",
 ]
 
 RESOURCE_METHODS = ["GET", "POST"]

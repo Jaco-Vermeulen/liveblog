@@ -8,9 +8,21 @@ type TagsManagerProps = {
   tags: string[];
   onChange(tags: string[]): void;
   disabled?: boolean;
+  label?: string;
+  inputId?: string;
+  placeholder?: string;
+  hint?: string;
 };
 
-export function TagsManager({ tags, onChange, disabled }: TagsManagerProps) {
+export function TagsManager({
+  tags,
+  onChange,
+  disabled,
+  label = 'Globale etikette',
+  inputId = 'global-tags-input',
+  placeholder = "Tik 'n etiket",
+  hint = "Druk Enter of klik Voeg by. Om 'n bestaande etiket te wysig, verander nie etikette op bestaande plasings nie.",
+}: TagsManagerProps) {
   const [draft, setDraft] = useState('');
 
   const addTag = useCallback(
@@ -52,15 +64,15 @@ export function TagsManager({ tags, onChange, disabled }: TagsManagerProps) {
   );
 
   return (
-    <LbFormField label="Globale etikette" htmlFor="global-tags-input">
+    <LbFormField label={label} htmlFor={inputId}>
       <div className="space-y-2">
         <div className="flex flex-wrap gap-2">{tagList}</div>
         <div className="flex flex-wrap gap-2">
           <LbInput
-            id="global-tags-input"
+            id={inputId}
             value={draft}
             disabled={disabled}
-            placeholder="Tik ’n etiket"
+            placeholder={placeholder}
             className="min-w-[12rem] flex-1"
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -79,10 +91,7 @@ export function TagsManager({ tags, onChange, disabled }: TagsManagerProps) {
             Voeg by
           </LbButton>
         </div>
-        <p className={cn('m-0 text-xs text-mar-muted')}>
-          Druk Enter of klik Voeg by. Om ’n bestaande etiket te wysig, verander nie etikette op
-          bestaande plasings nie.
-        </p>
+        <p className={cn('m-0 text-xs text-mar-muted')}>{hint}</p>
       </div>
     </LbFormField>
   );

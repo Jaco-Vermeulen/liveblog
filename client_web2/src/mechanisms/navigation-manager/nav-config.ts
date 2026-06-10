@@ -30,6 +30,7 @@ export const liveblogSubNav: SubNavItem[] = [
 export const settingsSubNav: SubNavItem[] = [
   { path: '/settings/general', label: AF.nav.general, end: true },
   { path: '/settings/instance-settings', label: AF.nav.instanceSettings },
+  { path: '/settings/integrations', label: AF.nav.integrations },
 ];
 
 export const mainNavItems: NavItem[] = [
@@ -138,6 +139,7 @@ const routeTitles: Record<string, string> = {
   '/settings': AF.routes.settings,
   '/settings/general': AF.routes.generalSettings,
   '/settings/instance-settings': AF.routes.instanceSettings,
+  '/settings/integrations': AF.routes.integrations,
   '/themes': AF.routes.themes,
   '/freetypes': AF.routes.freetypes,
   '/advertising': AF.routes.advertising,

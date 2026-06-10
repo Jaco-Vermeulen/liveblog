@@ -116,6 +116,7 @@ export function SettingsPage() {
             form={general.form}
             themes={general.themes}
             languages={general.languages}
+            blogCategories={general.blogCategories}
             publicUrl={general.publicUrl}
             embedCode={general.embedCode}
             metaLoading={general.metaLoading}

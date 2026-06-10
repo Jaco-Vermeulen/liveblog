@@ -6,6 +6,7 @@ import {
   InstanceFeaturesProvider,
   InstanceSettingsPage,
 } from '@/mechanisms/settings-manager';
+import { IntegrationsPage } from '@/mechanisms/integrations-manager';
 import { ThemesManagerPage } from '@/mechanisms/themes-manager';
 import { BlogAnalyticsPage } from '@/mechanisms/analytics-manager';
 import { FreetypesManagerPage } from '@/mechanisms/freetypes-manager';
@@ -70,6 +71,14 @@ export default function App() {
             element={
               <PrivilegeRoute require={{ global_preferences: 1 }}>
                 <InstanceSettingsPage />
+              </PrivilegeRoute>
+            }
+          />
+          <Route
+            path="/settings/integrations"
+            element={
+              <PrivilegeRoute require={{ global_preferences: 1 }}>
+                <IntegrationsPage />
               </PrivilegeRoute>
             }
           />

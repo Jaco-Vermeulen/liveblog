@@ -23,6 +23,7 @@ from flask import json, render_template, request, send_file, url_for
 from superdesk import get_resource_service
 from superdesk.errors import SuperdeskApiError
 from liveblog.blogs.blog import Blog
+from liveblog.posts.headline import prepare_blog_for_embed, resolve_live_headline
 from liveblog.themes.template.utils import get_theme_template
 from liveblog.themes.template.loaders import CompiledThemeTemplateLoader
 from liveblog.blogposting_schema.utils import generate_liveblog_posting_schema
@@ -225,6 +226,10 @@ def embed(blog_id, theme=None, output=None, api_host=None):
     blog = get_resource_service("client_blogs").find_one(req=None, _id=blog_id)
     if not blog:
         return "blog not found", 404
+
+    blog = dict(blog)
+    blog["current_headline"] = resolve_live_headline(blog_id)
+    blog = prepare_blog_for_embed(blog)
 
     # if the `output` is the `_id` get the data.
     if output:

@@ -22,6 +22,7 @@ export function GeneralSettingsPage() {
     saveMessage,
     updateForm,
     setTags,
+    setBlogCategories,
     save,
   } = useGeneralSettings();
 
@@ -151,7 +152,25 @@ export function GeneralSettingsPage() {
         </div>
 
         <div className="md:col-span-2">
-          <TagsManager tags={form.globalTags.value} onChange={setTags} />
+          <TagsManager
+            tags={form.globalTags.value}
+            onChange={setTags}
+            label={AF.settings.globalTags}
+            inputId="global-tags-input"
+            placeholder={AF.settings.tagPlaceholder}
+            hint={AF.settings.tagHint}
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <TagsManager
+            tags={form.blogCategories.value}
+            onChange={setBlogCategories}
+            label={AF.settings.blogCategories}
+            inputId="blog-categories-input"
+            placeholder={AF.settings.categoryPlaceholder}
+            hint={AF.settings.categoryHint}
+          />
         </div>
       </form>
     </LbContentContainer>
