@@ -23,14 +23,17 @@ def _latest_post_for_blog(posts_service, blog_id):
     req.max_results = 1
     lookup = dict(OPEN_POST_LOOKUP)
     lookup["blog"] = blog_id
-    return next(posts_service.get(req=req, lookup=lookup), None)
+    # Mongo query: Eve sort strings like "-order" are not valid for ES (ast.literal_eval).
+    return next(posts_service.get_from_mongo(req=req, lookup=lookup), None)
 
 
 def _latest_post_across_blogs(posts_service):
     req = ParsedRequest()
     req.sort = "-order"
     req.max_results = 1
-    return next(posts_service.get(req=req, lookup=dict(OPEN_POST_LOOKUP)), None)
+    return next(
+        posts_service.get_from_mongo(req=req, lookup=dict(OPEN_POST_LOOKUP)), None
+    )
 
 
 def _newest_blog_post_marker(blogs, post_field):

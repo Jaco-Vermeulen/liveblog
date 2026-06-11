@@ -14,10 +14,10 @@ REPO_URL="https://github.com/Jaco-Vermeulen/liveblog.git"
 BRANCH="master"
 INSTALL_DIR="/opt/liveblog"
 
-# Domain only — no http:// no trailing slash
+# Canonical domain — SUPERDESK_* URLs, emails, stored embed links use this host
 PUBLIC_HOST="live.nuwe-maroela.co.za"
-# Extra hostnames on same box (space-separated), e.g. cloudlet default hostname
-EXTRA_SERVER_NAMES="maroelablog.jnb1.cloudlet.cloud"
+# Extra hostnames on same box (space-separated) — configure nginx/TLS via deploy-liveblog.sh
+EXTRA_SERVER_NAMES="live.maroelamedia.co.za maroelablog.jnb1.cloudlet.cloud"
 
 USE_NGINX="true"
 USE_HTTPS="true"
@@ -323,9 +323,13 @@ print_done() {
   echo ".env:  ${INSTALL_DIR}/.env"
   if [[ "${USE_NGINX}" == "true" ]]; then
     echo "Use https://${PUBLIC_HOST} — NOT :9000 with https"
+    if [[ -n "${EXTRA_SERVER_NAMES}" ]]; then
+      echo "Also:  https://live.maroelamedia.co.za (after DNS + full deploy nginx/TLS)"
+    fi
   fi
   if [[ "${USE_NGINX}" == "true" ]]; then
     echo "Embed: https://${PUBLIC_HOST}/embed/<blog_id>/theme/nuwe-maroela"
+    echo "       https://live.maroelamedia.co.za/embed/<blog_id>/theme/nuwe-maroela"
     echo "       https://${PUBLIC_HOST}/embed/<blog_id>/theme/maroela"
   fi
   echo "================================================================================"

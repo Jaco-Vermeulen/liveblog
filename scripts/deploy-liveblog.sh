@@ -12,9 +12,10 @@ REPO_URL="https://github.com/Jaco-Vermeulen/liveblog.git"
 BRANCH="master"
 INSTALL_DIR="/opt/liveblog"
 
-# Domain only — no http:// no trailing slash
+# Canonical domain — SUPERDESK_* URLs, emails, stored embed links use this host
 PUBLIC_HOST="live.nuwe-maroela.co.za"
-EXTRA_SERVER_NAMES="maroelablog.jnb1.cloudlet.cloud"
+# Extra hostnames on the same box (space-separated) — nginx + TLS SAN cert
+EXTRA_SERVER_NAMES="live.maroelamedia.co.za maroelablog.jnb1.cloudlet.cloud"
 
 USE_NGINX="true"
 USE_HTTPS="true"
@@ -154,7 +155,10 @@ resolve_public_host() {
   if [[ "${USE_NGINX}" == "true" && "${PUBLIC_HOST}" =~ ^[0-9.]+$ ]]; then
     die "USE_NGINX=true needs a domain name, not an IP"
   fi
-  log "PUBLIC_HOST=${PUBLIC_HOST}"
+  log "PUBLIC_HOST=${PUBLIC_HOST} (canonical)"
+  if [[ -n "${EXTRA_SERVER_NAMES}" ]]; then
+    log "EXTRA_SERVER_NAMES=${EXTRA_SERVER_NAMES}"
+  fi
 }
 
 install_docker() {
@@ -423,20 +427,39 @@ install_nginx() {
   nginx_verify_embed
 }
 
+certbot_domain_list() {
+  local h
+  echo -n "${PUBLIC_HOST}"
+  for h in ${EXTRA_SERVER_NAMES}; do
+    [[ -n "${h}" ]] || continue
+    echo -n " ${h}"
+  done
+}
+
 install_tls() {
   if [[ "${USE_NGINX}" != "true" || "${USE_HTTPS}" != "true" || -z "${CERTBOT_EMAIL}" ]]; then
     return 0
   fi
-  log "certbot ${PUBLIC_HOST}..."
+  local domains h certbot_args=()
+  domains="$(certbot_domain_list)"
+  log "certbot domains:${domains}"
   case "${PKG_MGR}" in
     apt) pkg_install certbot python3-certbot-nginx ;;
     apk) pkg_install certbot ;;
     dnf|yum) pkg_install certbot python3-certbot-nginx ;;
   esac
-  if certbot --nginx -d "${PUBLIC_HOST}" --non-interactive --agree-tos -m "${CERTBOT_EMAIL}" --redirect 2>/dev/null; then
-    log "TLS OK"
+  certbot_args=(--nginx --non-interactive --agree-tos -m "${CERTBOT_EMAIL}" --redirect)
+  for h in ${domains}; do
+    certbot_args+=(-d "${h}")
+  done
+  if [[ -d "/etc/letsencrypt/live/${PUBLIC_HOST}" ]]; then
+    certbot_args+=(--cert-name "${PUBLIC_HOST}" --expand)
+  fi
+  if certbot "${certbot_args[@]}" 2>/dev/null; then
+    log "TLS OK (${domains})"
   else
-    log "WARN: certbot failed — set CERTBOT_EMAIL and re-run, or: certbot --nginx -d ${PUBLIC_HOST}"
+    log "WARN: certbot failed — ensure DNS points here for all names, set CERTBOT_EMAIL, re-run:"
+    log "  certbot --nginx --expand $(for h in ${domains}; do echo -n \"-d ${h} \"; done)"
   fi
   # Re-apply our full config so HTTPS block always has /embed (certbot can drop it)
   write_nginx_config_file
@@ -554,12 +577,18 @@ print_done() {
   echo ".env:  ${INSTALL_DIR}/.env"
   if [[ "${USE_NGINX}" == "true" ]]; then
     echo "Use https://${PUBLIC_HOST} — NOT :9000 with https"
+    if [[ -n "${EXTRA_SERVER_NAMES}" ]]; then
+      echo "Also:  https://${EXTRA_SERVER_NAMES%% *} (and other EXTRA_SERVER_NAMES)"
+    fi
   fi
   if [[ "${USE_HTTPS}" == "true" && -z "${CERTBOT_EMAIL}" ]]; then
-    echo "TLS:   set CERTBOT_EMAIL in deploy script and re-run"
+    echo "TLS:   set CERTBOT_EMAIL in deploy script and re-run (covers PUBLIC_HOST + EXTRA_SERVER_NAMES)"
   fi
   if [[ "${USE_NGINX}" == "true" ]]; then
-    echo "Embed: https://${PUBLIC_HOST}/embed/<blog_id>/theme/default"
+    echo "Embed: https://${PUBLIC_HOST}/embed/<blog_id>/theme/nuwe-maroela"
+    if [[ "${EXTRA_SERVER_NAMES}" == *"live.maroelamedia.co.za"* ]]; then
+      echo "       https://live.maroelamedia.co.za/embed/<blog_id>/theme/nuwe-maroela"
+    fi
   fi
   echo "================================================================================"
 }

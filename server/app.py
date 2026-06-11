@@ -35,6 +35,7 @@ from liveblog.advertisements.advertisements import advertisements_blueprint
 from liveblog.video_upload.video_upload import video_upload_blueprint
 from liveblog.instance_settings.instance_settings import instance_settings_blueprint
 from liveblog.bandwidth.bandwidth import bandwidth_blueprint
+from liveblog.elastic_recovery import install_elastic_recovery
 
 from superdesk.factory import get_app as superdesk_app
 from superdesk.default_settings import celery_queue as instance_prefix
@@ -132,6 +133,8 @@ def get_app(config=None):
 
     # Bandwidth endpoint
     app.register_blueprint(bandwidth_blueprint)
+
+    install_elastic_recovery(app)
 
     return app
 

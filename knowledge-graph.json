@@ -1,7 +1,13 @@
 {
   "project": "liveblog",
   "version": "3.94.0",
-  "updated": "2026-06-09",
+  "updated": "2026-06-11",
+  "elastic_recovery": {
+    "module": "server/liveblog/elastic_recovery.py",
+    "behavior": "On HTTP 500, runs index_from_mongo --all in-process and retries the request once transparently",
+    "setting": "ELASTIC_AUTO_REINDEX_ON_500 (default true)",
+    "cooldown_sec": 30
+  },
   "webhooks": {
     "settings_ui": "/settings/integrations",
     "api": "/api/webhooks",

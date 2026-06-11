@@ -3,7 +3,7 @@
 #   cd /opt/liveblog && sudo bash scripts/fix-nginx-embed.sh
 set -euo pipefail
 PUBLIC_HOST="${PUBLIC_HOST:-live.nuwe-maroela.co.za}"
-EXTRA_SERVER_NAMES="${EXTRA_SERVER_NAMES:-maroelablog.jnb1.cloudlet.cloud}"
+EXTRA_SERVER_NAMES="${EXTRA_SERVER_NAMES:-live.maroelamedia.co.za maroelablog.jnb1.cloudlet.cloud}"
 API_PORT="${API_PORT:-5000}"
 WS_PORT="${WS_PORT:-5100}"
 UI_PORT="${UI_PORT:-9000}"
