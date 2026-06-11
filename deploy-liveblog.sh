@@ -598,10 +598,28 @@ register_bundled_themes() {
   fi
 }
 
+ensure_latest_deploy_script() {
+  local repo_script="${INSTALL_DIR}/deploy-liveblog.sh"
+  [[ -d "${INSTALL_DIR}/.git" ]] || return 0
+  git -C "${INSTALL_DIR}" fetch origin 2>/dev/null || true
+  git -C "${INSTALL_DIR}" checkout "${BRANCH}" 2>/dev/null || true
+  git -C "${INSTALL_DIR}" pull --ff-only origin "${BRANCH}" 2>/dev/null || true
+  [[ -f "${repo_script}" ]] || return 0
+  local self="${BASH_SOURCE[0]}"
+  if [[ "${self}" != /* ]]; then
+    self="$(cd "$(dirname "${self}")" && pwd)/$(basename "${self}")"
+  fi
+  if ! cmp -s "${repo_script}" "${self}" 2>/dev/null; then
+    log "Outdated copy $(basename "${self}") — re-running ${repo_script}"
+    exec bash "${repo_script}" "$@"
+  fi
+}
+
 print_done() {
   echo ""
   echo "================================================================================"
-  echo "Done. Open: ${SUPERDESK_CLIENT_URL}"
+  echo "Liveblog deploy done (canonical: ${PUBLIC_HOST})"
+  echo "Open:   ${SUPERDESK_CLIENT_URL}"
   echo "Login: admin / admin"
   echo "Logs:  cd ${INSTALL_DIR} && docker compose logs -f"
   echo ".env:  ${INSTALL_DIR}/.env"
@@ -618,6 +636,7 @@ print_done() {
 }
 
 main() {
+  ensure_latest_deploy_script
   resolve_public_host
   install_docker
   build_urls
