@@ -9,10 +9,12 @@
 # AUTHORS and LICENSE files distributed with this source code, or
 # at https://www.sourcefabric.org/superdesk/license
 
+import copy
 import logging
 import datetime
 
 from bson.objectid import ObjectId
+from eve.io.base import DataLayer
 from flask import current_app as app
 from flask import render_template
 from superdesk import get_resource_service
@@ -33,7 +35,7 @@ from settings import (
 )
 
 from .schema import blogs_schema
-from .utils import can_delete_blog
+from .utils import build_blog_public_url, can_delete_blog, is_s3_storage_enabled
 from .categories import validate_blog_category
 from .tasks import (
     delete_blog_embeds_on_s3,
@@ -247,6 +249,21 @@ class BlogService(BaseService):
                 updates.get("category"), original.get("category")
             )
 
+    def _sync_blog_public_url(self, blog_id, blog, theme_name):
+        """Keep public_url aligned with the blog's assigned theme (nginx embed path)."""
+        public_url = build_blog_public_url(app, blog_id, theme_name)
+        public_urls = copy.deepcopy(blog.get("public_urls") or {"output": {}, "theme": {}})
+        public_urls.setdefault("theme", {})[theme_name] = public_url
+        url_updates = {"public_url": public_url, "public_urls": public_urls}
+        try:
+            self.system_update(blog_id, url_updates, blog)
+        except DataLayer.OriginalChangedError:
+            blog = self.find_one(req=None, _id=blog_id)
+            self.system_update(blog_id, url_updates, blog)
+        push_notification("blog", published=1, blog_id=str(blog_id), **url_updates)
+        blog.update(url_updates)
+        return blog
+
     def on_updated(self, updates, original):
         original_id = str(original["_id"])
         # Invalidate cache for updated blog.
@@ -258,12 +275,13 @@ class BlogService(BaseService):
         blog.update(updates)
 
         if "blog_preferences" in updates:
-            # Update blog embed
             theme_name = updates["blog_preferences"].get("theme")
             if theme_name:
-                publish_blog_embeds_on_s3.apply_async(
-                    args=[blog], kwargs={"save": True}, countdown=2
-                )
+                blog = self._sync_blog_public_url(original_id, blog, theme_name)
+                if is_s3_storage_enabled():
+                    publish_blog_embeds_on_s3.apply_async(
+                        args=[blog], kwargs={"save": True}, countdown=2
+                    )
 
         members = updates.get("members", {})
         recipients = []

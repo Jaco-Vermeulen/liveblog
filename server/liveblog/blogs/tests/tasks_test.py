@@ -24,8 +24,7 @@ class TestGenerateFallbackHtmlUrl(TestCase):
             "123", "default", None, "//example.com/"
         )
         mock_blogs.system_update.assert_not_called()
-        mock_blogs._update_theme_settings.assert_not_called()
-        self.assertEqual(result, "https://example.com/embed/123/theme/default")
+        self.assertIsNone(result)
 
 
 class TestPublishBlogEmbedsOnS3(TestCase):
@@ -110,6 +109,44 @@ class TestPublishBlogEmbedsOnS3(TestCase):
     @patch("liveblog.blogs.tasks.app")
     @patch("liveblog.blogs.tasks.build_blog_public_url")
     @patch("liveblog.blogs.tasks.logger")
+    def test_internal_publish_uses_canonical_url_when_embed_fails(
+        self,
+        mock_logger,
+        mock_build_blog_public_url,
+        mock_app,
+        mock_get_resource_service,
+        mock_publish_embed,
+        mock_get_theme_for_publish,
+        mock_push_notification,
+    ):
+        blog = {"_id": "123", "blog_preferences": {"theme": "tribute-ultimate"}}
+        theme = "tribute-ultimate"
+        canonical = "https://live.example.com/embed/123/theme/tribute-ultimate"
+
+        mock_get_theme_for_publish.return_value = theme
+        mock_app.config = {"CANONICAL_HOST": "live.example.com", "EMBED_PROTOCOL": "https://"}
+        mock_publish_embed.return_value = None
+        mock_build_blog_public_url.return_value = canonical
+
+        mock_blogs_service = MagicMock()
+        mock_get_resource_service.return_value = mock_blogs_service
+
+        public_url, public_urls = internal_publish_blog_embed_on_s3(blog)
+
+        mock_build_blog_public_url.assert_called_once_with(
+            mock_app, "123", theme, None
+        )
+        self.assertEqual(public_url, canonical)
+        self.assertEqual(public_urls["theme"][theme], canonical)
+        mock_blogs_service.system_update.assert_called_once()
+
+    @patch("liveblog.blogs.tasks.push_notification")
+    @patch("liveblog.blogs.tasks.get_theme_for_publish")
+    @patch("liveblog.blogs.tasks.publish_embed")
+    @patch("liveblog.blogs.tasks.get_resource_service")
+    @patch("liveblog.blogs.tasks.app")
+    @patch("liveblog.blogs.tasks.build_blog_public_url")
+    @patch("liveblog.blogs.tasks.logger")
     def test_internal_publish_blog_embed_on_s3(
         self,
         mock_logger,
@@ -126,7 +163,10 @@ class TestPublishBlogEmbedsOnS3(TestCase):
         output = None
 
         mock_get_theme_for_publish.return_value = theme
-        mock_app.config = {"SERVER_NAME": "example.com"}
+        mock_app.config = {
+            "SERVER_NAME": "example.com",
+            "EMBED_PROTOCOL": "https://",
+        }
         mock_publish_embed.return_value = public_url
 
         mock_blogs_service = MagicMock()

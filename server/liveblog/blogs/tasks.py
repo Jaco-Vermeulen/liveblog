@@ -39,16 +39,19 @@ logger = logging.getLogger("liveblog")
 
 def generate_fallback_html_url(blog_id, output, api_host):
     """
-  When embed generation fails for the blog's chosen theme, try publishing a
-  fallback HTML file using the bundled default SEO theme only.
-
-  The blog's ``blog_preferences.theme`` in Mongo is never changed here — a failed
-  embed must not silently revert the editor's theme choice.
+    Best-effort upload of a default-theme embed file when the assigned theme
+    fails to render. Never changes ``blog_preferences.theme`` and never returns
+    a URL — callers must keep ``public_url`` on the blog's assigned theme.
     """
     logger.info(f'generate_fallback_html_url for blog "{blog_id}" started.')
-    public_url = publish_embed(blog_id, "default", output, api_host)
+    try:
+        publish_embed(blog_id, "default", output, api_host)
+    except Exception:
+        logger.exception(
+            f'generate_fallback_html_url for blog "{blog_id}" could not publish default embed'
+        )
     logger.info(f'generate_fallback_html_url for blog "{blog_id}" finished.')
-    return public_url
+    return None
 
 
 def publish_embed(blog_id, theme=None, output=None, api_host=None):
@@ -73,14 +76,8 @@ def publish_embed(blog_id, theme=None, output=None, api_host=None):
 
         if theme != "default":
             notify_about_embed_generation_error(str(e), blog_id, theme)
-            try:
-                return generate_fallback_html_url(blog_id, output, api_host)
-            except Exception as e:
-                exc_info = sys.exc_info()
-                return logger.exception(
-                    f"Failed embed fallback generation with theme `{theme}`. Error: {e}",
-                    exc_info=exc_info,
-                )
+            generate_fallback_html_url(blog_id, output, api_host)
+        return None
 
     if html is None:
         return logger.exception(
@@ -188,16 +185,20 @@ def internal_publish_blog_embed_on_s3(blog, output=None, safe=True, save=True):
     theme = get_theme_for_publish(blog, output)
 
     blogs = get_resource_service("client_blogs")
-    server_url = app.config.get("CANONICAL_HOST") or app.config["SERVER_NAME"]
+    server_url = app.config.get("CANONICAL_HOST") or app.config.get("SERVER_NAME")
+    api_host = f"//{server_url}/" if server_url else None
 
+    published_url = None
     try:
-        api_host = f"//{server_url}/"
-        public_url = publish_embed(blog_id, theme, output, api_host=api_host)
+        published_url = publish_embed(blog_id, theme, output, api_host=api_host)
     except MediaStorageUnsupportedForBlogPublishing as e:
         if not safe:
             raise e
-
         logger.error('Media storage not supported for blog "{}"'.format(blog_id))
+
+    if published_url:
+        public_url = published_url
+    else:
         public_url = build_blog_public_url(app, blog_id, theme, output_id)
 
     public_urls = blog.get("public_urls", {"output": {}, "theme": {}})
