@@ -27,6 +27,8 @@ export default defineConfig(({ mode }) => {
     'localhost',
     '127.0.0.1',
     'live.nuwe-maroela.co.za',
+    'live.maroelamedia.co.za',
+    'maroelablog.jnb1.cloudlet.cloud',
     ...(env.VITE_ALLOWED_HOSTS
       ? env.VITE_ALLOWED_HOSTS.split(',').map((host) => host.trim()).filter(Boolean)
       : []),
