@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Strip Windows CRLF when copied from a PC (before set -euo pipefail).
-__deploy_script="${BASH_SOURCE[0]:-$0}"
-if [[ -r "${__deploy_script}" ]] && grep -q $'\r' "${__deploy_script}" 2>/dev/null; then
-  exec bash <(sed 's/\r$//' "${__deploy_script}") "$@"
+# Copied from Windows? Re-run through sed once (before set -euo pipefail).
+if [[ -z "${__DEPLOY_LF_OK:-}" ]]; then
+  export __DEPLOY_LF_OK=1
+  exec bash <(sed 's/\r$//' "${BASH_SOURCE[0]:-$0}") "$@"
 fi
-unset __deploy_script
 # =============================================================================
 # LIVEBLOG production deploy — copy this ONE file to the server, then run:
 #
