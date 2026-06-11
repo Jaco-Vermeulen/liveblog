@@ -108,4 +108,31 @@ describe('buildThemeStyleSettingsCss', () => {
     expect(css).toContain('html.lb-wrapHtml, body.lb-wrapBody');
     expect(css).toContain('background-color: #112233 !important');
   });
+
+  it('sets cssVariables for tribute page background', () => {
+    const css = buildThemeStyleSettingsCss({
+      name: 'tribute-light',
+      supportStylesSettings: true,
+      styleSettings: { page: { 'background-color': '#f5f2ed' } },
+      styleOptions: [
+        {
+          label: 'Page',
+          name: 'page',
+          cssSelector: 'html.lb-wrapHtml, body.lb-wrapBody',
+          options: [
+            {
+              label: 'Page background',
+              property: 'background-color',
+              type: 'colorpicker',
+              default: '#f5efe7',
+              cssVariables: ['--tl-parchment'],
+            },
+          ],
+        },
+      ],
+    } as Theme);
+
+    expect(css).toContain(':root { --tl-parchment: #f5f2ed !important');
+    expect(css).toContain('background-color: #f5f2ed !important');
+  });
 });

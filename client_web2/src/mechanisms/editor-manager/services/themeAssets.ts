@@ -112,6 +112,16 @@ export function buildThemeStyleSettingsCss(theme: Theme): string {
         option.type === 'colorpicker' && !raw.includes('!important')
           ? `${raw} !important`
           : raw;
+
+      const cssVariables = (option as { cssVariables?: string[] }).cssVariables ?? [];
+      if (cssVariables.length > 0) {
+        const rootProps = rules.get(':root') ?? [];
+        for (const varName of cssVariables) {
+          rootProps.push(`${varName}: ${value}`);
+        }
+        rules.set(':root', rootProps);
+      }
+
       const selector = buildCssSelector(group.cssSelector, option.tagName);
       const existing = rules.get(selector) ?? [];
       existing.push(`${property}: ${value}`);

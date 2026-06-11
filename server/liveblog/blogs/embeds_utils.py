@@ -105,6 +105,10 @@ def compile_styles_map(settings, style_options):
             ):
                 option_value = "{} !important".format(option_value)
 
+            for var_name in style_option.get("cssVariables") or []:
+                root_styles = styles_map.setdefault(":root", [])
+                root_styles.append((var_name, option_value))
+
             final_css_selector = build_css_selector(css_selector, style_option)
             styles = styles_map.setdefault(final_css_selector, [])
             styles.append((property_name, option_value))
@@ -124,9 +128,9 @@ def generate_theme_styles(theme):
         return ""
 
     options_groups = theme.get("styleOptions", {})
-    settings = theme.get("styleSettings", {})
+    settings = theme.get("styleSettings") or {}
 
-    if not options_groups or not settings:
+    if not options_groups:
         return ""
 
     styles_map = compile_styles_map(settings, options_groups)

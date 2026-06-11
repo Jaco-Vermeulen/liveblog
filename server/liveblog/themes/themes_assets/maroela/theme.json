@@ -107,7 +107,8 @@
                     "label": "Background",
                     "property": "background-color",
                     "type": "colorpicker",
-                    "default": "#ffffff"
+                    "default": "#ffffff",
+                    "cssVariables": ["--maroela-page-bg-light"]
                 }
             ]
         },

@@ -246,17 +246,26 @@
     "supportStylesSettings": true,
     "styleOptions": [
         {
-            "label": "General",
-            "name": "general",
-            "cssSelector": "div.lb-timeline",
-            "columns": 3,
+            "label": "Page",
+            "name": "page",
+            "cssSelector": "html.lb-wrapHtml, body.lb-wrapBody, .lb-timeline.lb-themed-preview[data-theme=\"tribute-light\"], .lb-timeline.tribute-light-timeline",
+            "columns": 1,
             "options": [
                 {
                     "label": "Page background",
-                    "property": "background",
+                    "property": "background-color",
                     "type": "colorpicker",
-                    "default": "#f5efe7"
-                },
+                    "default": "#f5efe7",
+                    "cssVariables": ["--tl-parchment"]
+                }
+            ]
+        },
+        {
+            "label": "General",
+            "name": "general",
+            "cssSelector": "div.lb-timeline",
+            "columns": 2,
+            "options": [
                 {
                     "label": "Link colour",
                     "property": "color",

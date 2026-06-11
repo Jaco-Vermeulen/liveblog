@@ -46,12 +46,6 @@
 <link href="{{ fonts_url }}" rel="stylesheet">
 {% endif %}
 
-{% if styles_settings %}
-<style>
-{{ styles_settings }}
-</style>
-{% endif %}
-
 <script type="application/ld+json">
 {{ schema | safe }}
 </script>
@@ -81,6 +75,11 @@
             <script {% if async %}async {% endif%}type="text/javascript" src="{{ script }}"></script>
         {% endfor %}
     {% endif %}
+{% if styles_settings %}
+<style id="liveblog-theme-style-overrides">
+{{ styles_settings }}
+</style>
+{% endif %}
 {% if not settings.renderForESI %}
     </body>
 </html>

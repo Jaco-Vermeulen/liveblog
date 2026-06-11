@@ -255,7 +255,8 @@
                     "label": "Page background",
                     "property": "background-color",
                     "type": "colorpicker",
-                    "default": "#f5efe7"
+                    "default": "#f5efe7",
+                    "cssVariables": ["--tl-parchment"]
                 }
             ]
         },

@@ -216,7 +216,9 @@
 
                     "type": "colorpicker",
 
-                    "default": "#f5efe7"
+                    "default": "#f5efe7",
+
+                    "cssVariables": ["--maroela-page-bg-light"]
 
                 }
 

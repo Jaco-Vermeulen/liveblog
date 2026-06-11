@@ -87,6 +87,32 @@ class EmbedUtilsTestCase(TestCase):
 
         self.assertEqual(styles_map, mock_styles_map_result)
 
+    def test_compile_styles_map_sets_css_variables_for_page_background(self):
+        style_options = [
+            {
+                "label": "Page",
+                "name": "page",
+                "cssSelector": "html.lb-wrapHtml, body.lb-wrapBody",
+                "options": [
+                    {
+                        "label": "Page background",
+                        "property": "background-color",
+                        "type": "colorpicker",
+                        "default": "#f5efe7",
+                        "cssVariables": ["--tl-parchment"],
+                    }
+                ],
+            }
+        ]
+        settings = {"page": {"background-color": "#f5f2ed"}}
+
+        styles_map = compile_styles_map(settings, style_options)
+
+        self.assertEqual(
+            styles_map[":root"],
+            [("--tl-parchment", "#f5f2ed !important")],
+        )
+
     def test_compile_styles_map_uses_legacy_general_background_for_page(self):
         style_options = [
             {

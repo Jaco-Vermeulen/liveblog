@@ -104,7 +104,8 @@
                     "label": "Page background",
                     "property": "background-color",
                     "type": "colorpicker",
-                    "default": "#f6f2ea"
+                    "default": "#f6f2ea",
+                    "cssVariables": ["--tl-parchment"]
                 }
             ]
         },
