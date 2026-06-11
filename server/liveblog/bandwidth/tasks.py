@@ -6,7 +6,7 @@ from flask import current_app as app
 from superdesk.celery_app import celery
 from superdesk import get_resource_service
 from superdesk.utc import utcnow
-from settings import CLOUDFLARE_URL, CLOUDFLARE_AUTH, CLOUDFLARE_ZONE_TAG, SERVER_NAME
+from settings import CLOUDFLARE_URL, CLOUDFLARE_AUTH, CLOUDFLARE_ZONE_TAG, CANONICAL_HOST, SERVER_NAME
 
 logger = logging.getLogger("liveblog")
 
@@ -59,7 +59,8 @@ def fetch_bandwidth_usage():
         logger.error("Missing needed credentials for Cloudflare API")
         return
 
-    subdomain = SERVER_NAME.split(".")[0] if SERVER_NAME else None
+    host = CANONICAL_HOST or SERVER_NAME
+    subdomain = host.split(".")[0] if host else None
 
     if not subdomain:
         logger.error("Missing subdomain for Cloudflare API request")

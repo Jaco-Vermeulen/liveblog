@@ -21,6 +21,7 @@ x-liveblog-env: &liveblog-env
   SUPERDESK_WS_URL: ${SUPERDESK_WS_URL:-ws://localhost:5100}
   SUPERDESK_CLIENT_URL: ${SUPERDESK_CLIENT_URL:-http://localhost:9000}
   SUPERDESK_TESTING: ${SUPERDESK_TESTING:-True}
+  LIVEBLOG_MULTI_HOST: ${LIVEBLOG_MULTI_HOST:-True}
   # Single worker in Docker dev — reload + Windows volume mounts otherwise spawn dozens of stale gunicorn workers (auth 404 / instant "session expired").
   SUPERDESK_RELOAD: ${SUPERDESK_RELOAD:-False}
   WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}

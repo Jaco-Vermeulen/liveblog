@@ -97,7 +97,11 @@ if not CLIENT_URL.startswith("http"):
 URL_PROTOCOL = server_url.scheme or None
 URL_PREFIX = server_url.path.lstrip("/") or ""
 
-SERVER_NAME = server_url.netloc or None
+# Canonical public hostname for generated embed/email URLs (always SUPERDESK_URL host).
+CANONICAL_HOST = server_url.netloc or None
+# When true, Flask SERVER_NAME is unset so nginx may serve multiple Host headers (nuwe + maroelamedia).
+LIVEBLOG_MULTI_HOST = env("LIVEBLOG_MULTI_HOST", False)
+SERVER_NAME = None if LIVEBLOG_MULTI_HOST else CANONICAL_HOST
 
 VALIDATION_ERROR_STATUS = 400
 JSON_SORT_KEYS = True

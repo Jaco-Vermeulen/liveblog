@@ -91,7 +91,7 @@ class BandwidthService(BaseService):
         if users:
             recipients_email.extend([user["email"] for user in users])
 
-        server_name = app.config["SERVER_NAME"]
+        server_name = app.config.get("CANONICAL_HOST") or app.config["SERVER_NAME"]
         admins = app.config["ADMINS"]
         app_name = app.config["APPLICATION_NAME"]
 

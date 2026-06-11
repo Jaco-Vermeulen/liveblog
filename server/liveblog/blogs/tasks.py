@@ -200,7 +200,7 @@ def internal_publish_blog_embed_on_s3(blog, output=None, safe=True, save=True):
     theme = get_theme_for_publish(blog, output)
 
     blogs = get_resource_service("client_blogs")
-    server_url = app.config["SERVER_NAME"]
+    server_url = app.config.get("CANONICAL_HOST") or app.config["SERVER_NAME"]
 
     try:
         api_host = f"//{server_url}/"
