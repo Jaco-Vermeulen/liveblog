@@ -663,6 +663,8 @@ class ThemesService(BaseService):
                 for key, value in package_settings.items():
                     if value is not None:
                         merged[key] = value
+                # Theme Manager / Mongo overrides must survive register_local_themes.
+                merged.update(previous_theme.get("settings") or {})
                 theme["settings"] = merged
             self._set_style_settings(theme, previous_theme)
             self.replace(previous_theme["_id"], theme, previous_theme)
@@ -788,7 +790,7 @@ class ThemesService(BaseService):
 
     def on_updated(self, updates, original):
         # Republish the related blogs if the settings have been changed.
-        if "settings" in updates:
+        if "settings" in updates or "styleSettings" in updates:
             self.publish_related_blogs(original)
 
     def on_delete(self, deleted_theme):

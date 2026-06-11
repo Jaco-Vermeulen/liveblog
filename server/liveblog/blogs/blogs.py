@@ -235,7 +235,10 @@ class BlogService(BaseService):
             updates["start_date"] = original["_created"]
 
         if "blog_preferences" in updates:
-            theme_name = updates["blog_preferences"].get("theme")
+            merged_prefs = dict(original.get("blog_preferences") or {})
+            merged_prefs.update(updates["blog_preferences"])
+            updates["blog_preferences"] = merged_prefs
+            theme_name = merged_prefs.get("theme")
             if theme_name:
                 self._update_theme_settings(updates, theme_name)
 
