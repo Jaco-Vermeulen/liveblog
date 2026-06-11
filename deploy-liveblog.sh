@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Strip Windows CRLF when the file was copied from a PC (must run before set -euo pipefail).
+if [[ -f "${BASH_SOURCE[0]:-$0}" ]] && grep -q $'\r' "${BASH_SOURCE[0]:-$0}" 2>/dev/null; then
+  sed -i 's/\r$//' "${BASH_SOURCE[0]:-$0}"
+  exec bash "${BASH_SOURCE[0]:-$0}" "$@"
+fi
 # =============================================================================
 # LIVEBLOG production deploy — copy this ONE file to the server, then run:
 #
