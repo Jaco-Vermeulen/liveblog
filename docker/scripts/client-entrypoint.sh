@@ -16,9 +16,16 @@ if [[ ! -x node_modules/.bin/vite ]]; then
   fi
 fi
 
+# Browser admin URL may be https; Vite proxy still targets internal http://server:5000/api.
 if [[ "${SUPERDESK_CLIENT_URL:-}" == https://* && "${API_PROXY_TARGET}" == http://* ]]; then
-  echo "ERROR: SUPERDESK_CLIENT_URL is https but VITE_LIVEBLOG_API_URL is http — fix .env" >&2
-  exit 1
+  case "${API_PROXY_TARGET}" in
+    http://server:*|http://localhost:*|http://127.0.0.1:*)
+      ;;
+    *)
+      echo "ERROR: SUPERDESK_CLIENT_URL is https but VITE_LIVEBLOG_API_URL is public http — fix .env" >&2
+      exit 1
+      ;;
+  esac
 fi
 
 export VITE_LIVEBLOG_API_URL="${API_PROXY_TARGET}"
