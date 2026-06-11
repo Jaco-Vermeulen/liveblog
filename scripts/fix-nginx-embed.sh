@@ -93,5 +93,5 @@ EOF
 nginx -t
 systemctl reload nginx 2>/dev/null || rc-service nginx reload
 echo "Wrote ${SITE} for: ${names}"
-nginx -T 2>/dev/null | grep -E 'server_name|location /embed' || true
-nginx -T 2>/dev/null | grep -q "location /embed" && echo "YES: /embed active" || echo "NO: still missing /embed"
+nginx -T 2>/dev/null | grep -E 'server_name|location.*/embed' || true
+nginx -T 2>/dev/null | grep -qE 'location.*/embed' && echo "YES: /embed active" || echo "NO: still missing /embed"

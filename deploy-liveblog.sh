@@ -37,6 +37,7 @@ LIVEBLOG_DEBUG="true"
 EMBED_PROTOCOL=""
 SUPERDESK_TESTING="true"
 WEB_CONCURRENCY="1"
+WEB_TIMEOUT="600"
 IFRAMELY_KEY="a5ee9a89addd13b7a2e3a48c23e74e8d"
 
 AMAZON_ACCESS_KEY_ID=""
@@ -404,17 +405,17 @@ nginx_reload() {
 nginx_verify_embed() {
   local site
   site="$(nginx_conf_path)"
-  if ! grep -q "location /embed" "${site}" 2>/dev/null; then
+  if ! grep -qE 'location.*/embed' "${site}" 2>/dev/null; then
     die "Config file missing /embed: ${site} — re-run deploy script"
   fi
   log "Config file OK: ${site} has location /embed"
-  if nginx -T 2>/dev/null | grep -q "location /embed"; then
+  if nginx -T 2>/dev/null | grep -qE 'location.*/embed'; then
     log "nginx active: location /embed → :${API_PORT}"
     return 0
   fi
   log "WARN: config has /embed but nginx -T does not — reloading..."
   nginx_reload
-  if nginx -T 2>/dev/null | grep -q "location /embed"; then
+  if nginx -T 2>/dev/null | grep -qE 'location.*/embed'; then
     log "nginx active after reload"
     return 0
   fi
@@ -520,6 +521,7 @@ LIVEBLOG_DEBUG=${LIVEBLOG_DEBUG}
 EMBED_PROTOCOL=${EMBED_PROTOCOL}
 SUPERDESK_TESTING=${SUPERDESK_TESTING}
 WEB_CONCURRENCY=${WEB_CONCURRENCY}
+WEB_TIMEOUT=${WEB_TIMEOUT}
 IFRAMELY_KEY=${IFRAMELY_KEY}
 EOF
   if [[ -n "${AMAZON_ACCESS_KEY_ID}" ]]; then
