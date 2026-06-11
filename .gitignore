@@ -16,7 +16,6 @@ __pycache__/
 env/
 .env
 scripts/deploy-liveblog-staging.sh
-/deploy-liveblog.sh
 data/
 build/
 develop-eggs/

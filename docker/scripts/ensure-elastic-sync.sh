@@ -16,7 +16,9 @@ cd /opt/server
 
 if ! curl -sf "${ES_URL}/${ES_INDEX}" >/dev/null 2>&1; then
   echo "ensure-elastic-sync: alias ${ES_INDEX} missing — rebuilding index..."
-  python3 manage.py app:rebuild_elastic_index --index="${ES_INDEX}"
+  if ! python3 manage.py app:rebuild_elastic_index --index="${ES_INDEX}"; then
+    echo "ensure-elastic-sync: WARN rebuild failed — starting API anyway (posts may be empty until reindex)"
+  fi
 fi
 
 es_count() {
@@ -41,7 +43,9 @@ sync_if_behind() {
 
   if [[ "${mongo_n}" =~ ^[0-9]+$ ]] && [[ "${es_n}" =~ ^[0-9]+$ ]] && [[ "${mongo_n}" -gt "${es_n}" ]]; then
     echo "ensure-elastic-sync: ${mongo_collection} — Mongo ${mongo_n}, ES ${es_n} — reindexing..."
-    python3 manage.py app:index_from_mongo --from="${es_resource}"
+    if ! python3 manage.py app:index_from_mongo --from="${es_resource}"; then
+      echo "ensure-elastic-sync: WARN index_from_mongo ${es_resource} failed — continuing"
+    fi
   fi
 }
 
