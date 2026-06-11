@@ -39,26 +39,14 @@ logger = logging.getLogger("liveblog")
 
 def generate_fallback_html_url(blog_id, output, api_host):
     """
-    This function is called when the primary embed generation fails, and it
-    generates an HTML embed url for the blog using the default seo theme. The function
-    also updates the blog's theme and theme settings to the default theme in the
-    database.
+  When embed generation fails for the blog's chosen theme, try publishing a
+  fallback HTML file using the bundled default SEO theme only.
+
+  The blog's ``blog_preferences.theme`` in Mongo is never changed here — a failed
+  embed must not silently revert the editor's theme choice.
     """
     logger.info(f'generate_fallback_html_url for blog "{blog_id}" started.')
-
-    theme = "default"
-    updates = {}
-    blogs = get_resource_service("blogs")
-    public_url = publish_embed(blog_id, theme, output, api_host)
-
-    blog_id, blog = get_blog(blog_id)
-
-    updates["blog_preferences"] = blog.get("blog_preferences", {})
-    updates["blog_preferences"]["theme"] = theme
-
-    blogs._update_theme_settings(updates, theme)
-    blogs.system_update(blog_id, updates, blog)
-
+    public_url = publish_embed(blog_id, "default", output, api_host)
     logger.info(f'generate_fallback_html_url for blog "{blog_id}" finished.')
     return public_url
 

@@ -1,10 +1,31 @@
 from superdesk.tests import TestCase
 from unittest.mock import patch, MagicMock
 from liveblog.blogs.tasks import (
+    generate_fallback_html_url,
     publish_blog_embeds_on_s3,
     publish_blog_embed_on_s3,
     internal_publish_blog_embed_on_s3,
 )
+
+
+class TestGenerateFallbackHtmlUrl(TestCase):
+    @patch("liveblog.blogs.tasks.publish_embed")
+    @patch("liveblog.blogs.tasks.get_resource_service")
+    def test_does_not_reset_blog_theme_in_mongo(
+        self, mock_get_resource_service, mock_publish_embed
+    ):
+        mock_publish_embed.return_value = "https://example.com/embed/123/theme/default"
+        mock_blogs = MagicMock()
+        mock_get_resource_service.return_value = mock_blogs
+
+        result = generate_fallback_html_url("123", None, "//example.com/")
+
+        mock_publish_embed.assert_called_once_with(
+            "123", "default", None, "//example.com/"
+        )
+        mock_blogs.system_update.assert_not_called()
+        mock_blogs._update_theme_settings.assert_not_called()
+        self.assertEqual(result, "https://example.com/embed/123/theme/default")
 
 
 class TestPublishBlogEmbedsOnS3(TestCase):

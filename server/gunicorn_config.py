@@ -10,4 +10,5 @@ access_log_format = "%(m)s %(U)s status=%(s)s time=%(T)ss size=%(B)sb"
 
 reload = os.environ.get("SUPERDESK_RELOAD", "").lower() in ("true", "1", "yes")
 
-timeout = int(os.environ.get("WEB_TIMEOUT", 30))
+# Reindex-from-mongo on 500 can take several minutes on large datasets.
+timeout = int(os.environ.get("WEB_TIMEOUT", 600))

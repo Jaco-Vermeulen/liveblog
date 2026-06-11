@@ -13,4 +13,13 @@ describe('resolveBlogThemePreviewUrl', () => {
     } as never);
     expect(url).toBe('/embed/blogid123');
   });
+
+  it('prefers assigned theme over stale public_url theme', () => {
+    const url = resolveBlogThemePreviewUrl({
+      _id: 'blog1',
+      blog_preferences: { theme: 'tribute-ultimate' },
+      public_url: 'https://live.example.com/embed/blog1/theme/default',
+    } as never);
+    expect(url).toBe('/embed/blog1/theme/tribute-ultimate');
+  });
 });

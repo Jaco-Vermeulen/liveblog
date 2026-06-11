@@ -1,5 +1,24 @@
 import type { Blog } from '@/mechanisms/liveblog-api';
 
+function themeNameFromBlog(blog: Blog): string | undefined {
+  const theme = blog.blog_preferences?.theme;
+  if (typeof theme === 'string' && theme.trim()) return theme.trim();
+  if (theme && typeof theme === 'object' && 'name' in theme) {
+    const name = (theme as { name?: string }).name;
+    return name?.trim() || undefined;
+  }
+  return undefined;
+}
+
+function embedPathForBlog(blogId: string, themeName?: string): string {
+  return themeName ? `/embed/${blogId}/theme/${themeName}` : `/embed/${blogId}`;
+}
+
+function themeNameFromEmbedPath(path: string): string | undefined {
+  const match = path.match(/\/embed\/[^/]+\/theme\/([^/?]+)/);
+  return match?.[1];
+}
+
 function serverOrigin(): string {
   const fromEnv = import.meta.env.VITE_LIVEBLOG_SERVER_URL as string | undefined;
   if (fromEnv) return fromEnv.replace(/\/$/, '');
@@ -26,11 +45,22 @@ function sameOriginEmbedPath(url: URL): string | null {
  * post toolbars into the iframe (cross-origin embeds fall back to React cards).
  */
 export function resolveBlogThemePreviewUrl(blog: Blog): string {
+  const assignedTheme = themeNameFromBlog(blog);
+  const canonicalPath = embedPathForBlog(blog._id, assignedTheme);
+
   const raw = blog.public_url?.trim();
   if (raw) {
     try {
       const u = new URL(raw, typeof window !== 'undefined' ? window.location.origin : undefined);
       const embedPath = sameOriginEmbedPath(u);
+      if (embedPath) {
+        const urlTheme = themeNameFromEmbedPath(embedPath);
+        if (assignedTheme && urlTheme && urlTheme !== assignedTheme) {
+          if (import.meta.env.DEV || typeof window !== 'undefined') {
+            return canonicalPath;
+          }
+        }
+      }
       if (embedPath && import.meta.env.DEV) {
         return embedPath;
       }
@@ -46,7 +76,7 @@ export function resolveBlogThemePreviewUrl(blog: Blog): string {
     }
   }
 
-  const path = `/embed/${blog._id}`;
+  const path = canonicalPath;
   if (import.meta.env.DEV) {
     return path;
   }

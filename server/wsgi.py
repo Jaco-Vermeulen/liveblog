@@ -24,7 +24,8 @@ class LazyWSGIApp(object):
     """Defer app creation until first request (gunicorn worker is ready)."""
 
     def __call__(self, environ, start_response):
-        return _load_application()(environ, start_response)
+        # Use wrapped wsgi_app so elastic recovery middleware is always in path.
+        return _load_application().wsgi_app(environ, start_response)
 
 
 application = LazyWSGIApp()
