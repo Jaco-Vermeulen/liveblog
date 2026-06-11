@@ -60,16 +60,25 @@ class EmbedUtilsTestCase(TestCase):
         self.assertEqual(selector, "div.lb-timeline")
         self.assertEqual(selector_with_child_tag, "div.lb-timeline a")
 
+        comma_selector = build_css_selector(
+            "html.lb-wrapHtml, body.lb-wrapBody",
+            style_option_with_tag,
+        )
+        self.assertEqual(
+            comma_selector,
+            "html.lb-wrapHtml a, body.lb-wrapBody a",
+        )
+
     def test_compile_styles_map(self):
         mock_styles_map_result = {
             "div.lb-timeline h1": [
                 ("font-family", "Mukta Vaani"),
                 ("font-weight", "normal"),
                 ("font-style", "normal"),
-                ("color", "#7d41a4"),
+                ("color", "#7d41a4 !important"),
             ],
-            "div.lb-timeline": [("background", "#ffffff")],
-            "div.lb-timeline a": [("color", "#3394bc")],
+            "div.lb-timeline": [("background", "#ffffff !important")],
+            "div.lb-timeline a": [("color", "#3394bc !important")],
         }
 
         styles_map = compile_styles_map(
@@ -78,11 +87,36 @@ class EmbedUtilsTestCase(TestCase):
 
         self.assertEqual(styles_map, mock_styles_map_result)
 
+    def test_compile_styles_map_uses_legacy_general_background_for_page(self):
+        style_options = [
+            {
+                "label": "Page",
+                "name": "page",
+                "cssSelector": "html.lb-wrapHtml, body.lb-wrapBody",
+                "options": [
+                    {
+                        "label": "Background",
+                        "property": "background-color",
+                        "type": "colorpicker",
+                        "default": "#111111",
+                    }
+                ],
+            }
+        ]
+        settings = {"general": {"background": "#abcdef"}}
+
+        styles_map = compile_styles_map(settings, style_options)
+
+        self.assertEqual(
+            styles_map["html.lb-wrapHtml, body.lb-wrapBody"],
+            [("background-color", "#abcdef !important")],
+        )
+
     def test_convert_styles_map_to_css(self):
         mock_css_styles_list = [
-            "div.lb-timeline { background: #ffffff }",
-            "div.lb-timeline a { color: #3394bc }",
-            "div.lb-timeline h1 { font-family: Mukta Vaani; font-weight: normal; font-style: normal; color: #7d41a4 }",
+            "div.lb-timeline { background: #ffffff !important }",
+            "div.lb-timeline a { color: #3394bc !important }",
+            "div.lb-timeline h1 { font-family: Mukta Vaani; font-weight: normal; font-style: normal; color: #7d41a4 !important }",
         ]
 
         mock_css_styles = "\n".join(mock_css_styles_list)

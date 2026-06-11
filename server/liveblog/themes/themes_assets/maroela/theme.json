@@ -98,17 +98,25 @@
     "supportStylesSettings": true,
     "styleOptions": [
         {
-            "label": "General",
-            "name": "general",
-            "cssSelector": "div.lb-timeline",
-            "columns": 3,
+            "label": "Page",
+            "name": "page",
+            "cssSelector": "html.lb-wrapHtml, body.lb-wrapBody",
+            "columns": 1,
             "options": [
                 {
                     "label": "Background",
-                    "property": "background",
+                    "property": "background-color",
                     "type": "colorpicker",
                     "default": "#ffffff"
-                },
+                }
+            ]
+        },
+        {
+            "label": "General",
+            "name": "general",
+            "cssSelector": "div.lb-timeline",
+            "columns": 2,
+            "options": [
                 {
                     "label": "Link Color",
                     "property": "color",

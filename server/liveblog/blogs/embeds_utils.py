@@ -46,9 +46,14 @@ def build_css_selector(group_selector, styles_group):
     E.g: `div.timeline a`
     """
     tag_name = styles_group.get("tagName", "")
-    css_selector = "{} {}".format(group_selector, tag_name).strip()
+    if not tag_name:
+        return group_selector.strip()
 
-    return css_selector
+    if "," in group_selector:
+        parts = [part.strip() for part in group_selector.split(",") if part.strip()]
+        return ", ".join("{} {}".format(part, tag_name) for part in parts)
+
+    return "{} {}".format(group_selector, tag_name).strip()
 
 
 def compile_styles_map(settings, style_options):
@@ -81,9 +86,24 @@ def compile_styles_map(settings, style_options):
                 settings, group_name, property_name, default_value, linked_to_group
             )
 
+            # Legacy themes stored page background under general.background.
+            if (
+                not option_value
+                and group_name == "page"
+                and property_name == "background-color"
+            ):
+                option_value = get_setting_value(
+                    settings, "general", "background", default_value
+                )
+
             # we get to this point and no value so far, then skip this option
             if not option_value:
                 continue
+
+            if style_option.get("type") == "colorpicker" and "!important" not in str(
+                option_value
+            ):
+                option_value = "{} !important".format(option_value)
 
             final_css_selector = build_css_selector(css_selector, style_option)
             styles = styles_map.setdefault(final_css_selector, [])

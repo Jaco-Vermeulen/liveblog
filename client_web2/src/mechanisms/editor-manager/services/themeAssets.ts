@@ -1,4 +1,4 @@
-import type { Theme } from '@/mechanisms/liveblog-api';
+import type { StyleSettings, Theme, ThemeStyleGroup } from '@/mechanisms/liveblog-api';
 
 /**
  * Rewrites theme asset URLs to same-origin paths in dev so Vite proxies
@@ -53,6 +53,75 @@ export function resolveThemeChain(theme: Theme, allThemes: Theme[]): Theme[] {
   }
 
   return chain;
+}
+
+function buildCssSelector(groupSelector: string, tagName?: string): string {
+  if (!tagName?.trim()) return groupSelector.trim();
+  if (groupSelector.includes(',')) {
+    return groupSelector
+      .split(',')
+      .map((part) => `${part.trim()} ${tagName}`)
+      .join(', ');
+  }
+  return `${groupSelector} ${tagName}`.trim();
+}
+
+function styleSettingValue(
+  settings: StyleSettings,
+  groupName: string,
+  property: string,
+  defaultValue?: string | null,
+): string | null | undefined {
+  const group = settings[groupName];
+  const value = group?.[property];
+  if (value) return String(value);
+  if (
+    groupName === 'page' &&
+    property === 'background-color' &&
+    settings.general?.background
+  ) {
+    return String(settings.general.background);
+  }
+  return defaultValue ?? undefined;
+}
+
+/** Mirrors server `generate_theme_styles` for editor preview (React fallback path). */
+export function buildThemeStyleSettingsCss(theme: Theme): string {
+  if (!theme.supportStylesSettings || !theme.styleOptions?.length || !theme.styleSettings) {
+    return '';
+  }
+
+  const rules = new Map<string, string[]>();
+
+  for (const group of theme.styleOptions as ThemeStyleGroup[]) {
+    if (group.serializerIgnore || !group.cssSelector) continue;
+
+    for (const option of group.options ?? []) {
+      const property = option.property;
+      if (!property) continue;
+
+      const raw = styleSettingValue(
+        theme.styleSettings,
+        group.name,
+        property,
+        option.default ?? null,
+      );
+      if (!raw) continue;
+
+      const value =
+        option.type === 'colorpicker' && !raw.includes('!important')
+          ? `${raw} !important`
+          : raw;
+      const selector = buildCssSelector(group.cssSelector, option.tagName);
+      const existing = rules.get(selector) ?? [];
+      existing.push(`${property}: ${value}`);
+      rules.set(selector, existing);
+    }
+  }
+
+  return Array.from(rules.entries())
+    .map(([selector, props]) => `${selector} { ${props.join('; ')} }`)
+    .join('\n');
 }
 
 export function buildThemeStylesheetUrls(theme: Theme, allThemes: Theme[]): string[] {

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Theme } from '@/mechanisms/liveblog-api';
 import {
+  buildThemeStyleSettingsCss,
   buildThemeStylesheetUrls,
   normalizeThemeAssetUrl,
   resolveThemeChain,
@@ -78,5 +79,33 @@ describe('buildThemeStylesheetUrls', () => {
     ]);
 
     vi.unstubAllEnvs();
+  });
+});
+
+describe('buildThemeStyleSettingsCss', () => {
+  it('emits page background with !important and legacy general.background fallback', () => {
+    const css = buildThemeStyleSettingsCss({
+      name: 'nuwe-maroela',
+      supportStylesSettings: true,
+      styleSettings: { general: { background: '#112233' } },
+      styleOptions: [
+        {
+          label: 'Page',
+          name: 'page',
+          cssSelector: 'html.lb-wrapHtml, body.lb-wrapBody',
+          options: [
+            {
+              label: 'Background',
+              property: 'background-color',
+              type: 'colorpicker',
+              default: '#f5efe7',
+            },
+          ],
+        },
+      ],
+    } as Theme);
+
+    expect(css).toContain('html.lb-wrapHtml, body.lb-wrapBody');
+    expect(css).toContain('background-color: #112233 !important');
   });
 });

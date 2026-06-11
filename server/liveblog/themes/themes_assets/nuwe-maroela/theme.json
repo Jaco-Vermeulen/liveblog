@@ -198,13 +198,13 @@
 
         {
 
-            "label": "General",
+            "label": "Page",
 
-            "name": "general",
+            "name": "page",
 
-            "cssSelector": "div.lb-timeline",
+            "cssSelector": "html.lb-wrapHtml, body.lb-wrapBody",
 
-            "columns": 3,
+            "columns": 1,
 
             "options": [
 
@@ -212,13 +212,29 @@
 
                     "label": "Background",
 
-                    "property": "background",
+                    "property": "background-color",
 
                     "type": "colorpicker",
 
                     "default": "#f5efe7"
 
-                },
+                }
+
+            ]
+
+        },
+
+        {
+
+            "label": "General",
+
+            "name": "general",
+
+            "cssSelector": "div.lb-timeline",
+
+            "columns": 2,
+
+            "options": [
 
                 {
 

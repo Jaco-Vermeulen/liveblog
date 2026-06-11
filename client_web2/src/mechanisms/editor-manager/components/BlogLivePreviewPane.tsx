@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import type { Blog, Post } from '@/mechanisms/liveblog-api';
 import { useBlogTheme } from '../hooks/useBlogTheme';
 import { resolveBlogThemePreviewUrl } from '../services/blogPreviewUrl';
+import { buildThemeStyleSettingsCss } from '../services/themeAssets';
 import { postsToMap, type PreviewEmbedHandlers } from '../services/previewEmbedBridge';
 import type { PreviewDeviceMode, PreviewDeviceOrientation } from '../types';
 import { PreviewBlogHeader } from './PreviewBlogHeader';
@@ -50,6 +51,10 @@ export function BlogLivePreviewPane({
 
   const themePreviewUrl = resolveBlogThemePreviewUrl(blog);
   const { stylesheetUrls, theme, isLoading: themeLoading } = useBlogTheme(blog);
+  const themeStyleCss = useMemo(
+    () => (theme ? buildThemeStyleSettingsCss(theme) : ''),
+    [theme],
+  );
   const publicUrl = blog.public_url?.trim() || themePreviewUrl;
 
   const embedHandlers = useMemo<PreviewEmbedHandlers | null>(() => {
@@ -108,6 +113,7 @@ export function BlogLivePreviewPane({
   return (
     <section className={shellClass} aria-label={P.aria}>
       {stylesheetUrls.length > 0 ? <ThemeStylesheetLoader urls={stylesheetUrls} /> : null}
+      {themeStyleCss ? <style data-liveblog-theme-styles>{themeStyleCss}</style> : null}
 
       <header className="m-editor-preview__toolbar">
         <div className="m-editor-preview__toolbar-start">
