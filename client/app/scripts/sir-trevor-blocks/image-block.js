@@ -76,11 +76,11 @@ export default function imageBlock(SirTrevor, config) {
                 }
             });
 
-            // TODO: This shouldn't be here, max image size is defined in the configuration
-            // Image size warning
-            const maxFileSize = 2; // in MB
+            // Warn when file is larger than half the configured upload limit
+            const maxFileSizeMB = config.maxContentLength / 1048576;
+            const warnAboveMB = maxFileSizeMB / 2;
 
-            if (data.file && data.file.size / 1048576 > maxFileSize) {
+            if (data.file && data.file.size / 1048576 > warnAboveMB) {
                 this.$editor.prepend($('<div>', {
                     name: 'size-warning',
                     class: 'alert alert-warning',
@@ -88,7 +88,7 @@ export default function imageBlock(SirTrevor, config) {
                 })
                     .html(window.gettext(
                         'The image is being uploaded, please stand by. ' +
-                    'It may take a while as the file is bigger than ' + maxFileSize + 'MB.'
+                    'It may take a while as the file is bigger than ' + warnAboveMB + 'MB.'
                     )));
                 window.setTimeout(() => {
                     self.$editor.find('[name="size-warning"]').css('display', 'none');

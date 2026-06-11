@@ -1,6 +1,7 @@
 import { api } from '../client';
 import { logger } from '@/mechanisms/request-logger';
 import { LiveblogApiError, resolveUrl } from '../client';
+import { assertImageUploadSize } from '../uploadLimits';
 import type { EveList } from '../types';
 
 export interface ArchivePictureRenditions {
@@ -90,6 +91,8 @@ export async function uploadArchiveMedia(file: File): Promise<{
   picture_url: string;
   picture_renditions: Record<string, { href?: string }>;
 }> {
+  assertImageUploadSize(file);
+
   const url = resolveUrl('/archive');
   const formData = new FormData();
   formData.append('media', file);

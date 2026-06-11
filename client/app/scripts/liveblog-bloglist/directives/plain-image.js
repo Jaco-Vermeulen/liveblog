@@ -26,7 +26,7 @@ export default function sdPlainImage(gettext, notify, config) {
                         scope.src = null;
                         scope.progressWidth = 0;
                     } else {
-                        if (scope.file.size / 1048576 > 2) {
+                        if (scope.file.size > config.maxContentLength / 2) {
                             notify.info(gettext('Blog image is big, upload can take some time!'));
                         }
                         img.onload = function() {

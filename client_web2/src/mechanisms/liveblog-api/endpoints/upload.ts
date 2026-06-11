@@ -1,6 +1,7 @@
 import { AF } from '@/copy';
 import { logger } from '@/mechanisms/request-logger';
 import { LiveblogApiError, resolveUrl } from '../client';
+import { assertImageUploadSize } from '../uploadLimits';
 
 export interface UploadMediaResponse {
   _id: string;
@@ -15,6 +16,8 @@ function getAuthHeader(): string | null {
 
 /** Multipart upload for user avatars (`/upload` resource). */
 export async function uploadUserAvatar(file: File): Promise<string> {
+  assertImageUploadSize(file);
+
   const url = resolveUrl('/upload');
   const formData = new FormData();
   formData.append('media', file);

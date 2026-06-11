@@ -7,6 +7,7 @@ export {
   requestPasswordReset,
   validatePasswordResetToken,
 } from './endpoints/passwordReset';
+export { assertImageUploadSize, MAX_IMAGE_UPLOAD_BYTES } from './uploadLimits';
 export { uploadUserAvatar } from './endpoints/upload';
 export type { UploadMediaResponse } from './endpoints/upload';
 export { userAvatarUrl } from './utils/userAvatar';
