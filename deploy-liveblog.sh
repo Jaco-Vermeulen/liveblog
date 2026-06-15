@@ -20,9 +20,9 @@ BRANCH="master"
 INSTALL_DIR="/opt/liveblog"
 
 # Canonical domain — SUPERDESK_* URLs, emails, stored embed links use this host
-PUBLIC_HOST="live.nuwe-maroela.co.za"
+PUBLIC_HOST="live.maroelamedia.co.za"
 # Extra hostnames on the same box (space-separated) — nginx + TLS SAN cert
-EXTRA_SERVER_NAMES="live.maroelamedia.co.za maroelablog.jnb1.cloudlet.cloud"
+EXTRA_SERVER_NAMES="live.nuwe-maroela.co.za maroelablog.jnb1.cloudlet.cloud"
 
 USE_NGINX="true"
 USE_HTTPS="true"
@@ -53,7 +53,7 @@ MAIL_USE_TLS="true"
 MAIL_USE_SSL="false"
 MAIL_USERNAME="Maroela Media"
 MAIL_PASSWORD="md-Gx3eRIxK5Gu77P-HHycn3w"
-MAIL_FROM="noreply@nuwe-maroela.co.za"
+MAIL_FROM="geen-antwoord@maroelamedia.co.za"
 MAIL_SUPPRESS_SEND="false"
 
 INSTALL_DOCKER="true"

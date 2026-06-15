@@ -279,6 +279,7 @@ export function EditorPage() {
             onFeaturedImageSourceChange={composerApi.setFeaturedImageSource}
             onUploadFeaturedImage={(file) => void composerApi.uploadFeaturedImage(file)}
             featuredImageUploading={composerApi.featuredImageUploading}
+            uploadError={composerApi.uploadError}
             onStickyChange={composerApi.setSticky}
             onHighlightChange={composerApi.setHighlight}
             globalTags={globalTags}

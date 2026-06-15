@@ -69,6 +69,7 @@ export interface PostComposerProps {
   onFeaturedImageSourceChange: (source: FeaturedImageSource) => void;
   onUploadFeaturedImage: (file: File) => void;
   featuredImageUploading?: boolean;
+  uploadError?: string | null;
   onStickyChange: (sticky: boolean) => void;
   onHighlightChange: (highlight: boolean) => void;
   globalTags?: string[];
@@ -105,6 +106,7 @@ export function PostComposer({
   onFeaturedImageSourceChange,
   onUploadFeaturedImage,
   featuredImageUploading = false,
+  uploadError = null,
   onStickyChange,
   onHighlightChange,
   globalTags = [],
@@ -122,6 +124,12 @@ export function PostComposer({
         </h2>
         <p className="m-editor-composer__hint">{blog.title}</p>
       </header>
+
+      {uploadError ? (
+        <LbAlert variant="error" className="mb-4" role="alert">
+          {uploadError}
+        </LbAlert>
+      ) : null}
 
       {isEditing && (
         <LbAlert variant="info" className="mb-4 flex flex-wrap items-center justify-between gap-2">

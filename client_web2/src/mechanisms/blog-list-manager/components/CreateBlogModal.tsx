@@ -7,7 +7,13 @@ import { LbInput } from '@/components/ui/LbInput';
 import { LbModal } from '@/components/ui/LbModal';
 import { LbSpinner } from '@/components/ui/LbSpinner';
 import { useAuth } from '@/mechanisms/auth-manager';
-import { listSelectableThemes, listUsers, type LiveblogUser, type Theme } from '@/mechanisms/liveblog-api';
+import {
+  listSelectableThemes,
+  listUsers,
+  uploadErrorMessage,
+  type LiveblogUser,
+  type Theme,
+} from '@/mechanisms/liveblog-api';
 import { useBlogActions } from '../hooks/useBlogActions';
 import { MemberUserPicker } from './MemberUserPicker';
 
@@ -94,8 +100,8 @@ export function CreateBlogModal({ open, onClose, onCreated }: CreateBlogModalPro
 
       onCreated();
       handleClose();
-    } catch {
-      setError(AF.blogs.createError);
+    } catch (err) {
+      setError(uploadErrorMessage(err) || AF.blogs.createError);
     } finally {
       setSubmitting(false);
     }

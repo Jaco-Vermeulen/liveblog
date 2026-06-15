@@ -3,6 +3,7 @@ import {
   listLanguages,
   listSelectableThemes,
   uploadArchiveMedia,
+  uploadErrorMessage,
   fetchBlogCategories,
   type Blog,
   type LanguageOption,
@@ -114,6 +115,7 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
   const [blogCategories, setBlogCategories] = useState<string[]>([]);
   const [metaLoading, setMetaLoading] = useState(true);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!blog) {
@@ -158,12 +160,17 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
       : '';
 
   const uploadPicture = useCallback(async (file: File) => {
-    const uploaded = await uploadArchiveMedia(file);
-    updateForm({
-      pictureId: uploaded.picture,
-      pictureUrl: uploaded.picture_url,
-      pictureRenditions: uploaded.picture_renditions,
-    });
+    setUploadError(null);
+    try {
+      const uploaded = await uploadArchiveMedia(file);
+      updateForm({
+        pictureId: uploaded.picture,
+        pictureUrl: uploaded.picture_url,
+        pictureRenditions: uploaded.picture_renditions,
+      });
+    } catch (err) {
+      setUploadError(uploadErrorMessage(err));
+    }
   }, [updateForm]);
 
   const clearPicture = useCallback(() => {
@@ -180,6 +187,7 @@ export function useBlogGeneralSettings(blog: Blog | undefined) {
     embedCode,
     updateForm,
     uploadPicture,
+    uploadError,
     clearPicture,
     resetFromBlog: () => blog && setForm(blogToGeneralForm(blog)),
   };

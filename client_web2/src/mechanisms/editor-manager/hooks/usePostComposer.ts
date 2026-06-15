@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Blog, Post } from '@/mechanisms/liveblog-api';
-import { uploadArchiveMedia } from '@/mechanisms/liveblog-api';
+import { uploadArchiveMedia, uploadErrorMessage } from '@/mechanisms/liveblog-api';
 import { freetypeDataToPostItem, useFreetypesList } from '@/mechanisms/freetypes-manager';
 import { DEFAULT_POST_TYPE } from '../subsystems/freetype-fields';
 import { defaultScorecardBody, normalizeScorecardBody } from '../subsystems/scorecard';
@@ -54,6 +54,7 @@ export function usePostComposer(blog: Blog | undefined) {
   );
   const [selectedPostType, setSelectedPostType] = useState<EditorPostType>(DEFAULT_POST_TYPE);
   const [freetypeData, setFreetypeData] = useState<Record<string, unknown>>({});
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const isFreetypeMode = selectedPostType !== DEFAULT_POST_TYPE;
   const isEditing = currentPost != null;
@@ -200,9 +201,14 @@ export function usePostComposer(blog: Blog | undefined) {
     setIsDirty(true);
   }, []);
 
+  const reportUploadError = useCallback((err: unknown) => {
+    setUploadError(uploadErrorMessage(err));
+  }, []);
+
   const uploadScorecardAsset = useCallback(
     async (index: number, target: 'home' | 'away' | 'background', file: File) => {
       if (!file) return;
+      setUploadError(null);
       setScorecardUploading(target);
       try {
         const uploaded = await uploadArchiveMedia(file);
@@ -226,15 +232,18 @@ export function usePostComposer(blog: Blog | undefined) {
           }),
         );
         setIsDirty(true);
+      } catch (err) {
+        reportUploadError(err);
       } finally {
         setScorecardUploading(null);
       }
     },
-    [],
+    [reportUploadError],
   );
 
   const uploadImage = useCallback(async (index: number, file: File) => {
     if (!file) return;
+    setUploadError(null);
     setImageUploadingIndex(index);
     try {
       const uploaded = await uploadArchiveMedia(file);
@@ -262,10 +271,12 @@ export function usePostComposer(blog: Blog | undefined) {
         }),
       );
       setIsDirty(true);
+    } catch (err) {
+      reportUploadError(err);
     } finally {
       setImageUploadingIndex(null);
     }
-  }, []);
+  }, [reportUploadError]);
 
   const setPostType = useCallback((postType: EditorPostType) => {
     setSelectedPostType(postType);
@@ -326,6 +337,7 @@ export function usePostComposer(blog: Blog | undefined) {
   );
 
   const uploadFeaturedImage = useCallback(async (file: File) => {
+    setUploadError(null);
     setFeaturedImageUploading(true);
     try {
       const uploaded = await uploadArchiveMedia(file);
@@ -336,10 +348,12 @@ export function usePostComposer(blog: Blog | undefined) {
         picture_renditions: uploaded.picture_renditions,
       });
       setIsDirty(true);
+    } catch (err) {
+      reportUploadError(err);
     } finally {
       setFeaturedImageUploading(false);
     }
-  }, []);
+  }, [reportUploadError]);
 
   const setFeaturedImageSourceAction = useCallback((source: FeaturedImageSource) => {
     setFeaturedImageSource(source);
@@ -456,6 +470,7 @@ export function usePostComposer(blog: Blog | undefined) {
     setFeaturedImageSource: setFeaturedImageSourceAction,
     uploadFeaturedImage,
     featuredImageUploading,
+    uploadError,
     setSticky,
     setHighlight,
     setTags: setTagsAction,

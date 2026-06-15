@@ -124,6 +124,7 @@ export function SettingsPage() {
             isSaving={isUpdating}
             onChange={general.updateForm}
             onUploadImage={(file) => void general.uploadPicture(file)}
+            uploadError={general.uploadError}
             onRemoveImage={general.clearPicture}
             onSubmit={(e) => void handleSaveGeneral(e)}
           />

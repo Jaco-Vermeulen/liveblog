@@ -163,7 +163,7 @@ services:
       # Vite dev proxy (inside Docker network) — browser uses relative /api on :9000
       VITE_LIVEBLOG_API_URL: http://server:5000/api
       VITE_LIVEBLOG_WS_URL: ${SUPERDESK_WS_URL:-ws://localhost:5100}
-      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-live.nuwe-maroela.co.za,live.maroelamedia.co.za,maroelablog.jnb1.cloudlet.cloud}
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-live.maroelamedia.co.za,maroelablog.jnb1.cloudlet.cloud}
       CLIENT_PORT: "9000"
       VITE_DEV_HOST: "0.0.0.0"
     ports:

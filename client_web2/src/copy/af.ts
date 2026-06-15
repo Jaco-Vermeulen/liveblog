@@ -777,6 +777,7 @@ export const AF = {
   upload: {
     noUploadId: 'Geen upload-ID teruggekry nie',
     imageTooLarge: (maxMb: number) => `Beeld is groter as ${maxMb} MB`,
+    failed: 'Kon nie beeld oplaai nie.',
   },
 
   placeholder: {

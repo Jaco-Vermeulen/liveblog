@@ -1,6 +1,7 @@
 import { useMemo, type ChangeEvent, type FormEvent } from 'react';
 import { AF } from '@/copy';
 import { ExternalLink } from 'lucide-react';
+import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
@@ -26,6 +27,7 @@ export interface GeneralSettingsProps {
   blogId: string;
   onChange(patch: Partial<BlogGeneralForm>): void;
   onUploadImage(file: File): void;
+  uploadError?: string | null;
   onRemoveImage(): void;
   onSubmit(e: FormEvent): void;
 }
@@ -42,6 +44,7 @@ export function GeneralSettings({
   blogId,
   onChange,
   onUploadImage,
+  uploadError = null,
   onRemoveImage,
   onSubmit,
 }: GeneralSettingsProps) {
@@ -120,6 +123,11 @@ export function GeneralSettings({
             />
           </label>
         )}
+        {uploadError ? (
+          <LbAlert variant="error" className="mt-2 text-sm" role="alert">
+            {uploadError}
+          </LbAlert>
+        ) : null}
       </LbFormField>
 
       <LbFormField label={AF.editor.settings.description} htmlFor="settings-description">
