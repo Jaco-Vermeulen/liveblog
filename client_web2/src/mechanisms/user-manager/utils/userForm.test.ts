@@ -51,6 +51,14 @@ describe('formToCreateBody', () => {
     const body = formToCreateBody(form);
     expect(body.password).toBe('longpassword');
   });
+
+  it('omits role for administrators', () => {
+    const form = userToForm(baseUser);
+    form.user_type = 'administrator';
+    const body = formToCreateBody(form);
+    expect(body.user_type).toBe('administrator');
+    expect('role' in body).toBe(false);
+  });
 });
 
 describe('reactivateUserPatch', () => {
@@ -65,5 +73,13 @@ describe('formToAdminPatch', () => {
     form.email = 'new@example.com';
     const patch = formToAdminPatch(form, baseUser);
     expect(patch).toEqual({ email: 'new@example.com' });
+  });
+
+  it('does not send role null when promoting to administrator', () => {
+    const form = userToForm(baseUser);
+    form.user_type = 'administrator';
+    const patch = formToAdminPatch(form, baseUser);
+    expect(patch.user_type).toBe('administrator');
+    expect('role' in patch).toBe(false);
   });
 });

@@ -152,9 +152,14 @@ export function formToCreateBody(form: UserFormState): CreateUserBody {
 
     is_author: form.is_author,
 
-    role: form.user_type === 'administrator' ? null : form.role.trim(),
-
   };
+
+  // Superdesk rejects null role; administrators omit role (legacy edit-form hides the field).
+  if (form.user_type !== 'administrator') {
+
+    body.role = form.role.trim();
+
+  }
 
   if (form.password.length >= 8) {
 
@@ -228,13 +233,17 @@ export function formToAdminPatch(form: UserFormState, original: LiveblogUser): P
 
 
 
-  const nextRole = form.user_type === 'administrator' ? null : form.role.trim() || null;
+  if (form.user_type !== 'administrator') {
 
-  const prevRole = original.role ?? null;
+    const nextRole = form.role.trim() || null;
 
-  if (nextRole !== prevRole) {
+    const prevRole = original.role ?? null;
 
-    patch.role = nextRole;
+    if (nextRole !== prevRole) {
+
+      patch.role = nextRole;
+
+    }
 
   }
 

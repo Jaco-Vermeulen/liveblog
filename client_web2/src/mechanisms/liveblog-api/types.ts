@@ -28,7 +28,7 @@ export interface LiveblogUser extends EveResource {
   jid?: string | null;
   slack_username?: string | null;
   user_type?: 'administrator' | 'user' | string;
-  role?: string | null;
+  role?: string;
   desk?: string | null;
   is_active?: boolean;
   is_enabled?: boolean;
@@ -107,7 +107,7 @@ export interface CreateUserBody {
   phone?: string;
   user_type?: 'administrator' | 'user';
   is_author?: boolean;
-  role?: string | null;
+  role?: string;
 }
 
 
