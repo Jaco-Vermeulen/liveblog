@@ -504,9 +504,9 @@ function buildScorecardHtmlFromMeta(data) {
   var battingSide = scReadBattingSide(match.batting_side);
   var homeSideDisplay = scReadSideDisplay(match.home_side_display);
   var awaySideDisplay = scReadSideDisplay(match.away_side_display);
-  var sections = scReadSections(match, variant, home, away);
-  var heading = match.scorers_label ? String(match.scorers_label).trim() : preset.scorersLabel;
-  var bowlersHeading = match.bowlers_label ? String(match.bowlers_label).trim() : preset.bowlersLabel;
+  var lists = scReadCustomLists(match);
+  var listHtml = scRenderCustomListsHtml(lists);
+  var playersBlock = listHtml.panels;
   var cricketLayout = variant === 'cricket';
   var cricketClass = cricketLayout ? ' lb-scorecard-card--cricket' : '';
   var bgClass = bg ? ' lb-scorecard-card--has-bg' : '';
@@ -526,155 +526,6 @@ function buildScorecardHtmlFromMeta(data) {
   var statusHtml = statusParts.length
     ? '<div class="lb-scorecard-card__result-meta">' + statusParts.join('') + '</div>'
     : '';
-
-  var homeScorers = home.scorers.filter(function (s) {
-    return s.name || s.minute || s.stat;
-  });
-  var awayScorers = away.scorers.filter(function (s) {
-    return s.name || s.minute || s.stat;
-  });
-  var homeBowlers = home.bowlers.filter(function (b) {
-    return b.name || b.figures;
-  });
-  var awayBowlers = away.bowlers.filter(function (b) {
-    return b.name || b.figures;
-  });
-
-  // Data-driven: show the stat column whenever any scorer has a stat, regardless
-  // of the chosen template.
-  var showStat = [].concat(homeScorers, awayScorers).some(function (s) {
-    return s.stat;
-  });
-
-  var homeDisplay = scResolveTeamDisplay(
-    'home',
-    variant,
-    battingSide,
-    homeSideDisplay,
-    awaySideDisplay,
-    homeBowlers.length > 0,
-    sections,
-  );
-  var awayDisplay = scResolveTeamDisplay(
-    'away',
-    variant,
-    battingSide,
-    homeSideDisplay,
-    awaySideDisplay,
-    awayBowlers.length > 0,
-    sections,
-  );
-  var splitPanel = scUsesSplitPanel(variant, homeDisplay, awayDisplay);
-
-  var homeHasPlayers =
-    (homeDisplay.batters && homeScorers.length) || (homeDisplay.bowlers && homeBowlers.length);
-  var awayHasPlayers =
-    (awayDisplay.batters && awayScorers.length) || (awayDisplay.bowlers && awayBowlers.length);
-
-  var playersBlock = '';
-  if (splitPanel && (homeHasPlayers || awayHasPlayers)) {
-    var homeHeading =
-      homeDisplay.batters && !homeDisplay.bowlers
-        ? heading
-        : homeDisplay.bowlers && !homeDisplay.batters
-          ? bowlersHeading
-          : heading;
-    var awayHeading =
-      awayDisplay.batters && !awayDisplay.bowlers
-        ? heading
-        : awayDisplay.bowlers && !awayDisplay.batters
-          ? bowlersHeading
-          : bowlersHeading;
-    var homeList = scRenderSidePlayerList(
-      'home',
-      homeScorers,
-      homeBowlers,
-      homeDisplay,
-      preset.minuteSuffix,
-      showStat,
-    );
-    var awayList = scRenderSidePlayerList(
-      'away',
-      awayScorers,
-      awayBowlers,
-      awayDisplay,
-      preset.minuteSuffix,
-      showStat,
-    );
-    playersBlock =
-      '<div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--split"><div class="lb-scorecard-card__scorers-row">' +
-      (homeList
-        ? '<div class="lb-scorecard-card__scorers-side" data-side="home"><p class="lb-scorecard-card__scorers-heading">' +
-          scEscapeHtml(homeHeading) +
-          '</p>' +
-          homeList +
-          '</div>'
-        : '') +
-      (awayList
-        ? '<div class="lb-scorecard-card__scorers-side" data-side="away"><p class="lb-scorecard-card__scorers-heading">' +
-          scEscapeHtml(awayHeading) +
-          '</p>' +
-          awayList +
-          '</div>'
-        : '') +
-      '</div></div>';
-  } else {
-    var scorersBlock = '';
-    if (
-      (homeDisplay.batters && homeScorers.length) ||
-      (awayDisplay.batters && awayScorers.length)
-    ) {
-      var homeList = homeDisplay.batters && homeScorers.length
-        ? '<ul class="lb-scorecard-card__scorer-list" data-side="home">' +
-          homeScorers
-            .map(function (s) {
-              return scRenderHomeScorerLi(s, preset.minuteSuffix, showStat);
-            })
-            .join('') +
-          '</ul>'
-        : '';
-      var awayList = awayDisplay.batters && awayScorers.length
-        ? '<ul class="lb-scorecard-card__scorer-list" data-side="away">' +
-          awayScorers
-            .map(function (s) {
-              return scRenderAwayScorerLi(s, preset.minuteSuffix, showStat);
-            })
-            .join('') +
-          '</ul>'
-        : '';
-      scorersBlock =
-        '<div class="lb-scorecard-card__scorers-panel">' +
-        '<p class="lb-scorecard-card__scorers-heading">' +
-        scEscapeHtml(heading) +
-        '</p><div class="lb-scorecard-card__scorers-row">' +
-        homeList +
-        awayList +
-        '</div></div>';
-    }
-
-    var bowlersBlock = '';
-    if ((homeDisplay.bowlers && homeBowlers.length) || (awayDisplay.bowlers && awayBowlers.length)) {
-      var homeBList = homeDisplay.bowlers && homeBowlers.length
-        ? '<ul class="lb-scorecard-card__scorer-list" data-side="home">' +
-          homeBowlers.map(scRenderHomeBowlerLi).join('') +
-          '</ul>'
-        : '';
-      var awayBList = awayDisplay.bowlers && awayBowlers.length
-        ? '<ul class="lb-scorecard-card__scorer-list" data-side="away">' +
-          awayBowlers.map(scRenderAwayBowlerLi).join('') +
-          '</ul>'
-        : '';
-      bowlersBlock =
-        '<div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--bowlers">' +
-        '<p class="lb-scorecard-card__scorers-heading">' +
-        scEscapeHtml(bowlersHeading) +
-        '</p><div class="lb-scorecard-card__scorers-row">' +
-        homeBList +
-        awayBList +
-        '</div></div>';
-    }
-    playersBlock = scorersBlock + bowlersBlock;
-  }
 
   var metaBlock = match.info
     ? '<footer class="lb-scorecard-card__meta"><p>' + scEscapeHtml(String(match.info)) + '</p></footer>'
@@ -715,9 +566,9 @@ function buildScorecardHtmlFromMeta(data) {
     ' role="region" aria-label="Skoorbord">' +
     '<div class="lb-scorecard-card__overlay" aria-hidden="true"></div>' +
     '<div class="lb-scorecard-card__scoreline">' +
-    scRenderTeam(home, 'home', 'Tuisspan', homeScore, cricketLayout, sections.teamStats) +
+    scRenderTeam(home, 'home', 'Tuisspan', homeScore, cricketLayout, listHtml.inlineHome) +
     centerHtml +
-    scRenderTeam(away, 'away', 'Wêreldspan', awayScore, cricketLayout, sections.teamStats) +
+    scRenderTeam(away, 'away', 'Wêreldspan', awayScore, cricketLayout, listHtml.inlineAway) +
     '</div>' +
     playersBlock +
     metaBlock +
