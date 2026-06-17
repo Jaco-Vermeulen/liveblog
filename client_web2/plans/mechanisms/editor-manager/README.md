@@ -8,7 +8,7 @@ The largest legacy admin module (`liveblog-edit`), ported to React. Covers the e
 
 ## Status
 
-**Phase 4 complete (2026-05-26)** — embed-handlers, polls, blog-settings-rail, output-modal. **WebSocket live (2026-05-26):** `useEditorWebSocket` (T-edit-13, T-edit-14). **Blogging UX (2026-05-27):** schedule, edit/cancel, unpublish, image block, freetype composer (T-edit-15), Scorecard builtin (T-edit-23). **Rich text composer (2026-05-27):** Maroela-style toolbar via `rich-text-editor` subsystem (T-edit-24, T-edit-25).
+**Phase 4 complete (2026-05-26)** — embed-handlers, polls, blog-settings-rail, output-modal. **WebSocket live (2026-05-26):** `useEditorWebSocket` (T-edit-13, T-edit-14). **Blogging UX (2026-05-27):** schedule, edit/cancel, unpublish, image block, freetype composer (T-edit-15), Scorecard builtin (T-edit-23). **Rich text composer (2026-05-27):** Maroela-style toolbar via `rich-text-editor` subsystem (T-edit-24, T-edit-25). **Webhook-gated composer (2026-06-17):** optional custom title vs title+featured image based on blog webhooks; shared media library.
 
 ## Purpose
 
@@ -305,6 +305,17 @@ See [subsystems/rich-text-editor/README.md](subsystems/rich-text-editor/README.m
 | Edit mode | `usePostComposer.loadPost`, banner + cancel in `PostComposer` |
 | Unpublish | `usePosts.unpublishPost` — `open` → `draft` |
 | Image block | `blockTransform` `item_type: 'image'`, URL in composer |
+
+### Webhook-gated title & featured image (2026-06-17)
+
+| Blog webhooks | Composer UI | Save behaviour |
+|---------------|-------------|----------------|
+| **None** | Checkbox “Voeg pasgemaakte titel by”; title field only when checked | `show_headline` + `headline` when opted in; no featured image |
+| **One or more enabled** (blog-specific or global) | **Pasgemaakte titel** + optional **Hoofbeeld** picker | `headline` always; featured image optional (`none` default); `show_headline` false |
+
+- Detection: `useBlogHasWebhook` → `blogWebhooks.ts` (`webhookAppliesToBlog` matches `blog_id` or all-blogs hooks).
+- Cache: React Query key `['webhooks', 'blog', blogId]`; invalidated from **integrations-manager** on webhook save/remove (`invalidateWebhookQueries`).
+- Featured image library: `GET /api/media_pictures` (all editors, paginated via `listAllMediaPictures`); broken renditions filtered server- and client-side.
 
 ## File Structure
 

@@ -51,7 +51,34 @@ function blogImageItemsQuery(blogId: string) {
   };
 }
 
-/** List uploaded picture media from the server archive (Superdesk media library). */
+/** Shared media library — all uploaded pictures, visible to every editor. */
+export function listMediaPictures(
+  maxResults = 200,
+  page = 1,
+): Promise<EveList<ArchivePicture>> {
+  return api.get<EveList<ArchivePicture>>('/media_pictures', {
+    max_results: maxResults,
+    page,
+  });
+}
+
+/** Fetch every page of the shared media library. */
+export async function listAllMediaPictures(pageSize = 200): Promise<ArchivePicture[]> {
+  const first = await listMediaPictures(pageSize, 1);
+  const items = [...(first._items ?? [])];
+  const total = first._meta?.total ?? items.length;
+  const pageLimit = first._meta?.max_results ?? pageSize;
+  const pages = Math.max(1, Math.ceil(total / pageLimit));
+
+  for (let page = 2; page <= pages; page += 1) {
+    const next = await listMediaPictures(pageSize, page);
+    items.push(...(next._items ?? []));
+  }
+
+  return items;
+}
+
+/** @deprecated Use listMediaPictures — desk-filtered archive query. */
 export function listArchivePictures(
   maxResults = 200,
   page = 1,

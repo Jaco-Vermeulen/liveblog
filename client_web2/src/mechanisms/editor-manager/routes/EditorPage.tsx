@@ -13,6 +13,7 @@ import { useBlog } from '../hooks/useBlog';
 import { useEditorViewMode } from '../hooks/useEditorViewMode';
 import { useEditorWebSocket } from '../hooks/useEditorWebSocket';
 import { usePostComposer } from '../hooks/usePostComposer';
+import { useBlogHasWebhook } from '../hooks/useBlogHasWebhook';
 import { usePosts } from '../hooks/usePosts';
 import { useEditorEmbedRuntime } from '../hooks/useEditorEmbedRuntime';
 import { useEditorLiveblogSettings } from '../hooks/useEditorLiveblogSettings';
@@ -35,7 +36,8 @@ export function EditorPage() {
   const mainTimelineApi = useTimeline(id ?? '', { panel, sticky: false });
   const pinnedTimelineApi = useTimeline(id ?? '', { panel, sticky: true });
   const postsApi = usePosts(id ?? '');
-  const composerApi = usePostComposer(blog);
+  const { hasWebhook } = useBlogHasWebhook(id ?? '');
+  const composerApi = usePostComposer(blog, hasWebhook);
   const { globalTags, allowMultipleTags, isLoading: tagsSettingsLoading } =
     useEditorLiveblogSettings();
 
@@ -247,6 +249,7 @@ export function EditorPage() {
         composer={
           <PostComposer
             blog={blog}
+            hasWebhook={hasWebhook}
             composer={composerApi.composer}
             canSubmit={composerApi.canSubmit}
             isSubmitting={composerApi.isSubmitting}

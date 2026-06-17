@@ -1,5 +1,14 @@
 ﻿# Editor Manager — Changelog
 
+## 2026-06-17 - Webhook-conditional composer title and featured image
+
+[ADDED] `useBlogHasWebhook`, `blogWebhooks.ts` — editor shows **Pasgemaakte titel** + **Hoofbeeld** only when the blog has an enabled webhook (blog-specific or global); otherwise optional custom title via checkbox only.
+[ADDED] Featured image `none` source — posting works without a blog cover image; picker hides broken thumbnails and omits empty blog-cover tile.
+[CHANGED] `useFeaturedImageLibrary` — loads all pages from `GET /api/media_pictures` (shared server library, all editors).
+[CHANGED] `useWebhooks` invalidates React Query webhook cache on save/remove so the editor picks up new webhooks without reload.
+[CHANGED] Copy — plain Afrikaans labels (`Pasgemaakte titel`, `Hoofbeeld`); no webhook/nuuskaart jargon in composer.
+[ADDED] Vitest: `blogWebhooks.test.ts`, `featuredImage` cases; server `media_pictures_test.py`.
+
 ## 2026-05-27 - Rich text toolbar UX
 
 [CHANGED] Toolbar — full-width flex (`flex: 1` groups + buttons), transparent bar, no gaps between segments. tasks: T-edit-25

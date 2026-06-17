@@ -1,5 +1,12 @@
 ﻿# Liveblog API — Changelog
 
+## 2026-06-17 - Shared media pictures + webhook query helpers
+
+[ADDED] Server `GET /api/media_pictures` — mongo-backed picture list for all users with `posts` privilege (no desk filter); skips entries without usable renditions.
+[ADDED] `listMediaPictures`, `listAllMediaPictures` in `endpoints/archive.ts`.
+[ADDED] `webhookQueries.ts` — `WEBHOOKS_QUERY_KEY`, `blogHasWebhookQueryKey`, `invalidateWebhookQueries`.
+[ADDED] Vitest `archive.test.ts` (pagination).
+
 ## 2026-05-27 - Profile + activity notifications
 
 [ADDED] `endpoints/activity.ts` — `listUserActivity`, `markActivityRead`, unread helpers.

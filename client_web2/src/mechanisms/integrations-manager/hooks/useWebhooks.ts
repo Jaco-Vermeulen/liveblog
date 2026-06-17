@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { AF } from '@/copy';
 import {
+  invalidateWebhookQueries,
   listBlogs,
   listWebhooks,
   LiveblogApiError,
@@ -41,6 +43,7 @@ export const emptyWebhookForm = (): WebhookFormState => ({
 });
 
 export function useWebhooks() {
+  const queryClient = useQueryClient();
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +90,7 @@ export function useWebhooks() {
       setModal(null);
       setMessage(AF.integrations.webhooks.saved);
       await refresh();
+      await invalidateWebhookQueries(queryClient);
     } catch (err) {
       setError(err instanceof Error ? err.message : AF.integrations.errors.save);
     } finally {
@@ -100,6 +104,7 @@ export function useWebhooks() {
       await removeWebhook(webhook);
       setMessage(AF.integrations.webhooks.removed);
       await refresh();
+      await invalidateWebhookQueries(queryClient);
     } catch (err) {
       setError(err instanceof Error ? err.message : AF.integrations.errors.remove);
     }

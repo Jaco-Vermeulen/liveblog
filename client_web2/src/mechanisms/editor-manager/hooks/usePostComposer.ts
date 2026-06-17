@@ -28,7 +28,7 @@ import { usePosts } from './usePosts';
 
 const defaultBlock = (): SirTrevorBlock => ({ type: 'Text', data: { text: '' } });
 
-export function usePostComposer(blog: Blog | undefined) {
+export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   const blogId = blog?._id ?? '';
   const { savePost } = usePosts(blogId);
   const { freetypes } = useFreetypesList();
@@ -37,7 +37,7 @@ export function usePostComposer(blog: Blog | undefined) {
   const [headline, setHeadline] = useState('');
   const [showHeadline, setShowHeadline] = useState(false);
   const [featuredImageSource, setFeaturedImageSource] = useState<FeaturedImageSource>({
-    type: 'blog',
+    type: 'none',
   });
   const [featuredImageUploading, setFeaturedImageUploading] = useState(false);
   const [sticky, setSticky] = useState(false);
@@ -130,7 +130,7 @@ export function usePostComposer(blog: Blog | undefined) {
         setBlocks([defaultBlock()]);
         setHeadline('');
         setShowHeadline(false);
-        setFeaturedImageSource({ type: 'blog' });
+        setFeaturedImageSource({ type: 'none' });
         setSticky(false);
         setHighlight(false);
         setTags([]);
@@ -300,6 +300,9 @@ export function usePostComposer(blog: Blog | undefined) {
 
   const setShowHeadlineAction = useCallback((value: boolean) => {
     setShowHeadline(value);
+    if (!value) {
+      setHeadline('');
+    }
     setIsDirty(true);
   }, []);
 
@@ -332,9 +335,22 @@ export function usePostComposer(blog: Blog | undefined) {
   }, [blocks, freetypeData, isFreetypeMode, selectedPostType]);
 
   const resolveFeaturedPatch = useCallback(
-    () => resolveFeaturedImagePatch(featuredImageSource, blocks) ?? {},
-    [blocks, featuredImageSource],
+    () => (hasWebhook ? resolveFeaturedImagePatch(featuredImageSource, blocks) ?? {} : {}),
+    [blocks, featuredImageSource, hasWebhook],
   );
+
+  const resolveHeadlinePatch = useCallback(() => {
+    if (hasWebhook) {
+      return {
+        headline: headline.trim(),
+        show_headline: false,
+      };
+    }
+    return {
+      headline: showHeadline ? headline.trim() : '',
+      show_headline: showHeadline,
+    };
+  }, [hasWebhook, headline, showHeadline]);
 
   const uploadFeaturedImage = useCallback(async (file: File) => {
     setUploadError(null);
@@ -383,8 +399,7 @@ export function usePostComposer(blog: Blog | undefined) {
         sticky,
         lb_highlight: highlight,
         tags,
-        headline: headline.trim(),
-        show_headline: showHeadline,
+        ...resolveHeadlinePatch(),
         ...resolveFeaturedPatch(),
         ...resolveSchedulePatch(),
       });
@@ -398,6 +413,7 @@ export function usePostComposer(blog: Blog | undefined) {
     headline,
     highlight,
     reset,
+    resolveHeadlinePatch,
     resolveItems,
     resolveFeaturedPatch,
     resolveSchedulePatch,
@@ -418,8 +434,7 @@ export function usePostComposer(blog: Blog | undefined) {
         sticky,
         lb_highlight: highlight,
         tags,
-        headline: headline.trim(),
-        show_headline: showHeadline,
+        ...resolveHeadlinePatch(),
         ...resolveFeaturedPatch(),
       });
       reset();
@@ -432,6 +447,7 @@ export function usePostComposer(blog: Blog | undefined) {
     headline,
     highlight,
     reset,
+    resolveHeadlinePatch,
     resolveFeaturedPatch,
     resolveItems,
     savePost,

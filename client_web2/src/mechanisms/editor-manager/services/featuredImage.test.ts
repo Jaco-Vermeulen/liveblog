@@ -19,7 +19,12 @@ const labels = {
 };
 
 describe('featuredImage', () => {
-  it('resolveFeaturedImagePatch uses blog default when source is blog', () => {
+  it('resolveFeaturedImagePatch clears featured image when source is none', () => {
+    const patch = resolveFeaturedImagePatch({ type: 'none' }, []);
+    expect(patch?.featured_image_url).toBeNull();
+  });
+
+  it('resolveFeaturedImagePatch clears featured image when source is blog', () => {
     const patch = resolveFeaturedImagePatch({ type: 'blog' }, []);
     expect(patch?.featured_image_url).toBeNull();
   });
@@ -42,6 +47,10 @@ describe('featuredImage', () => {
     const patch = resolveFeaturedImagePatch({ type: 'block', index: 0 }, blocks);
     expect(patch?.featured_image).toBe('img-1');
     expect(patch?.featured_image_url).toBe('https://example.com/a.jpg');
+  });
+
+  it('featuredImageSourceFromPost defaults to none without featured fields', () => {
+    expect(featuredImageSourceFromPost({} as Post).type).toBe('none');
   });
 
   it('featuredImageSourceFromPost reads custom featured fields', () => {
@@ -68,6 +77,17 @@ describe('featuredImage', () => {
     });
     expect(source?.picture).toBe('pic-1');
     expect(source?.picture_url).toBe('https://example.com/pic.jpg');
+  });
+
+  it('buildFeaturedImageLibraryOptions skips blog cover when blog has no picture', () => {
+    const options = buildFeaturedImageLibraryOptions(
+      {} as Blog,
+      [],
+      [{ _id: 'pic-1', renditions: { viewImage: { href: 'https://example.com/one.png' } } }],
+      [],
+      labels,
+    );
+    expect(options.map((option) => option.key)).toEqual(['archive:pic-1']);
   });
 
   it('buildFeaturedImageLibraryOptions includes blog cover and archive pictures', () => {

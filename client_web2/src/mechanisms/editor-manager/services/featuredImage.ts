@@ -1,6 +1,7 @@
 import type { ArchivePicture, BlogImageItem, Blog, Post } from '@/mechanisms/liveblog-api';
 import type { SirTrevorBlock } from '../types';
 export type FeaturedImageSource =
+  | { type: 'none' }
   | { type: 'blog' }
   | { type: 'block'; index: number }
   | {
@@ -22,7 +23,7 @@ export function featuredImageSourceFromPost(post: Post | null): FeaturedImageSou
       >,
     };
   }
-  return { type: 'blog' };
+  return { type: 'none' };
 }
 
 export function previewUrlForFeaturedSource(
@@ -64,6 +65,13 @@ export function resolveFeaturedImagePatch(
   source: FeaturedImageSource,
   blocks: SirTrevorBlock[],
 ): Pick<Post, 'featured_image' | 'featured_image_url' | 'featured_image_renditions'> | null {
+  if (source.type === 'none') {
+    return {
+      featured_image: null as unknown as string,
+      featured_image_url: null as unknown as string,
+      featured_image_renditions: null as unknown as Post['featured_image_renditions'],
+    };
+  }
   if (source.type === 'blog') {
     return {
       featured_image: null as unknown as string,
@@ -193,12 +201,14 @@ export function buildFeaturedImageLibraryOptions(
     options.push(option);
   };
 
-  addOption({
-    key: 'blog',
-    url: blog.picture_url ?? '',
-    label: blog.picture_url ? labels.blogImage : labels.blogImageMissing,
-    source: { type: 'blog' },
-  });
+  if (blog.picture_url?.trim()) {
+    addOption({
+      key: 'blog',
+      url: blog.picture_url,
+      label: labels.blogImage,
+      source: { type: 'blog' },
+    });
+  }
 
   for (const picture of [...archivePictures].sort((a, b) =>
     String(b._updated ?? '').localeCompare(String(a._updated ?? '')),
@@ -244,7 +254,7 @@ export function isSameFeaturedSource(
   b: FeaturedImageSource,
 ): boolean {
   if (a.type !== b.type) return false;
-  if (a.type === 'blog') return true;
+  if (a.type === 'none' || a.type === 'blog') return b.type === a.type;
   if (a.type === 'block') return b.type === 'block' && a.index === b.index;
   if (a.type === 'custom' && b.type === 'custom') {
     if (a.picture && b.picture) return a.picture === b.picture;
@@ -258,6 +268,7 @@ export function labelForFeaturedSource(
   blog: Blog,
   options: FeaturedImageOption[],
   labels: {
+    none: string;
     blogImage: string;
     blogImageMissing: string;
     postImage: (n: number) => string;
@@ -266,6 +277,9 @@ export function labelForFeaturedSource(
 ): string {
   const match = options.find((option) => isSameFeaturedSource(option.source, source));
   if (match) return match.label;
+  if (source.type === 'none') {
+    return labels.none;
+  }
   if (source.type === 'blog') {
     return blog.picture_url ? labels.blogImage : labels.blogImageMissing;
   }

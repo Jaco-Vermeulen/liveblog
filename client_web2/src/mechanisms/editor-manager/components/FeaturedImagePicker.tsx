@@ -39,6 +39,32 @@ const featuredLabels = {
   libraryImage: AF.editor.featuredImage.libraryImage,
 };
 
+function PickerThumbnail({ url, className }: { url: string; className?: string }) {
+  const [broken, setBroken] = useState(false);
+
+  if (!url.trim() || broken) {
+    return (
+      <div
+        className={cn(
+          'flex aspect-square w-full items-center justify-center rounded-md bg-mar-beige text-mar-muted',
+          className,
+        )}
+      >
+        <ImageIcon className="h-5 w-5" aria-hidden />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt=""
+      className={cn('rounded-md object-cover', className ?? 'aspect-square w-full')}
+      onError={() => setBroken(true)}
+    />
+  );
+}
+
 function ImagePickerTile({
   label,
   selected,
@@ -158,6 +184,7 @@ export function FeaturedImagePicker({
   }, [blocks, blog, libraryQuery.data]);
 
   const currentLabel = labelForFeaturedSource(source, blog, options, {
+    none: AF.editor.featuredImage.none,
     blogImage: AF.editor.featuredImage.blogImage,
     blogImageMissing: AF.editor.featuredImage.blogImageMissing,
     postImage: AF.editor.featuredImage.postImage,
@@ -187,7 +214,7 @@ export function FeaturedImagePicker({
         onClick={() => selectSource(option.source)}
       >
         {option.url ? (
-          <img src={option.url} alt="" className="aspect-square w-full rounded-md object-cover" />
+          <PickerThumbnail url={option.url} />
         ) : (
           <div className="flex aspect-square w-full items-center justify-center rounded-md bg-mar-beige text-mar-muted">
             <ImageIcon className="h-5 w-5" aria-hidden />
@@ -208,11 +235,7 @@ export function FeaturedImagePicker({
           onClick={() => setOpen(true)}
         >
           {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt=""
-              className="h-9 w-9 shrink-0 rounded-md object-cover"
-            />
+            <PickerThumbnail url={previewUrl} className="h-9 w-9 shrink-0" />
           ) : (
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-mar-beige text-mar-muted">
               <ImageIcon className="h-4 w-4" aria-hidden />
@@ -241,6 +264,15 @@ export function FeaturedImagePicker({
           <p className="py-8 text-center text-sm text-red-600">{AF.editor.featuredImage.loadError}</p>
         ) : (
           <div className="grid max-h-[min(55vh,26rem)] grid-cols-4 gap-2 overflow-y-auto pr-1">
+            <ImagePickerTile
+              label={AF.editor.featuredImage.none}
+              selected={source.type === 'none'}
+              onClick={() => selectSource({ type: 'none' })}
+            >
+              <div className="flex aspect-square w-full items-center justify-center rounded-md bg-mar-beige text-mar-muted">
+                <ImageIcon className="h-5 w-5" aria-hidden />
+              </div>
+            </ImagePickerTile>
             <UploadTile uploading={uploading} onPick={(file) => void handleUpload(file)} />
             {options.map(renderOption)}
           </div>

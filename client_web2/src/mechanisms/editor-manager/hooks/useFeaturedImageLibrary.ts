@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
-  listArchivePictures,
+  listAllMediaPictures,
   listBlogImageItems,
   type ArchivePicture,
   type BlogImageItem,
@@ -15,11 +15,11 @@ export function useFeaturedImageLibrary(blogId: string, enabled: boolean) {
     enabled: enabled && Boolean(blogId),
     queryFn: async (): Promise<{ pictures: ArchivePicture[]; items: BlogImageItem[] }> => {
       const [pictures, items] = await Promise.all([
-        listArchivePictures(),
+        listAllMediaPictures(),
         listBlogImageItems(blogId),
       ]);
       return {
-        pictures: pictures._items ?? [],
+        pictures,
         items: items._items ?? [],
       };
     },

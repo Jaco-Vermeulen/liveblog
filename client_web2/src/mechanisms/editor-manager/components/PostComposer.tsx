@@ -39,6 +39,7 @@ const BLOCK_TYPES: {
 
 export interface PostComposerProps {
   blog: Blog;
+  hasWebhook?: boolean;
   composer: ComposerState;
   canSubmit: boolean;
   isSubmitting: boolean;
@@ -80,6 +81,7 @@ export interface PostComposerProps {
 
 export function PostComposer({
   blog,
+  hasWebhook = false,
   composer,
   canSubmit,
   isSubmitting,
@@ -147,38 +149,52 @@ export function PostComposer({
         onFreetypeDataChange={onFreetypeDataChange}
       />
 
-      <LbFormField label={AF.editor.entryTitle} htmlFor="composer-entry-title">
-        <LbInput
-          id="composer-entry-title"
-          type="text"
-          value={composer.headline}
-          placeholder={AF.editor.entryTitlePlaceholder}
-          onChange={(e) => onHeadlineChange(e.target.value)}
-        />
-      </LbFormField>
+      {hasWebhook ? (
+        <>
+          <LbFormField label={AF.editor.entryTitle} htmlFor="composer-entry-title">
+            <LbInput
+              id="composer-entry-title"
+              type="text"
+              value={composer.headline}
+              placeholder={AF.editor.entryTitlePlaceholder}
+              onChange={(e) => onHeadlineChange(e.target.value)}
+            />
+          </LbFormField>
 
-      <label className="mb-4 flex items-start gap-2 text-sm text-mar-text">
-        <input
-          type="checkbox"
-          className="mt-1"
-          checked={composer.showHeadline}
-          onChange={(e) => onShowHeadlineChange(e.target.checked)}
-        />
-        <span>
-          <span className="font-medium">{AF.editor.showEntryTitle}</span>
-          <span className="mt-1 block text-mar-text-muted">{AF.editor.showEntryTitleHint}</span>
-        </span>
-      </label>
+          {!isFreetypeMode && (
+            <FeaturedImagePicker
+              blog={blog}
+              blocks={composer.blocks}
+              source={composer.featuredImageSource}
+              uploading={featuredImageUploading}
+              onSourceChange={onFeaturedImageSourceChange}
+              onUpload={onUploadFeaturedImage}
+            />
+          )}
+        </>
+      ) : (
+        <>
+          <label className="mb-4 flex items-center gap-2 text-sm text-mar-text">
+            <input
+              type="checkbox"
+              checked={composer.showHeadline}
+              onChange={(e) => onShowHeadlineChange(e.target.checked)}
+            />
+            <span className="font-medium">{AF.editor.addCustomTitle}</span>
+          </label>
 
-      {!isFreetypeMode && (
-        <FeaturedImagePicker
-          blog={blog}
-          blocks={composer.blocks}
-          source={composer.featuredImageSource}
-          uploading={featuredImageUploading}
-          onSourceChange={onFeaturedImageSourceChange}
-          onUpload={onUploadFeaturedImage}
-        />
+          {composer.showHeadline ? (
+            <LbFormField label={AF.editor.entryTitle} htmlFor="composer-entry-title">
+              <LbInput
+                id="composer-entry-title"
+                type="text"
+                value={composer.headline}
+                placeholder={AF.editor.entryTitlePlaceholder}
+                onChange={(e) => onHeadlineChange(e.target.value)}
+              />
+            </LbFormField>
+          ) : null}
+        </>
       )}
 
       {!isFreetypeMode && (
