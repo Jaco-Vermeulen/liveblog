@@ -1,24 +1,14 @@
-import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  Italic,
-  Link2,
-  Link2Off,
-  List,
-  ListOrdered,
-  Quote,
-  Redo2,
-  RemoveFormatting,
-  Type,
-  Underline,
-  Undo2,
-} from 'lucide-react';
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { Menu } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AF } from '@/copy';
+import {
+  RichTextContextMenu,
+  type RichTextContextMenuState,
+} from './RichTextContextMenu';
+import { RichTextToolbarGroups, type RichTextToolbarActions } from './RichTextToolbarGroups';
 import { normalizeRichTextHtml } from './richTextHtml';
+import { isSelectionInLink } from './richTextSelection';
+import { useRichTextCompactToolbar } from './useRichTextCompactToolbar';
 
 const R = AF.editor.richText;
 
@@ -32,43 +22,11 @@ export interface RichTextBlockEditorProps {
   id?: string;
 }
 
-function ToolbarGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="m-rich-text-editor__group">
-      <div className="m-rich-text-editor__group-btns">{children}</div>
-      <p className="m-rich-text-editor__group-label">{label}</p>
-    </div>
-  );
-}
-
-function ToolbarBtn({
-  title,
-  onClick,
-  children,
-  variant = 'icon',
-}: {
-  title: string;
-  onClick: () => void;
-  children: ReactNode;
-  variant?: 'icon' | 'text';
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      className={`m-rich-text-editor__btn m-rich-text-editor__btn--${variant}`}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
+function hasNonCollapsedSelection(root: HTMLElement): boolean {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
+  const range = selection.getRangeAt(0);
+  return root.contains(range.commonAncestorContainer);
 }
 
 export function RichTextBlockEditor({
@@ -78,22 +36,42 @@ export function RichTextBlockEditor({
   placeholder = AF.editor.writePost,
   id,
 }: RichTextBlockEditorProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const overflowPanelRef = useRef<HTMLDivElement | null>(null);
   const undoPastRef = useRef<string[]>([]);
   const undoFutureRef = useRef<string[]>([]);
   const lastHtmlRef = useRef('');
+  const lastPropValueRef = useRef('');
   const applyingHistoryRef = useRef(false);
   const skipNextInputUndoRef = useRef(false);
+  const [linkActive, setLinkActive] = useState(false);
+  const [formatMenuOpen, setFormatMenuOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState<RichTextContextMenuState | null>(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [hasSelection, setHasSelection] = useState(false);
 
+  const compactToolbar = useRichTextCompactToolbar(rootRef);
   const normalizedValue = normalizeRichTextHtml(value);
+
+  const refreshEditorState = useCallback(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    setLinkActive(isSelectionInLink(el));
+    setHasSelection(hasNonCollapsedSelection(el));
+    setCanUndo(undoPastRef.current.length > 0);
+    setCanRedo(undoFutureRef.current.length > 0);
+  }, []);
 
   const commitChange = useCallback(
     (html: string) => {
       const next = normalizeRichTextHtml(html);
       lastHtmlRef.current = next;
       onChange(next);
+      refreshEditorState();
     },
-    [onChange],
+    [onChange, refreshEditorState],
   );
 
   const applyUndo = useCallback(() => {
@@ -195,6 +173,98 @@ export function RichTextBlockEditor({
     applyEditorCommand('createLink', url.trim());
   }, [applyEditorCommand]);
 
+  const applyClipboardCommand = useCallback(
+    async (command: 'cut' | 'copy' | 'paste') => {
+      const el = editorRef.current;
+      if (!el) return;
+      el.focus();
+      const before = el.innerHTML;
+
+      if (command === 'paste') {
+        try {
+          if (document.execCommand('paste')) {
+            recordCommandChange(before, el.innerHTML);
+            return;
+          }
+        } catch {
+          /* execCommand paste is often blocked */
+        }
+
+        try {
+          const text = await navigator.clipboard.readText();
+          if (!text) return;
+          document.execCommand('insertText', false, text);
+          document.execCommand('styleWithCSS', false, 'false');
+          recordCommandChange(before, el.innerHTML);
+        } catch {
+          /* clipboard permission denied */
+        }
+        return;
+      }
+
+      document.execCommand(command, false);
+      document.execCommand('styleWithCSS', false, 'false');
+      recordCommandChange(before, el.innerHTML);
+    },
+    [recordCommandChange],
+  );
+
+  const toolbarActions = useMemo<RichTextToolbarActions>(
+    () => ({
+      applyBold: () => applyEditorCommand('bold', undefined, true),
+      applyItalic: () => applyEditorCommand('italic', undefined, true),
+      applyUnderline: () => applyEditorCommand('underline', undefined, true),
+      applyH2: () => applyEditorCommand('formatBlock', 'H2'),
+      applyH3: () => applyEditorCommand('formatBlock', 'H3'),
+      applyParagraph: () => applyEditorCommand('formatBlock', 'P'),
+      applyBulletList: () => applyEditorCommand('insertUnorderedList'),
+      applyNumberedList: () => applyEditorCommand('insertOrderedList'),
+      applyQuote: () => applyEditorCommand('formatBlock', 'BLOCKQUOTE'),
+      applyAlignLeft: () => applyAlignment('left'),
+      applyAlignCenter: () => applyAlignment('center'),
+      applyAlignRight: () => applyAlignment('right'),
+      applyAlignJustify: () => applyAlignment('justify'),
+      insertLink,
+      applyUnlink: () => applyEditorCommand('unlink'),
+      applyClearFormat: () => applyEditorCommand('removeFormat'),
+      applyUndo,
+      applyRedo,
+      linkActive,
+    }),
+    [applyAlignment, applyEditorCommand, applyRedo, applyUndo, insertLink, linkActive],
+  );
+
+  const contextMenuActions = useMemo(
+    () => ({
+      canUndo,
+      canRedo,
+      hasSelection,
+      linkActive,
+      applyUndo,
+      applyRedo,
+      applyCut: () => void applyClipboardCommand('cut'),
+      applyCopy: () => void applyClipboardCommand('copy'),
+      applyPaste: () => void applyClipboardCommand('paste'),
+      applyBold: () => applyEditorCommand('bold', undefined, true),
+      applyItalic: () => applyEditorCommand('italic', undefined, true),
+      applyUnderline: () => applyEditorCommand('underline', undefined, true),
+      insertLink,
+      applyUnlink: () => applyEditorCommand('unlink'),
+      applyClearFormat: () => applyEditorCommand('removeFormat'),
+    }),
+    [
+      applyClipboardCommand,
+      applyEditorCommand,
+      applyRedo,
+      applyUndo,
+      canRedo,
+      canUndo,
+      hasSelection,
+      insertLink,
+      linkActive,
+    ],
+  );
+
   const onInput = useCallback(
     (event: React.FormEvent<HTMLDivElement>) => {
       const el = event.currentTarget;
@@ -249,90 +319,114 @@ export function RichTextBlockEditor({
     [applyEditorCommand, applyRedo, applyUndo],
   );
 
+  const onContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setFormatMenuOpen(false);
+      setContextMenu({ x: event.clientX, y: event.clientY });
+      refreshEditorState();
+    },
+    [refreshEditorState],
+  );
+
   useEffect(() => {
     const el = editorRef.current;
     if (!el) return;
-    if (document.activeElement === el) return;
     const display = normalizedValue || '';
+    const propChanged = normalizedValue !== lastPropValueRef.current;
+    lastPropValueRef.current = normalizedValue;
+
+    if (!propChanged && document.activeElement === el) {
+      lastHtmlRef.current = el.innerHTML;
+      return;
+    }
+
     if (el.innerHTML !== display) {
       el.innerHTML = display;
       undoPastRef.current = [];
       undoFutureRef.current = [];
+      refreshEditorState();
     }
     lastHtmlRef.current = el.innerHTML;
-  }, [normalizedValue]);
+  }, [normalizedValue, refreshEditorState]);
+
+  useEffect(() => {
+    const onSelectionChange = () => {
+      const el = editorRef.current;
+      if (!el) return;
+      if (document.activeElement === el || el.contains(document.activeElement)) {
+        refreshEditorState();
+      }
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => document.removeEventListener('selectionchange', onSelectionChange);
+  }, [refreshEditorState]);
+
+  useEffect(() => {
+    if (!compactToolbar) setFormatMenuOpen(false);
+  }, [compactToolbar]);
+
+  useEffect(() => {
+    if (!formatMenuOpen) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (overflowPanelRef.current?.contains(target)) return;
+      if ((target as HTMLElement).closest?.('.m-rich-text-editor__menu-toggle')) return;
+      setFormatMenuOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFormatMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [formatMenuOpen]);
 
   const showPlaceholder = !normalizedValue;
 
   return (
-    <div className="m-rich-text-editor">
-      <div className="m-rich-text-editor__toolbar" role="toolbar" aria-label={R.toolbar}>
-          <ToolbarGroup label={R.font}>
-            <ToolbarBtn title={R.bold} onClick={() => applyEditorCommand('bold', undefined, true)}>
-              <Bold className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.italic} onClick={() => applyEditorCommand('italic', undefined, true)}>
-              <Italic className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.underline} onClick={() => applyEditorCommand('underline', undefined, true)}>
-              <Underline className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
-          <ToolbarGroup label={R.style}>
-            <ToolbarBtn title={R.h2} variant="text" onClick={() => applyEditorCommand('formatBlock', 'H2')}>
-              H2
-            </ToolbarBtn>
-            <ToolbarBtn title={R.h3} variant="text" onClick={() => applyEditorCommand('formatBlock', 'H3')}>
-              H3
-            </ToolbarBtn>
-            <ToolbarBtn title={R.paragraph} onClick={() => applyEditorCommand('formatBlock', 'P')}>
-              <Type className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
-          <ToolbarGroup label={R.paragraphGroup}>
-            <ToolbarBtn title={R.bulletList} onClick={() => applyEditorCommand('insertUnorderedList')}>
-              <List className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.numberedList} onClick={() => applyEditorCommand('insertOrderedList')}>
-              <ListOrdered className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.quote} onClick={() => applyEditorCommand('formatBlock', 'BLOCKQUOTE')}>
-              <Quote className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
-          <ToolbarGroup label={R.align}>
-            <ToolbarBtn title={R.left} onClick={() => applyAlignment('left')}>
-              <AlignLeft className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.center} onClick={() => applyAlignment('center')}>
-              <AlignCenter className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.right} onClick={() => applyAlignment('right')}>
-              <AlignRight className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.justify} onClick={() => applyAlignment('justify')}>
-              <AlignJustify className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
-          <ToolbarGroup label={R.edit}>
-            <ToolbarBtn title={R.link} onClick={insertLink}>
-              <Link2 className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.unlink} onClick={() => applyEditorCommand('unlink')}>
-              <Link2Off className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.clearFormat} onClick={() => applyEditorCommand('removeFormat')}>
-              <RemoveFormatting className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
-          <ToolbarGroup label={R.history}>
-            <ToolbarBtn title={R.undo} onClick={applyUndo}>
-              <Undo2 className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-            <ToolbarBtn title={R.redo} onClick={applyRedo}>
-              <Redo2 className="m-rich-text-editor__icon" aria-hidden />
-            </ToolbarBtn>
-          </ToolbarGroup>
+    <div
+      ref={rootRef}
+      className={`m-rich-text-editor${compactToolbar ? ' m-rich-text-editor--compact' : ''}`}
+      data-compact={compactToolbar ? 'true' : 'false'}
+    >
+      <div
+        className={`m-rich-text-editor__toolbar${compactToolbar ? ' m-rich-text-editor__toolbar--compact' : ''}`}
+        role="toolbar"
+        aria-label={R.toolbar}
+      >
+        {compactToolbar ? (
+          <>
+            <button
+              type="button"
+              className="m-rich-text-editor__menu-toggle"
+              aria-expanded={formatMenuOpen}
+              aria-controls="rich-text-format-panel"
+              aria-label={formatMenuOpen ? R.closeFormatMenu : R.openFormatMenu}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setFormatMenuOpen((open) => !open)}
+            >
+              <Menu className="m-rich-text-editor__menu-icon" aria-hidden />
+              <span>{R.toolbar}</span>
+            </button>
+            {formatMenuOpen ? (
+              <div
+                id="rich-text-format-panel"
+                ref={overflowPanelRef}
+                className="m-rich-text-editor__overflow-panel"
+              >
+                <RichTextToolbarGroups actions={toolbarActions} />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <RichTextToolbarGroups actions={toolbarActions} />
+        )}
       </div>
       <div className="m-rich-text-editor__body-wrap">
         {showPlaceholder ? (
@@ -350,10 +444,30 @@ export function RichTextBlockEditor({
           aria-label={placeholder}
           className="m-rich-text-editor__body"
           onInput={onInput}
-          onBlur={onBlur}
+          onBlur={(event) => {
+            setLinkActive(false);
+            setHasSelection(false);
+            onBlur?.();
+          }}
           onKeyDown={onKeyDown}
+          onKeyUp={refreshEditorState}
+          onMouseUp={refreshEditorState}
+          onFocus={refreshEditorState}
+          onContextMenu={onContextMenu}
+          onClick={(event) => {
+            if ((event.target as HTMLElement).closest('a')) {
+              event.preventDefault();
+            }
+          }}
         />
       </div>
+      {contextMenu ? (
+        <RichTextContextMenu
+          menu={contextMenu}
+          actions={contextMenuActions}
+          onClose={() => setContextMenu(null)}
+        />
+      ) : null}
     </div>
   );
 }

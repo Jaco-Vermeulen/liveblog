@@ -21,6 +21,23 @@ describe('renderScorecardHtml', () => {
     expect(html).not.toContain('scorers-panel--bowlers');
   });
 
+  it('renders bowlers on rugby when the secondary section is enabled', () => {
+    const body = applyScorecardVariant(defaultScorecardBody(), 'rugby');
+    body.sections.secondaryPlayers = true;
+    body.home.name = 'Bulls';
+    body.home.score = '24';
+    body.home.scorers = [{ name: 'Pollard', minute: '40', stat: '3' }];
+    body.home.bowlers = [{ name: 'Smith', figures: 'MOTM' }];
+    body.away.name = 'Sharks';
+    body.away.score = '17';
+
+    const html = renderScorecardHtml(body);
+
+    expect(html).toContain('lb-scorecard-card__scorer-stat">3</span>');
+    expect(html).toContain('scorers-panel--bowlers');
+    expect(html).toContain('Smith');
+  });
+
   it('renders cricket with split innings, current over, and team scores', () => {
     const body = applyScorecardVariant(defaultScorecardBody(), 'cricket');
     body.home.name = 'Proteas';

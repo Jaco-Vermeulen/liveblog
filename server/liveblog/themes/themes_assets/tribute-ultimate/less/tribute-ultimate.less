@@ -578,6 +578,12 @@ body.lb-wrapBody {
     background-image: url("/themes_assets/default/images/link-icon.png");
     background-size: 0.5625rem;
   }
+
+  &.lb-type--favicon {
+    background-color: #fff;
+    background-size: 65%;
+    box-shadow: 0 0 0 2px var(--tl-paper);
+  }
 }
 
 .lb-timeline .lb-post-date-icons {
@@ -714,15 +720,28 @@ body.lb-wrapBody {
   text-align: left;
 }
 
-// Until iframely.load() runs, oEmbed may ship a fixed 133px stub — avoid a blank sliver.
+// Let iframely.load() set card height — min-height on loaded cards forced ~280px boxes
+// on compact Facebook page cards (horizontal layout ~120–150px tall).
 .lb-timeline .iframely-responsive {
   width: 100%;
-  min-height: 280px;
 }
 
 .lb-timeline .iframely-responsive iframe {
   width: 100% !important;
-  min-height: 280px;
+}
+
+// Pre-load oEmbed stub only (before iframe is injected).
+.lb-timeline .iframely-embed:not(:has(iframe)) .iframely-responsive {
+  min-height: 133px;
+}
+
+// Consent placeholder reserves space; loaded embeds should hug content.
+.lb-timeline .item--embed__consent-wrapper {
+  min-height: 0;
+}
+
+.lb-timeline .item--embed__consent-wrapper:has(.lb_consent--placeholder) {
+  min-height: 350px;
 }
 
 .lb-timeline .fb-post {

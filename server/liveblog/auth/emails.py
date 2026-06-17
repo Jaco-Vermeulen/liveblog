@@ -4,6 +4,7 @@ import logging
 import re
 
 from flask import current_app as app, render_template
+from superdesk import get_resource_service
 from superdesk.emails import send_email
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,49 @@ def _logo_url():
 def _email_trace_id(token):
     """Short id for logs + footer (support debugging)."""
     return "reset-{}".format(re.sub(r"[^a-zA-Z0-9]", "", token)[:16])
+
+
+def send_activate_account_email(doc, activate_ttl):
+    """Replace superdesk default (English, /#/reset-password hash URL)."""
+    user = get_resource_service("users").find_one(req=None, _id=doc["user"])
+    app_name = app.config.get("APPLICATION_NAME", "Maroela Media Liveblog")
+    client_url = (app.config.get("CLIENT_URL") or "").rstrip("/")
+    url = _reset_password_url(doc["token"])
+    hours = int(activate_ttl) * 24
+    subject = render_template("account_created_subject.txt", app_name=app_name)
+    text_body = render_template(
+        "account_created.txt",
+        app_name=app_name,
+        user=user,
+        first_name=user.get("first_name"),
+        instance_url=client_url,
+        expires=hours,
+        url=url,
+    )
+    html_body = render_template(
+        "account_created.html",
+        app_name=app_name,
+        user=user,
+        first_name=user.get("first_name"),
+        instance_url=client_url,
+        expires=hours,
+        url=url,
+    )
+    sender = app.config["ADMINS"][0]
+
+    logger.info(
+        "Queue account-activation e-mail to=%s url=%s",
+        doc["email"],
+        url,
+    )
+
+    send_email.delay(
+        subject=subject,
+        sender=sender,
+        recipients=[doc["email"]],
+        text_body=text_body,
+        html_body=html_body,
+    )
 
 
 def send_reset_password_email(doc, token_ttl):

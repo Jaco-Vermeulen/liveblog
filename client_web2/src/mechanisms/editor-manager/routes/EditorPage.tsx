@@ -5,6 +5,7 @@ import { LbAlert } from '@/components/ui/LbAlert';
 import { LbLoadingScreen } from '@/components/ui/LbLoadingScreen';
 import { LiveblogApiError } from '@/mechanisms/liveblog-api';
 import { BlogLivePreviewPane } from '../components/BlogLivePreviewPane';
+import { ComposerDraftPreview } from '../components/ComposerDraftPreview';
 import { canPublishPost } from '../services/blogSecurity';
 import { EditorLayout } from '../components/EditorLayout';
 import { PostComposer } from '../components/PostComposer';
@@ -19,9 +20,16 @@ import { useEditorEmbedRuntime } from '../hooks/useEditorEmbedRuntime';
 import { useEditorLiveblogSettings } from '../hooks/useEditorLiveblogSettings';
 import { useTimeline } from '../hooks/useTimeline';
 import { applyPostsNotification } from '../services/applyPostsNotification';
+import { composerToPreviewItems } from '../services/composerPreview';
 import { createDualTimelineHandlers } from '../services/dualTimelineHandlers';
 import { AF } from '@/copy';
 import type { EditorPanel } from '../types';
+import type { Post } from '@/mechanisms/liveblog-api';
+
+function excludePost(posts: Post[], postId: string | null | undefined): Post[] {
+  if (!postId) return posts;
+  return posts.filter((post) => post._id !== postId);
+}
 
 export function EditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -164,42 +172,58 @@ export function EditorPage() {
 
   const canEditPosts = blog ? canPublishPost(authState.user, blog) : false;
 
-  const timeline = (
-  <>
-    {pinnedTimelineApi.posts.length > 0 ? (
+  const editingPostIdForPreview =
+    composerApi.isEditing && composerApi.composer.isDirty && composerApi.composer.currentPost
+      ? composerApi.composer.currentPost._id
+      : null;
+
+  const pinnedPreviewPosts = excludePost(pinnedTimelineApi.posts, editingPostIdForPreview);
+  const mainPreviewPosts = excludePost(mainTimelineApi.posts, editingPostIdForPreview);
+  const previewPosts = [...pinnedPreviewPosts, ...mainPreviewPosts];
+  const draftPreviewItems = composerToPreviewItems(composerApi.composer);
+  const draftPortalEnabled =
+    composerApi.composer.isDirty || draftPreviewItems.length > 0;
+
+  const renderTimeline = (
+    pinned: Post[],
+    main: Post[],
+    variant: 'default' | 'preview',
+  ) => (
+    <>
+      {pinned.length > 0 ? (
+        <Timeline
+          timeline={pinnedTimelineApi.timeline}
+          posts={pinned}
+          hasMore={pinnedTimelineApi.hasMore}
+          allowPinHighlight={canEditPosts}
+          variant={variant}
+          onPostSelect={composerApi.loadPost}
+          onLoadMore={() => void pinnedTimelineApi.fetchNextPage()}
+          onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
+          onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
+          onUnpublishPost={canEditPosts ? (post) => void handleUnpublish(post) : undefined}
+          onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
+          onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
+        />
+      ) : null}
       <Timeline
-        timeline={pinnedTimelineApi.timeline}
-        posts={pinnedTimelineApi.posts}
-        hasMore={pinnedTimelineApi.hasMore}
+        timeline={mainTimelineApi.timeline}
+        posts={main}
+        hasMore={mainTimelineApi.hasMore}
         allowPinHighlight={canEditPosts}
-        variant={viewMode === 'edit' ? 'default' : 'preview'}
+        variant={variant}
         onPostSelect={composerApi.loadPost}
-        onLoadMore={() => void pinnedTimelineApi.fetchNextPage()}
+        onLoadMore={() => void mainTimelineApi.fetchNextPage()}
         onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
         onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
         onUnpublishPost={canEditPosts ? (post) => void handleUnpublish(post) : undefined}
         onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
         onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
       />
-    ) : null}
-    <Timeline
-      timeline={mainTimelineApi.timeline}
-      posts={mainTimelineApi.posts}
-      hasMore={mainTimelineApi.hasMore}
-      allowPinHighlight={canEditPosts}
-      variant={viewMode === 'edit' ? 'default' : 'preview'}
-      onPostSelect={composerApi.loadPost}
-      onLoadMore={() => void mainTimelineApi.fetchNextPage()}
-      onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
-      onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
-      onUnpublishPost={canEditPosts ? (post) => void handleUnpublish(post) : undefined}
-      onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
-      onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
-    />
-  </>
+    </>
   );
 
-  const previewPosts = [...pinnedTimelineApi.posts, ...mainTimelineApi.posts];
+  const previewTimeline = renderTimeline(pinnedPreviewPosts, mainPreviewPosts, 'preview');
 
   if (isLoading || !blog) {
     return <LbLoadingScreen message={AF.editor.loadingBlog} />;
@@ -235,15 +259,21 @@ export function EditorPage() {
             immersive={viewMode === 'preview'}
             refreshToken={previewRefreshToken}
             posts={previewPosts}
+            draftPortalEnabled={draftPortalEnabled}
             allowPinHighlight={canEditPosts}
             onPostSelect={composerApi.loadPost}
             onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
             onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
             onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}
             onToggleHighlight={canEditPosts ? (post) => void handleToggleHighlight(post) : undefined}
-            draftSlot={null}
+            draftSlot={
+              <ComposerDraftPreview
+                composer={composerApi.composer}
+                user={authState.user}
+              />
+            }
           >
-            {timeline}
+            {previewTimeline}
           </BlogLivePreviewPane>
         }
         composer={
@@ -259,6 +289,7 @@ export function EditorPage() {
             onAddBlock={composerApi.addBlock}
             onRemoveBlock={composerApi.removeBlock}
             onRemoveBlockIfEmpty={composerApi.removeBlockIfEmpty}
+            onReorderBlock={composerApi.reorderBlocks}
             onUpdateBlock={composerApi.updateBlock}
             onUploadImage={composerApi.uploadImage}
             onUploadScorecardAsset={composerApi.uploadScorecardAsset}
@@ -291,7 +322,6 @@ export function EditorPage() {
             onTagsChange={composerApi.setTags}
           />
         }
-        timeline={timeline}
         />
       </div>
     </div>

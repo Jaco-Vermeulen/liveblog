@@ -19,6 +19,8 @@ import {
   scheduleEnabledFromPost,
 } from '../services/composerSchedule';
 import type { ComposerState, EditorPostType, SirTrevorBlock, SirTrevorBlockType } from '../types';
+import { newComposerBlockKey } from '../services/composerBlockKeys';
+import { reorderArray } from '../services/reorderArray';
 import {
   featuredImageSourceFromPost,
   resolveFeaturedImagePatch,
@@ -28,12 +30,20 @@ import { usePosts } from './usePosts';
 
 const defaultBlock = (): SirTrevorBlock => ({ type: 'Text', data: { text: '' } });
 
+function toEntries(blocks: SirTrevorBlock[]): { id: string; block: SirTrevorBlock }[] {
+  return blocks.map((block) => ({ id: newComposerBlockKey(), block }));
+}
+
+function entryFromBlock(block: SirTrevorBlock): { id: string; block: SirTrevorBlock } {
+  return { id: newComposerBlockKey(), block };
+}
+
 export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   const blogId = blog?._id ?? '';
   const { savePost } = usePosts(blogId);
   const { freetypes } = useFreetypesList();
 
-  const [blocks, setBlocks] = useState<SirTrevorBlock[]>([defaultBlock()]);
+  const [entries, setEntries] = useState(() => [entryFromBlock(defaultBlock())]);
   const [headline, setHeadline] = useState('');
   const [showHeadline, setShowHeadline] = useState(false);
   const [featuredImageSource, setFeaturedImageSource] = useState<FeaturedImageSource>({
@@ -59,8 +69,12 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   const isFreetypeMode = selectedPostType !== DEFAULT_POST_TYPE;
   const isEditing = currentPost != null;
 
+  const blocks = useMemo(() => entries.map((entry) => entry.block), [entries]);
+  const blockIds = useMemo(() => entries.map((entry) => entry.id), [entries]);
+
   const composer: ComposerState = {
     blocks,
+    blockIds,
     headline,
     showHeadline,
     featuredImageSource,
@@ -94,25 +108,35 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
     selectedPostType,
   ]);
 
+  const blurComposerEditor = useCallback(() => {
+    if (typeof document === 'undefined') return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.closest('.m-rich-text-editor__body')) {
+      active.blur();
+    }
+  }, []);
+
   const loadPost = useCallback(
     (post: Post | null) => {
+      blurComposerEditor();
       setCurrentPost(post);
       if (post) {
         const scorecardBody = loadScorecardFromPost(post);
         if (scorecardBody) {
           setSelectedPostType(DEFAULT_POST_TYPE);
           setFreetypeData({});
-          setBlocks([{ type: 'Scorecard', data: { scorecardBody } }]);
+          setEntries([entryFromBlock({ type: 'Scorecard', data: { scorecardBody } })]);
         } else {
         const loaded = loadFreetypeFromPost(post, freetypes);
         if (loaded) {
           setSelectedPostType(loaded.freetype);
           setFreetypeData(loaded.data);
-          setBlocks([defaultBlock()]);
+          setEntries([entryFromBlock(defaultBlock())]);
         } else {
           setSelectedPostType(DEFAULT_POST_TYPE);
           setFreetypeData({});
-          setBlocks(postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()]);
+          const loadedBlocks = postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()];
+          setEntries(toEntries(loadedBlocks));
         }
         }
         setHeadline(post.headline ?? '');
@@ -127,7 +151,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
       } else {
         setSelectedPostType(DEFAULT_POST_TYPE);
         setFreetypeData({});
-        setBlocks([defaultBlock()]);
+        setEntries([entryFromBlock(defaultBlock())]);
         setHeadline('');
         setShowHeadline(false);
         setFeaturedImageSource({ type: 'none' });
@@ -139,7 +163,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
       }
       setIsDirty(false);
     },
-    [freetypes],
+    [blurComposerEditor, freetypes],
   );
 
   const createBlock = (type: SirTrevorBlockType): SirTrevorBlock => {
@@ -168,35 +192,42 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   };
 
   const addBlock = useCallback((type: SirTrevorBlockType) => {
-    setBlocks((prev) => {
-      const kept = prev.filter((block) => !isBlockEmpty(block));
-      return [...kept, createBlock(type)];
+    setEntries((prev) => {
+      const kept = prev.filter((entry) => !isBlockEmpty(entry.block));
+      return [...kept, entryFromBlock(createBlock(type))];
     });
     setIsDirty(true);
   }, []);
 
   const removeBlock = useCallback((index: number) => {
-    setBlocks((prev) => {
+    setEntries((prev) => {
       const next = prev.filter((_, i) => i !== index);
-      return next.length ? next : [defaultBlock()];
+      return next.length ? next : [entryFromBlock(defaultBlock())];
     });
     setIsDirty(true);
   }, []);
 
   const removeBlockIfEmpty = useCallback((index: number) => {
-    setBlocks((prev) => {
+    setEntries((prev) => {
       if (prev.length <= 1) return prev;
-      const block = prev[index];
-      if (!block || !isBlockEmpty(block)) return prev;
+      const entry = prev[index];
+      if (!entry || !isBlockEmpty(entry.block)) return prev;
       const next = prev.filter((_, i) => i !== index);
-      return next.length ? next : [defaultBlock()];
+      return next.length ? next : [entryFromBlock(defaultBlock())];
     });
     setIsDirty(true);
   }, []);
 
+  const reorderBlocks = useCallback((fromIndex: number, toIndex: number) => {
+    setEntries((prev) => reorderArray(prev, fromIndex, toIndex));
+    setIsDirty(true);
+  }, []);
+
   const updateBlock = useCallback((index: number, data: Record<string, unknown>) => {
-    setBlocks((prev) =>
-      prev.map((block, i) => (i === index ? { ...block, data: { ...block.data, ...data } } : block)),
+    setEntries((prev) =>
+      prev.map((entry, i) =>
+        i === index ? { ...entry, block: { ...entry.block, data: { ...entry.block.data, ...data } } } : entry,
+      ),
     );
     setIsDirty(true);
   }, []);
@@ -212,20 +243,29 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
       setScorecardUploading(target);
       try {
         const uploaded = await uploadArchiveMedia(file);
-        setBlocks((prev) =>
-          prev.map((block, i) => {
-            if (i !== index || block.type !== 'Scorecard') return block;
-            const body = normalizeScorecardBody(block.data.scorecardBody);
+        setEntries((prev) =>
+          prev.map((entry, i) => {
+            if (i !== index || entry.block.type !== 'Scorecard') return entry;
+            const body = normalizeScorecardBody(entry.block.data.scorecardBody);
             if (target === 'background') {
-              return { ...block, data: { scorecardBody: { ...body, backgroundUrl: uploaded.picture_url } } };
+              return {
+                ...entry,
+                block: {
+                  ...entry.block,
+                  data: { scorecardBody: { ...body, backgroundUrl: uploaded.picture_url } },
+                },
+              };
             }
             const team = target === 'home' ? 'home' : 'away';
             return {
-              ...block,
-              data: {
-                scorecardBody: {
-                  ...body,
-                  [team]: { ...body[team], logoUrl: uploaded.picture_url },
+              ...entry,
+              block: {
+                ...entry.block,
+                data: {
+                  scorecardBody: {
+                    ...body,
+                    [team]: { ...body[team], logoUrl: uploaded.picture_url },
+                  },
                 },
               },
             };
@@ -247,24 +287,28 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
     setImageUploadingIndex(index);
     try {
       const uploaded = await uploadArchiveMedia(file);
-      setBlocks((prev) =>
-        prev.map((block, i) => {
-          if (i !== index) return block;
+      setEntries((prev) =>
+        prev.map((entry, i) => {
+          if (i !== index) return entry;
+          const block = entry.block;
           const media = {
             _id: uploaded.picture,
             renditions: uploaded.picture_renditions,
           };
           const currentMeta = (block.data.meta as Record<string, unknown> | undefined) ?? {};
           return {
-            ...block,
-            data: {
-              ...block.data,
-              url: uploaded.picture_url,
-              picture_url: uploaded.picture_url,
-              media,
-              meta: {
-                ...currentMeta,
+            ...entry,
+            block: {
+              ...block,
+              data: {
+                ...block.data,
+                url: uploaded.picture_url,
+                picture_url: uploaded.picture_url,
                 media,
+                meta: {
+                  ...currentMeta,
+                  media,
+                },
               },
             },
           };
@@ -335,8 +379,9 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   }, [blocks, freetypeData, isFreetypeMode, selectedPostType]);
 
   const resolveFeaturedPatch = useCallback(
-    () => (hasWebhook ? resolveFeaturedImagePatch(featuredImageSource, blocks) ?? {} : {}),
-    [blocks, featuredImageSource, hasWebhook],
+    () =>
+      hasWebhook ? resolveFeaturedImagePatch(featuredImageSource, blocks, currentPost) ?? {} : {},
+    [blocks, currentPost, featuredImageSource, hasWebhook],
   );
 
   const resolveHeadlinePatch = useCallback(() => {
@@ -467,6 +512,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
     addBlock,
     removeBlock,
     removeBlockIfEmpty,
+    reorderBlocks,
     updateBlock,
     uploadImage,
     uploadScorecardAsset,

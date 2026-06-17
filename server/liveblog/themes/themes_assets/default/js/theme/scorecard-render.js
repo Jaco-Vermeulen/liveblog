@@ -33,7 +33,45 @@ function scPresetForVariant(variant) {
     showScorerStat: false,
     showBowlers: false,
     scorersLabel: 'Doelskoppe',
-    bowlersLabel: 'Boulers',
+    bowlersLabel: 'Bykomende spelers',
+  };
+}
+
+function scDefaultSections(variant) {
+  if (variant === 'cricket') {
+    return { teamStats: true, primaryPlayers: true, secondaryPlayers: true };
+  }
+  return { teamStats: false, primaryPlayers: true, secondaryPlayers: false };
+}
+
+function scReadSections(match, variant, home, away) {
+  var raw = match.sections;
+  if (raw && typeof raw === 'object') {
+    return {
+      teamStats: !!(raw.team_stats || raw.teamStats),
+      primaryPlayers: raw.primary_players !== false && raw.primaryPlayers !== false,
+      secondaryPlayers: !!(raw.secondary_players || raw.secondaryPlayers),
+    };
+  }
+  var defaults = scDefaultSections(variant);
+  var hasBowlers =
+    home.bowlers.some(function (b) {
+      return b.name || b.figures;
+    }) ||
+    away.bowlers.some(function (b) {
+      return b.name || b.figures;
+    });
+  var hasExtras =
+    home.extras.some(function (e) {
+      return e.label || e.value;
+    }) ||
+    away.extras.some(function (e) {
+      return e.label || e.value;
+    });
+  return {
+    teamStats: hasExtras || defaults.teamStats,
+    primaryPlayers: true,
+    secondaryPlayers: hasBowlers || defaults.secondaryPlayers,
   };
 }
 
@@ -183,15 +221,22 @@ function scFormatCurrentOver(raw) {
   return 'Over ' + value;
 }
 
-function scResolveTeamDisplay(side, variant, battingSide, homeSideDisplay, awaySideDisplay) {
+function scResolveTeamDisplay(side, variant, battingSide, homeSideDisplay, awaySideDisplay, hasBowlers, sections) {
   var mode = side === 'home' ? homeSideDisplay : awaySideDisplay;
-  if (mode === 'batters') return { batters: true, bowlers: false };
-  if (mode === 'bowlers') return { batters: false, bowlers: true };
-  if (mode === 'both') return { batters: true, bowlers: true };
+  if (mode === 'batters') return { batters: sections.primaryPlayers, bowlers: false };
+  if (mode === 'bowlers') return { batters: false, bowlers: sections.secondaryPlayers };
+  if (mode === 'both') {
+    return { batters: sections.primaryPlayers, bowlers: sections.secondaryPlayers };
+  }
   if (mode === 'none') return { batters: false, bowlers: false };
-  if (variant === 'rugby') return { batters: true, bowlers: false };
-  if (side === battingSide) return { batters: true, bowlers: false };
-  return { batters: false, bowlers: true };
+  if (variant === 'cricket') {
+    if (side === battingSide) return { batters: sections.primaryPlayers, bowlers: false };
+    return { batters: false, bowlers: sections.secondaryPlayers };
+  }
+  return {
+    batters: sections.primaryPlayers,
+    bowlers: sections.secondaryPlayers && !!hasBowlers,
+  };
 }
 
 function scUsesSplitPanel(variant, homeDisplay, awayDisplay) {
@@ -203,7 +248,7 @@ function scUsesSplitPanel(variant, homeDisplay, awayDisplay) {
   );
 }
 
-function scRenderTeam(team, side, fallbackName, score, cricketLayout) {
+function scRenderTeam(team, side, fallbackName, score, cricketLayout, inlineHtml) {
   var name = team.name ? scEscapeHtml(team.name) : scEscapeHtml(fallbackName);
   var logo = team.logoUrl
     ? '<img src="' +
@@ -222,9 +267,188 @@ function scRenderTeam(team, side, fallbackName, score, cricketLayout) {
     name +
     '</span>' +
     scoreHtml +
-    scRenderTeamExtras(team) +
+    (inlineHtml || '') +
     '</div>'
   );
+}
+
+function scReadColumns(raw) {
+  var columns = [];
+  if (Array.isArray(raw)) {
+    raw.forEach(function (row, index) {
+      if (!row) return;
+      columns.push({
+        id: String(row.id || '').trim() || 'col-' + index,
+        label: String(row.label || '').trim(),
+      });
+    });
+  }
+  return columns.length ? columns : [{ id: 'field1', label: 'Veld 1' }];
+}
+
+function scReadListRows(raw, columns) {
+  var rows = [];
+  if (!Array.isArray(raw)) return rows;
+  raw.forEach(function (row) {
+    if (!row) return;
+    var valuesRaw = row.values && typeof row.values === 'object' ? row.values : row;
+    var values = {};
+    columns.forEach(function (col) {
+      values[col.id] = String(valuesRaw[col.id] || '').trim();
+    });
+    rows.push({ values: values });
+  });
+  return rows;
+}
+
+function scReadPlacement(raw) {
+  var v = String(raw || '').trim();
+  if (v === 'team-inline' || v === 'full') return v;
+  return 'panel';
+}
+
+function scReadCustomLists(match) {
+  if (!match.lists || !Array.isArray(match.lists)) return [];
+  var lists = [];
+  match.lists.forEach(function (item, index) {
+    if (!item) return;
+    var columns = scReadColumns(item.columns);
+    lists.push({
+      id: String(item.id || '').trim() || 'list-' + index,
+      heading: String(item.heading || '').trim(),
+      placement: scReadPlacement(item.placement),
+      columns: columns,
+      homeRows: scReadListRows(item.home_rows || item.homeRows, columns),
+      awayRows: scReadListRows(item.away_rows || item.awayRows, columns),
+      rows: scReadListRows(item.rows, columns),
+    });
+  });
+  return lists;
+}
+
+function scRowHasData(row, columns) {
+  return columns.some(function (col) {
+    return (row.values[col.id] || '').trim();
+  });
+}
+
+function scRenderCustomDataRow(row, columns, side) {
+  var cells = columns
+    .map(function (col, index) {
+      var raw = (row.values[col.id] || '').trim() || '–';
+      var cls = index === columns.length - 1 ? 'lb-scorecard-card__scorer-name' : 'lb-scorecard-card__scorer-min';
+      return '<span class="' + cls + '">' + scEscapeHtml(raw) + '</span>';
+    })
+    .join('');
+  if (side === 'full') return '<li>' + cells + '</li>';
+  return '<li data-side="' + side + '">' + cells + '</li>';
+}
+
+function scRenderInlineCustomList(list, side) {
+  var rows = side === 'home' ? list.homeRows : list.awayRows;
+  var visible = rows.filter(function (row) {
+    return scRowHasData(row, list.columns);
+  });
+  if (!visible.length) return '';
+  if (
+    list.columns.length === 2 &&
+    list.columns[0].id === 'label' &&
+    list.columns[1].id === 'value'
+  ) {
+    var items = visible
+      .map(function (row) {
+        return (
+          '<li><span class="lb-scorecard-card__extra-label">' +
+          scEscapeHtml(row.values.label || '—') +
+          '</span><span class="lb-scorecard-card__extra-value">' +
+          scEscapeHtml(row.values.value || '—') +
+          '</span></li>'
+        );
+      })
+      .join('');
+    return '<ul class="lb-scorecard-card__team-extras">' + items + '</ul>';
+  }
+  var items = visible
+    .map(function (row) {
+      return scRenderCustomDataRow(row, list.columns, side);
+    })
+    .join('');
+  return '<ul class="lb-scorecard-card__scorer-list" data-side="' + side + '">' + items + '</ul>';
+}
+
+function scRenderPanelCustomList(list) {
+  if (list.placement === 'full') {
+    var fullVisible = list.rows.filter(function (row) {
+      return scRowHasData(row, list.columns);
+    });
+    if (!fullVisible.length) return '';
+    var fullItems = fullVisible
+      .map(function (row) {
+        return scRenderCustomDataRow(row, list.columns, 'full');
+      })
+      .join('');
+    var fullHeading = list.heading
+      ? '<p class="lb-scorecard-card__scorers-heading">' + scEscapeHtml(list.heading) + '</p>'
+      : '';
+    return (
+      '<div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--full">' +
+      fullHeading +
+      '<ul class="lb-scorecard-card__scorer-list" data-scope="full">' +
+      fullItems +
+      '</ul></div>'
+    );
+  }
+  var homeVisible = list.homeRows.filter(function (row) {
+    return scRowHasData(row, list.columns);
+  });
+  var awayVisible = list.awayRows.filter(function (row) {
+    return scRowHasData(row, list.columns);
+  });
+  if (!homeVisible.length && !awayVisible.length) return '';
+  var homeList = homeVisible.length
+    ? '<ul class="lb-scorecard-card__scorer-list" data-side="home">' +
+      homeVisible
+        .map(function (row) {
+          return scRenderCustomDataRow(row, list.columns, 'home');
+        })
+        .join('') +
+      '</ul>'
+    : '';
+  var awayList = awayVisible.length
+    ? '<ul class="lb-scorecard-card__scorer-list" data-side="away">' +
+      awayVisible
+        .map(function (row) {
+          return scRenderCustomDataRow(row, list.columns, 'away');
+        })
+        .join('') +
+      '</ul>'
+    : '';
+  var panelHeading = list.heading
+    ? '<p class="lb-scorecard-card__scorers-heading">' + scEscapeHtml(list.heading) + '</p>'
+    : '';
+  return (
+    '<div class="lb-scorecard-card__scorers-panel">' +
+    panelHeading +
+    '<div class="lb-scorecard-card__scorers-row">' +
+    homeList +
+    awayList +
+    '</div></div>'
+  );
+}
+
+function scRenderCustomListsHtml(lists) {
+  var inlineHome = '';
+  var inlineAway = '';
+  var panels = '';
+  lists.forEach(function (list) {
+    if (list.placement === 'team-inline') {
+      inlineHome += scRenderInlineCustomList(list, 'home');
+      inlineAway += scRenderInlineCustomList(list, 'away');
+    } else if (list.placement === 'panel' || list.placement === 'full') {
+      panels += scRenderPanelCustomList(list);
+    }
+  });
+  return { inlineHome: inlineHome, inlineAway: inlineAway, panels: panels };
 }
 
 function scRenderSidePlayerList(side, batters, bowlers, display, minuteSuffix, showStat) {
@@ -280,6 +504,7 @@ function buildScorecardHtmlFromMeta(data) {
   var battingSide = scReadBattingSide(match.batting_side);
   var homeSideDisplay = scReadSideDisplay(match.home_side_display);
   var awaySideDisplay = scReadSideDisplay(match.away_side_display);
+  var sections = scReadSections(match, variant, home, away);
   var heading = match.scorers_label ? String(match.scorers_label).trim() : preset.scorersLabel;
   var bowlersHeading = match.bowlers_label ? String(match.bowlers_label).trim() : preset.bowlersLabel;
   var cricketLayout = variant === 'cricket';
@@ -302,22 +527,6 @@ function buildScorecardHtmlFromMeta(data) {
     ? '<div class="lb-scorecard-card__result-meta">' + statusParts.join('') + '</div>'
     : '';
 
-  var homeDisplay = scResolveTeamDisplay(
-    'home',
-    variant,
-    battingSide,
-    homeSideDisplay,
-    awaySideDisplay,
-  );
-  var awayDisplay = scResolveTeamDisplay(
-    'away',
-    variant,
-    battingSide,
-    homeSideDisplay,
-    awaySideDisplay,
-  );
-  var splitPanel = scUsesSplitPanel(variant, homeDisplay, awayDisplay);
-
   var homeScorers = home.scorers.filter(function (s) {
     return s.name || s.minute || s.stat;
   });
@@ -330,6 +539,32 @@ function buildScorecardHtmlFromMeta(data) {
   var awayBowlers = away.bowlers.filter(function (b) {
     return b.name || b.figures;
   });
+
+  // Data-driven: show the stat column whenever any scorer has a stat, regardless
+  // of the chosen template.
+  var showStat = [].concat(homeScorers, awayScorers).some(function (s) {
+    return s.stat;
+  });
+
+  var homeDisplay = scResolveTeamDisplay(
+    'home',
+    variant,
+    battingSide,
+    homeSideDisplay,
+    awaySideDisplay,
+    homeBowlers.length > 0,
+    sections,
+  );
+  var awayDisplay = scResolveTeamDisplay(
+    'away',
+    variant,
+    battingSide,
+    homeSideDisplay,
+    awaySideDisplay,
+    awayBowlers.length > 0,
+    sections,
+  );
+  var splitPanel = scUsesSplitPanel(variant, homeDisplay, awayDisplay);
 
   var homeHasPlayers =
     (homeDisplay.batters && homeScorers.length) || (homeDisplay.bowlers && homeBowlers.length);
@@ -356,7 +591,7 @@ function buildScorecardHtmlFromMeta(data) {
       homeBowlers,
       homeDisplay,
       preset.minuteSuffix,
-      preset.showScorerStat,
+      showStat,
     );
     var awayList = scRenderSidePlayerList(
       'away',
@@ -364,7 +599,7 @@ function buildScorecardHtmlFromMeta(data) {
       awayBowlers,
       awayDisplay,
       preset.minuteSuffix,
-      preset.showScorerStat,
+      showStat,
     );
     playersBlock =
       '<div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--split"><div class="lb-scorecard-card__scorers-row">' +
@@ -393,7 +628,7 @@ function buildScorecardHtmlFromMeta(data) {
         ? '<ul class="lb-scorecard-card__scorer-list" data-side="home">' +
           homeScorers
             .map(function (s) {
-              return scRenderHomeScorerLi(s, preset.minuteSuffix, preset.showScorerStat);
+              return scRenderHomeScorerLi(s, preset.minuteSuffix, showStat);
             })
             .join('') +
           '</ul>'
@@ -402,7 +637,7 @@ function buildScorecardHtmlFromMeta(data) {
         ? '<ul class="lb-scorecard-card__scorer-list" data-side="away">' +
           awayScorers
             .map(function (s) {
-              return scRenderAwayScorerLi(s, preset.minuteSuffix, preset.showScorerStat);
+              return scRenderAwayScorerLi(s, preset.minuteSuffix, showStat);
             })
             .join('') +
           '</ul>'
@@ -418,10 +653,7 @@ function buildScorecardHtmlFromMeta(data) {
     }
 
     var bowlersBlock = '';
-    if (
-      preset.showBowlers &&
-      ((homeDisplay.bowlers && homeBowlers.length) || (awayDisplay.bowlers && awayBowlers.length))
-    ) {
+    if ((homeDisplay.bowlers && homeBowlers.length) || (awayDisplay.bowlers && awayBowlers.length)) {
       var homeBList = homeDisplay.bowlers && homeBowlers.length
         ? '<ul class="lb-scorecard-card__scorer-list" data-side="home">' +
           homeBowlers.map(scRenderHomeBowlerLi).join('') +
@@ -483,9 +715,9 @@ function buildScorecardHtmlFromMeta(data) {
     ' role="region" aria-label="Skoorbord">' +
     '<div class="lb-scorecard-card__overlay" aria-hidden="true"></div>' +
     '<div class="lb-scorecard-card__scoreline">' +
-    scRenderTeam(home, 'home', 'Tuisspan', homeScore, cricketLayout) +
+    scRenderTeam(home, 'home', 'Tuisspan', homeScore, cricketLayout, sections.teamStats) +
     centerHtml +
-    scRenderTeam(away, 'away', 'Wêreldspan', awayScore, cricketLayout) +
+    scRenderTeam(away, 'away', 'Wêreldspan', awayScore, cricketLayout, sections.teamStats) +
     '</div>' +
     playersBlock +
     metaBlock +

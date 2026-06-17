@@ -7,13 +7,20 @@ import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
 import { applyScorecardVariant, presetConfigForBody, SCORECARD_PRESETS } from './scorecardPresets';
 import { ScorecardCard } from './ScorecardCard';
-import type { ScorecardTeamSideDisplay } from './scorecardDisplay';
+import {
+  addColumnToList,
+  emptyCustomList,
+  emptyListRow,
+  removeColumnFromList,
+  syncListColumnIds,
+  updateListColumnLabel,
+} from './scorecardCustomLists';
 import type {
   ScorecardBody,
-  ScorecardPlayerRow,
-  ScorecardScorer,
+  ScorecardCustomList,
+  ScorecardListPlacement,
+  ScorecardListRow,
   ScorecardTeam,
-  ScorecardTeamExtra,
   ScorecardVariant,
 } from './scorecardTypes';
 import { defaultScorecardBody } from './scorecardTypes';
@@ -26,28 +33,198 @@ export interface ScorecardBlockEditorProps {
   uploadingSide?: 'home' | 'away' | 'background' | null;
 }
 
-function sanitizeScore(value: string, numericOnly: boolean): string {
-  if (numericOnly) return value.replace(/[^\d]/g, '').slice(0, 8);
+function sanitizeScore(value: string): string {
   return value.slice(0, 16);
 }
 
-const SIDE_DISPLAY_OPTIONS: { value: ScorecardTeamSideDisplay; label: string }[] = [
-  { value: 'auto', label: SC.sideDisplay.auto },
-  { value: 'batters', label: SC.sideDisplay.batters },
-  { value: 'bowlers', label: SC.sideDisplay.bowlers },
-  { value: 'both', label: SC.sideDisplay.both },
-  { value: 'none', label: SC.sideDisplay.none },
+const PLACEMENT_OPTIONS: { value: ScorecardListPlacement; label: string }[] = [
+  { value: 'panel', label: SC.placementPanel },
+  { value: 'team-inline', label: SC.placementTeamInline },
+  { value: 'full', label: SC.placementFull },
 ];
 
-function TeamFields({
+function RowEditor({
+  row,
+  list,
+  onChange,
+  onRemove,
+  canRemove,
+}: {
+  row: ScorecardListRow;
+  list: ScorecardCustomList;
+  onChange: (row: ScorecardListRow) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+}) {
+  return (
+    <div className="m-scorecard-editor__scorer-row">
+      {list.columns.map((col) => (
+        <LbInput
+          key={col.id}
+          aria-label={col.label || SC.columnLabel}
+          value={row.values[col.id] ?? ''}
+          onChange={(e) =>
+            onChange({
+              values: { ...row.values, [col.id]: e.target.value },
+            })
+          }
+          placeholder={col.label || SC.columnLabelPlaceholder}
+          className="min-w-0 flex-1"
+        />
+      ))}
+      <button
+        type="button"
+        className="m-editor-composer__block-remove"
+        onClick={onRemove}
+        disabled={!canRemove}
+        aria-label={SC.removeRow}
+      >
+        <Trash2 className="h-4 w-4" aria-hidden />
+      </button>
+    </div>
+  );
+}
+
+function RowsBlock({
+  title,
+  rows,
+  list,
+  onChange,
+}: {
+  title: string;
+  rows: ScorecardListRow[];
+  list: ScorecardCustomList;
+  onChange: (rows: ScorecardListRow[]) => void;
+}) {
+  const addRow = () => onChange([...rows, emptyListRow(list.columns)]);
+  const updateRow = (index: number, row: ScorecardListRow) => {
+    onChange(rows.map((r, i) => (i === index ? row : r)));
+  };
+  const removeRow = (index: number) => {
+    if (rows.length <= 1) return;
+    onChange(rows.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="m-scorecard-editor__scorers">
+      <p className="m-scorecard-editor__scorers-label">{title}</p>
+      {rows.map((row, index) => (
+        <RowEditor
+          key={index}
+          row={row}
+          list={list}
+          onChange={(next) => updateRow(index, next)}
+          onRemove={() => removeRow(index)}
+          canRemove={rows.length > 1}
+        />
+      ))}
+      <LbButton type="button" variant="secondary" onClick={addRow}>
+        <Plus className="mr-1 inline h-4 w-4" aria-hidden />
+        {SC.addRow}
+      </LbButton>
+    </div>
+  );
+}
+
+function CustomListEditor({
+  list,
+  onChange,
+  onRemove,
+}: {
+  list: ScorecardCustomList;
+  onChange: (list: ScorecardCustomList) => void;
+  onRemove: () => void;
+}) {
+  const patch = (partial: Partial<ScorecardCustomList>) => onChange({ ...list, ...partial });
+
+  return (
+    <fieldset className="m-scorecard-editor__list">
+      <div className="m-scorecard-editor__list-header">
+        <legend className="m-scorecard-editor__team-legend">{list.heading.trim() || SC.listHeading}</legend>
+        <LbButton type="button" variant="secondary" onClick={onRemove}>
+          {SC.removeList}
+        </LbButton>
+      </div>
+
+      <LbFormField label={SC.listHeading} htmlFor={`sc-list-heading-${list.id}`}>
+        <LbInput
+          id={`sc-list-heading-${list.id}`}
+          value={list.heading}
+          onChange={(e) => patch({ heading: e.target.value })}
+          placeholder={SC.listHeadingPlaceholder}
+        />
+      </LbFormField>
+
+      <LbFormField label={SC.listPlacement} htmlFor={`sc-list-placement-${list.id}`}>
+        <select
+          id={`sc-list-placement-${list.id}`}
+          className="m-editor-composer__select"
+          value={list.placement}
+          onChange={(e) => patch({ placement: e.target.value as ScorecardListPlacement })}
+        >
+          {PLACEMENT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </LbFormField>
+
+      <div className="m-scorecard-editor__scorers">
+        <p className="m-scorecard-editor__scorers-label">{SC.columnsHeading}</p>
+        {list.columns.map((col) => (
+          <div key={col.id} className="m-scorecard-editor__scorer-row">
+            <LbInput
+              aria-label={SC.columnLabel}
+              value={col.label}
+              onChange={(e) => onChange(updateListColumnLabel(list, col.id, e.target.value))}
+              placeholder={SC.columnLabelPlaceholder}
+              className="min-w-0 flex-1"
+            />
+            <button
+              type="button"
+              className="m-editor-composer__block-remove"
+              onClick={() => onChange(removeColumnFromList(list, col.id))}
+              disabled={list.columns.length <= 1}
+              aria-label={SC.removeColumn}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        ))}
+        <LbButton type="button" variant="secondary" onClick={() => onChange(addColumnToList(list))}>
+          <Plus className="mr-1 inline h-4 w-4" aria-hidden />
+          {SC.addColumn}
+        </LbButton>
+      </div>
+
+      {list.placement === 'full' ? (
+        <RowsBlock title={SC.fullRows} rows={list.rows} list={list} onChange={(rows) => patch({ rows })} />
+      ) : (
+        <>
+          <RowsBlock
+            title={SC.homeRows}
+            rows={list.homeRows}
+            list={list}
+            onChange={(homeRows) => patch({ homeRows })}
+          />
+          <RowsBlock
+            title={SC.awayRows}
+            rows={list.awayRows}
+            list={list}
+            onChange={(awayRows) => patch({ awayRows })}
+          />
+        </>
+      )}
+    </fieldset>
+  );
+}
+
+function TeamBasics({
   label,
   team,
   side,
   preset,
-  scorersSectionLabel,
-  sideDisplay,
-  onSideDisplayChange,
-  showSideDisplay,
   onChange,
   onUploadLogo,
   uploading,
@@ -56,79 +233,13 @@ function TeamFields({
   team: ScorecardTeam;
   side: 'home' | 'away';
   preset: ReturnType<typeof presetConfigForBody>;
-  scorersSectionLabel: string;
-  sideDisplay: ScorecardTeamSideDisplay;
-  onSideDisplayChange: (value: ScorecardTeamSideDisplay) => void;
-  showSideDisplay: boolean;
   onChange: (team: ScorecardTeam) => void;
   onUploadLogo: (file: File) => void;
   uploading: boolean;
 }) {
-  const updateScorer = (index: number, patch: Partial<ScorecardScorer>) => {
-    const scorers = team.scorers.map((s, i) => (i === index ? { ...s, ...patch } : s));
-    onChange({ ...team, scorers });
-  };
-
-  const addScorer = () => {
-    onChange({ ...team, scorers: [...team.scorers, { name: '', minute: '', stat: '' }] });
-  };
-
-  const removeScorer = (index: number) => {
-    if (team.scorers.length <= 1) return;
-    onChange({ ...team, scorers: team.scorers.filter((_, i) => i !== index) });
-  };
-
-  const updateBowler = (index: number, patch: Partial<ScorecardPlayerRow>) => {
-    const bowlers = team.bowlers.map((b, i) => (i === index ? { ...b, ...patch } : b));
-    onChange({ ...team, bowlers });
-  };
-
-  const addBowler = () => {
-    onChange({ ...team, bowlers: [...team.bowlers, { name: '', figures: '' }] });
-  };
-
-  const removeBowler = (index: number) => {
-    if (team.bowlers.length <= 1) return;
-    onChange({ ...team, bowlers: team.bowlers.filter((_, i) => i !== index) });
-  };
-
-  const extrasRows = team.extras.length ? team.extras : [{ label: '', value: '' }];
-
-  const updateExtra = (index: number, patch: Partial<ScorecardTeamExtra>) => {
-    const base = team.extras.length ? [...team.extras] : [{ label: '', value: '' }];
-    const extras = base.map((e, i) => (i === index ? { ...e, ...patch } : e));
-    onChange({ ...team, extras });
-  };
-
-  const addExtra = () => {
-    onChange({ ...team, extras: [...extrasRows, { label: '', value: '' }] });
-  };
-
-  const removeExtra = (index: number) => {
-    const next = extrasRows.filter((_, i) => i !== index);
-    onChange({ ...team, extras: next.length ? next : [{ label: '', value: '' }] });
-  };
-
   return (
     <fieldset className="m-scorecard-editor__team">
       <legend className="m-scorecard-editor__team-legend">{label}</legend>
-
-      {showSideDisplay ? (
-        <LbFormField label={SC.showOnCard} htmlFor={`sc-${side}-display`}>
-          <select
-            id={`sc-${side}-display`}
-            className="m-editor-composer__select"
-            value={sideDisplay}
-            onChange={(e) => onSideDisplayChange(e.target.value as ScorecardTeamSideDisplay)}
-          >
-            {SIDE_DISPLAY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </LbFormField>
-      ) : null}
 
       <LbFormField label={SC.teamName} htmlFor={`sc-${side}-name`}>
         <LbInput
@@ -143,7 +254,7 @@ function TeamFields({
         <LbInput
           id={`sc-${side}-score`}
           value={team.score}
-          onChange={(e) => onChange({ ...team, score: sanitizeScore(e.target.value, preset.scoreNumericOnly) })}
+          onChange={(e) => onChange({ ...team, score: sanitizeScore(e.target.value) })}
           placeholder={preset.scoreNumericOnly ? '0' : SC.scorePlaceholderCricket}
           inputMode={preset.scoreNumericOnly ? 'numeric' : 'text'}
           className={preset.scoreNumericOnly ? 'max-w-[5rem]' : undefined}
@@ -176,138 +287,6 @@ function TeamFields({
           }}
         />
       </LbFormField>
-
-      {preset.showTeamExtras ? (
-        <div className="m-scorecard-editor__scorers">
-          <p className="m-scorecard-editor__scorers-label">{SC.teamStats}</p>
-          <p className="m-scorecard-editor__scorers-hint">
-            Bv. Etiket &quot;Overs&quot; en waarde &quot;50.0&quot; vir innings-overs onder die span se naam op die kaart.
-          </p>
-          {extrasRows.map((extra, index) => (
-            <div key={index} className="m-scorecard-editor__scorer-row">
-              <LbInput
-                aria-label={SC.labelField}
-                value={extra.label}
-                onChange={(e) => updateExtra(index, { label: e.target.value })}
-                placeholder={SC.labelPlaceholder}
-                className="min-w-0 flex-1"
-              />
-              <LbInput
-                aria-label={SC.valueField}
-                value={extra.value}
-                onChange={(e) => updateExtra(index, { value: e.target.value })}
-                placeholder={SC.valuePlaceholder}
-                className="min-w-0 flex-1"
-              />
-              <button
-                type="button"
-                className="m-editor-composer__block-remove"
-                onClick={() => removeExtra(index)}
-                aria-label={SC.removeStat}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          ))}
-          <LbButton type="button" variant="secondary" onClick={addExtra}>
-            <Plus className="mr-1 inline h-4 w-4" aria-hidden />
-            Voeg statistiek by
-          </LbButton>
-        </div>
-      ) : null}
-
-      <div className="m-scorecard-editor__scorers">
-        <p className="m-scorecard-editor__scorers-label">{scorersSectionLabel}</p>
-        {preset.showScorerStat ? (
-          <p className="m-scorecard-editor__scorers-hint">
-            Kolwer-ry: runs in die eerste kolom, {preset.scorerDetailLabel.toLowerCase()} (bv. 48.2) in die tweede.
-          </p>
-        ) : null}
-        {team.scorers.map((scorer, index) => (
-          <div key={index} className="m-scorecard-editor__scorer-row">
-            {preset.showScorerStat ? (
-              <LbInput
-                aria-label={SC.statField}
-                value={scorer.stat}
-                onChange={(e) => updateScorer(index, { stat: e.target.value.slice(0, 8) })}
-                placeholder={SC.runsPlaceholder}
-                className="w-16"
-              />
-            ) : null}
-            <LbInput
-              aria-label={preset.scorerDetailLabel}
-              value={scorer.minute}
-              onChange={(e) =>
-                updateScorer(index, {
-                  minute: preset.minuteSuffix
-                    ? e.target.value.replace(/[^\d]/g, '').slice(0, 3)
-                    : e.target.value.slice(0, 8),
-                })
-              }
-              inputMode={preset.minuteSuffix ? 'numeric' : 'text'}
-              placeholder={preset.scorerDetailLabel}
-              className="w-16"
-            />
-            <LbInput
-              aria-label={SC.playerField}
-              value={scorer.name}
-              onChange={(e) => updateScorer(index, { name: e.target.value })}
-              placeholder={SC.playerNamePlaceholder}
-              className="min-w-0 flex-1"
-            />
-            <button
-              type="button"
-              className="m-editor-composer__block-remove"
-              onClick={() => removeScorer(index)}
-              disabled={team.scorers.length <= 1}
-              aria-label={SC.removePlayer}
-            >
-              <Trash2 className="h-4 w-4" aria-hidden />
-            </button>
-          </div>
-        ))}
-        <LbButton type="button" variant="secondary" onClick={addScorer}>
-          <Plus className="mr-1 inline h-4 w-4" aria-hidden />
-          Voeg speler by
-        </LbButton>
-      </div>
-
-      {preset.showBowlers ? (
-        <div className="m-scorecard-editor__scorers">
-          <p className="m-scorecard-editor__scorers-label">{preset.bowlersLabel}</p>
-          {team.bowlers.map((bowler, index) => (
-            <div key={index} className="m-scorecard-editor__scorer-row">
-              <LbInput
-                aria-label={SC.figuresField}
-                value={bowler.figures}
-                onChange={(e) => updateBowler(index, { figures: e.target.value.slice(0, 12) })}
-                placeholder={SC.figuresPlaceholder}
-                className="w-20"
-              />
-              <LbInput
-                aria-label={SC.bowlerField}
-                value={bowler.name}
-                onChange={(e) => updateBowler(index, { name: e.target.value })}
-                placeholder={SC.bowlerNamePlaceholder}
-                className="min-w-0 flex-1"
-              />
-              <button
-                type="button"
-                className="m-editor-composer__block-remove"
-                onClick={() => removeBowler(index)}
-                disabled={team.bowlers.length <= 1}
-                aria-label={SC.removeBowler}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          ))}
-          <LbButton type="button" variant="secondary" onClick={addBowler}>
-            <Plus className="mr-1 inline h-4 w-4" aria-hidden />
-            Voeg bouler by
-          </LbButton>
-        </div>
-      ) : null}
     </fieldset>
   );
 }
@@ -321,11 +300,29 @@ export function ScorecardBlockEditor({
 }: ScorecardBlockEditorProps) {
   const body = scorecardBody ?? defaultScorecardBody();
   const preset = presetConfigForBody(body);
+  const lists = body.customLists ?? [];
 
   const patch = (partial: Partial<ScorecardBody>) => onChange({ ...body, ...partial });
 
+  const patchLists = (customLists: ScorecardCustomList[]) =>
+    patch({ customLists: customLists.map(syncListColumnIds) });
+
   const onVariantChange = (variant: ScorecardVariant) => {
     onChange(applyScorecardVariant(body, variant));
+  };
+
+  const addList = () => {
+    patchLists([...lists, emptyCustomList()]);
+  };
+
+  const updateList = (index: number, list: ScorecardCustomList) => {
+    const next = [...lists];
+    next[index] = syncListColumnIds(list);
+    patchLists(next);
+  };
+
+  const removeList = (index: number) => {
+    patchLists(lists.filter((_, i) => i !== index));
   };
 
   return (
@@ -347,12 +344,13 @@ export function ScorecardBlockEditor({
             </option>
           ))}
         </select>
+        <p className="mt-1 text-xs text-mar-muted">{SC.starterHint}</p>
         {body.variant === 'cricket' ? (
           <p className="mt-1 text-xs text-mar-muted">{SC.cricketHint}</p>
         ) : null}
       </LbFormField>
 
-      {(body.variant === 'cricket' || body.variant === 'custom') && (
+      {body.variant === 'cricket' && (
         <div className="m-scorecard-editor__labels-grid">
           <LbFormField label={SC.currentOver} htmlFor="sc-current-over">
             <LbInput
@@ -376,62 +374,42 @@ export function ScorecardBlockEditor({
         </div>
       )}
 
-      <div className="m-scorecard-editor__labels-grid">
-        <LbFormField label={SC.scorersHeading} htmlFor="sc-scorers-label">
-          <LbInput
-            id="sc-scorers-label"
-            value={body.scorersLabel}
-            onChange={(e) => patch({ scorersLabel: e.target.value })}
-            placeholder={preset.scorersLabel}
-          />
-        </LbFormField>
-        {(preset.showBowlers || body.variant === 'custom') && (
-          <LbFormField label={SC.bowlersHeading} htmlFor="sc-bowlers-label">
-            <LbInput
-              id="sc-bowlers-label"
-              value={body.bowlersLabel}
-              onChange={(e) => patch({ bowlersLabel: e.target.value })}
-              placeholder={preset.bowlersLabel}
-            />
-          </LbFormField>
-        )}
-        <LbFormField label={SC.detailColumnLabel} htmlFor="sc-detail-label">
-          <LbInput
-            id="sc-detail-label"
-            value={body.scorerDetailLabel}
-            onChange={(e) => patch({ scorerDetailLabel: e.target.value })}
-            placeholder={preset.scorerDetailLabel}
-          />
-        </LbFormField>
-      </div>
-
       <div className="m-scorecard-editor__grid">
-        <TeamFields
+        <TeamBasics
           label={SC.homeTeam}
           side="home"
           team={body.home}
           preset={preset}
-          scorersSectionLabel={body.scorersLabel || preset.scorersLabel}
-          sideDisplay={body.homeSideDisplay}
-          onSideDisplayChange={(homeSideDisplay) => patch({ homeSideDisplay })}
-          showSideDisplay={body.variant === 'cricket' || body.variant === 'custom'}
           onChange={(home) => patch({ home })}
           onUploadLogo={(file) => void onUploadLogo('home', file)}
           uploading={uploadingSide === 'home'}
         />
-        <TeamFields
+        <TeamBasics
           label={SC.awayTeam}
           side="away"
           team={body.away}
           preset={preset}
-          scorersSectionLabel={body.scorersLabel || preset.scorersLabel}
-          sideDisplay={body.awaySideDisplay}
-          onSideDisplayChange={(awaySideDisplay) => patch({ awaySideDisplay })}
-          showSideDisplay={body.variant === 'cricket' || body.variant === 'custom'}
           onChange={(away) => patch({ away })}
           onUploadLogo={(file) => void onUploadLogo('away', file)}
           uploading={uploadingSide === 'away'}
         />
+      </div>
+
+      <div className="m-scorecard-editor__sections">
+        <p className="m-scorecard-editor__scorers-label">{SC.listsHeading}</p>
+        {lists.length === 0 ? <p className="m-scorecard-editor__scorers-hint">{SC.emptyListsHint}</p> : null}
+        {lists.map((list, index) => (
+          <CustomListEditor
+            key={list.id}
+            list={list}
+            onChange={(next) => updateList(index, next)}
+            onRemove={() => removeList(index)}
+          />
+        ))}
+        <LbButton type="button" variant="secondary" onClick={addList}>
+          <Plus className="mr-1 inline h-4 w-4" aria-hidden />
+          {SC.addList}
+        </LbButton>
       </div>
 
       <LbFormField

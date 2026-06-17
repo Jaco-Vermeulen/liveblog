@@ -38,8 +38,14 @@ export type EditorPostType = 'Default' | Freetype;
 
 import type { FeaturedImageSource } from './services/featuredImage';
 
+export interface ComposerBlockEntry {
+  id: string;
+  block: SirTrevorBlock;
+}
+
 export interface ComposerState {
   blocks: SirTrevorBlock[];
+  blockIds: string[];
   headline: string;
   showHeadline: boolean;
   featuredImageSource: FeaturedImageSource;

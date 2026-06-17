@@ -122,6 +122,7 @@ services:
       - ./server/liveblog/auth/db.py:/opt/server/liveblog/auth/db.py:ro
       - ./server/liveblog/auth/emails.py:/opt/server/liveblog/auth/emails.py:ro
       - ./server/liveblog/auth/__init__.py:/opt/server/liveblog/auth/__init__.py:ro
+      - ./server/liveblog/users/services.py:/opt/server/liveblog/users/services.py:ro
       - ./server/liveblog/auth/email_assets:/opt/server/liveblog/auth/email_assets:ro
       - ./server/superdesk/templates:/opt/server/superdesk/templates:ro
       - ./server/liveblog/themes/themes.py:/opt/server/liveblog/themes/themes.py:ro

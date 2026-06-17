@@ -518,9 +518,10 @@ class ClientModuleTestCase(TestCase):
         # test original creator ids
         original_creator_id = self.blog_posts[0].get("original_creator").get("_id")
         self.assertEqual(original_creator.get("_id"), original_creator_id)
-        # test post items type items_length > 1, but only one image
-        post_items_type = doc.get("post_items_type")
-        self.assertIsNone(post_items_type, True)
+        # Mixed editorial blocks (text + image + poll) resolve to poll badge.
+        post_items_type = self.blog_posts[0].get("post_items_type")
+        self.assertIsNotNone(post_items_type, True)
+        self.assertEqual(post_items_type, "poll")
 
     def test_post_type_poll(self):
         doc = self.blog_post_service.extract_author_ids(self.blog_posts[0])

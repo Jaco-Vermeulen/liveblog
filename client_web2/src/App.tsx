@@ -15,6 +15,7 @@ import { MarketplaceManagerPage } from '@/mechanisms/marketplace-manager';
 import { SyndicationManagerPage } from '@/mechanisms/syndication-manager';
 import { UsersManagerPage } from '@/mechanisms/user-manager';
 import {
+  AdminReactQueryDevtools,
   AuthProvider,
   LoginPage,
   PrivilegeRoute,
@@ -22,6 +23,7 @@ import {
   ProtectedRoute,
   ProfilePage,
   ResetPasswordPage,
+  ResetPasswordTokenRedirect,
   SecureLoginPage,
 } from '@/mechanisms/auth-manager';
 import { AppShell, NotificationsProvider } from '@/mechanisms/navigation-manager';
@@ -30,6 +32,8 @@ import { WebSocketProvider } from '@/mechanisms/websocket-manager';
 export default function App() {
   return (
     <AuthProvider>
+      <AdminReactQueryDevtools />
+      <ResetPasswordTokenRedirect />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />

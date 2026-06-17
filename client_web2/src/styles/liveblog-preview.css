@@ -262,29 +262,6 @@
   height: 100%;
 }
 
-.m-portal-editor .lb-preview-draft-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 30;
-  max-height: 45%;
-  overflow-y: auto;
-  padding: 0.5rem 0.65rem;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-mar-panel, #f3ebe2) 96%, transparent),
-    color-mix(in srgb, var(--color-mar-panel, #f3ebe2) 88%, transparent) 70%,
-    transparent
-  );
-  pointer-events: none;
-}
-
-.m-portal-editor .lb-preview-draft-overlay .lb-post--draft {
-  pointer-events: auto;
-  box-shadow: 0 8px 24px rgba(28, 25, 23, 0.12);
-}
-
 .m-portal-editor .lb-preview-theme-iframe {
   display: block;
   width: 100%;
@@ -316,12 +293,14 @@
 
 .m-portal-editor .lb-themed-preview .m-embed-html .iframely-responsive {
   width: 100%;
-  min-height: 280px;
 }
 
 .m-portal-editor .lb-themed-preview .m-embed-html .iframely-responsive iframe {
   width: 100% !important;
-  min-height: 280px;
+}
+
+.m-portal-editor .lb-themed-preview .m-embed-html .iframely-embed:not(:has(iframe)) .iframely-responsive {
+  min-height: 133px;
 }
 
 .m-portal-editor .lb-post.lb-post--admin-preview {
@@ -447,19 +426,28 @@
   color: var(--color-mar-muted, #57534e);
 }
 
-/* Draft in themed mode */
+/* Draft in themed fallback preview */
 .lb-post.lb-post--draft {
-  margin: 0.5rem 0.65rem;
-  border: 2px dashed var(--color-mar-teal, #157578);
+  position: relative;
+  margin: 0;
+  outline: 2px dashed var(--color-mar-teal, #157578);
+  outline-offset: -2px;
 }
 
 .lb-post__draft-label {
-  display: block;
-  padding: 0.5rem 0.875rem 0;
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 5;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--color-mar-teal, #157578);
+  background: color-mix(in srgb, var(--color-mar-panel, #f3ebe2) 96%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-mar-teal, #157578) 35%, transparent);
 }
 
 .m-editor-preview__poll {
@@ -499,4 +487,11 @@
   display: block;
   height: 100%;
   background: var(--color-mar-teal, #157578);
+}
+
+.lb-type.lb-type--favicon {
+  background-color: #fff;
+  background-size: 65%;
+  background-position: center;
+  background-repeat: no-repeat;
 }

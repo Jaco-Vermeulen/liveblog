@@ -163,6 +163,7 @@ class PostsResource(ArchiveResource):
             "featured_image_url": {"type": "string", "nullable": True},
             "featured_image_renditions": {
                 "type": "dict",
+                "nullable": True,
                 "mapping": {"type": "object", "enabled": False},
             },
             "featured_image": Resource.rel(

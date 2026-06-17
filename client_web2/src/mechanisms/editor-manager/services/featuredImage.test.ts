@@ -19,14 +19,27 @@ const labels = {
 };
 
 describe('featuredImage', () => {
-  it('resolveFeaturedImagePatch clears featured image when source is none', () => {
+  it('resolveFeaturedImagePatch omits featured fields for none on new posts', () => {
     const patch = resolveFeaturedImagePatch({ type: 'none' }, []);
-    expect(patch?.featured_image_url).toBeNull();
+    expect(patch).toEqual({});
   });
 
-  it('resolveFeaturedImagePatch clears featured image when source is blog', () => {
+  it('resolveFeaturedImagePatch omits featured fields for blog on new posts', () => {
     const patch = resolveFeaturedImagePatch({ type: 'blog' }, []);
+    expect(patch).toEqual({});
+  });
+
+  it('resolveFeaturedImagePatch clears featured image when editing an existing featured post', () => {
+    const patch = resolveFeaturedImagePatch(
+      { type: 'none' },
+      [],
+      {
+        featured_image: 'img-1',
+        featured_image_url: 'https://example.com/a.jpg',
+      } as Post,
+    );
     expect(patch?.featured_image_url).toBeNull();
+    expect(patch?.featured_image_renditions).toEqual({});
   });
 
   it('resolveFeaturedImagePatch copies media from image block', () => {

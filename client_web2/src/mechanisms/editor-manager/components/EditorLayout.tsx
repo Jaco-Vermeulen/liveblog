@@ -18,7 +18,6 @@ export interface EditorLayoutProps {
   showViewModeSwitch?: boolean;
   composer: ReactNode;
   preview?: ReactNode | null;
-  timeline: ReactNode;
 }
 
 export function EditorLayout({
@@ -31,12 +30,10 @@ export function EditorLayout({
   showViewModeSwitch = true,
   composer,
   preview,
-  timeline,
 }: EditorLayoutProps) {
   const showComposer = viewMode === 'edit' || viewMode === 'split';
   const showPreview = Boolean(preview) && (viewMode === 'preview' || viewMode === 'split');
-  /** Classic edit mode: timeline beside composer. Split/preview: posts live inside preview pane only. */
-  const showTimeline = viewMode === 'edit';
+  /** Edit/preview: single pane. Split: compose + preview; timeline lives in preview pane only. */
   const columnsClass = `m-editor-columns m-editor-columns--${viewMode}`;
 
   return (
@@ -88,32 +85,17 @@ export function EditorLayout({
 
         <div className={columnsClass}>
           {showComposer ? (
-            viewMode === 'split' || viewMode === 'edit' ? (
-              <div className="m-editor-panel m-editor-panel--compose">
-                <header className="m-editor-panel__head">
-                  <span className="m-editor-panel__title">{AF.editor.editPanel}</span>
-                  <span className="m-editor-panel__hint">{AF.editor.editHint}</span>
-                </header>
-                <div className="m-editor-panel__body">{composer}</div>
-              </div>
-            ) : null
+            <div className="m-editor-panel m-editor-panel--compose">
+              <header className="m-editor-panel__head">
+                <span className="m-editor-panel__title">{AF.editor.editPanel}</span>
+                <span className="m-editor-panel__hint">{AF.editor.editHint}</span>
+              </header>
+              <div className="m-editor-panel__body">{composer}</div>
+            </div>
           ) : null}
           {showPreview ? (
-            viewMode === 'split' || viewMode === 'preview' ? (
-              <div className="m-editor-panel m-editor-panel--preview">
-                <div className="m-editor-panel__body m-editor-panel__body--flush">{preview}</div>
-              </div>
-            ) : (
-              <div className="m-editor-columns__preview">{preview}</div>
-            )
-          ) : null}
-          {showTimeline ? (
-            <div className="m-editor-panel m-editor-panel--timeline">
-              <header className="m-editor-panel__head">
-                <span className="m-editor-panel__title">{AF.editor.timeline}</span>
-                <span className="m-editor-panel__hint">{AF.editor.timelineHint}</span>
-              </header>
-              <div className="m-editor-panel__body m-editor-panel__body--timeline">{timeline}</div>
+            <div className="m-editor-panel m-editor-panel--preview">
+              <div className="m-editor-panel__body m-editor-panel__body--flush">{preview}</div>
             </div>
           ) : null}
         </div>

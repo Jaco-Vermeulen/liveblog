@@ -7,6 +7,7 @@ from liveblog.auth.emails import (
     _email_trace_id,
     _logo_url,
     _reset_password_url,
+    send_activate_account_email,
     send_reset_password_email,
 )
 
@@ -56,4 +57,28 @@ class ResetPasswordEmailTest(TestCase):
             self.assertNotIn("<svg", kwargs["html_body"])
             self.assertNotIn("cid:", kwargs["html_body"])
             self.assertIn("reset-tok123", kwargs["html_body"])
+            self.assertNotIn("/#/reset-password", kwargs["html_body"])
+
+    @patch("liveblog.auth.emails.send_email")
+    @patch("liveblog.auth.emails.get_resource_service")
+    def test_activate_account_email_uses_web2_url(self, mock_users_service, mock_send):
+        mock_users_service.return_value.find_one.return_value = {
+            "_id": "u1",
+            "first_name": "Test",
+            "username": "testuser",
+            "email": "user@example.com",
+        }
+        with self.app.app_context():
+            self.app.config["CLIENT_URL"] = "http://localhost:9000"
+            self.app.config["APPLICATION_NAME"] = "Maroela Media Liveblog"
+            self.app.config["ADMINS"] = ["geen-antwoord@maroelamedia.co.za"]
+
+            send_activate_account_email(
+                {"email": "user@example.com", "token": "activate-tok", "user": "u1"},
+                activate_ttl=7,
+            )
+
+            mock_send.delay.assert_called_once()
+            kwargs = mock_send.delay.call_args[1]
+            self.assertIn("/reset-password?token=activate-tok", kwargs["html_body"])
             self.assertNotIn("/#/reset-password", kwargs["html_body"])

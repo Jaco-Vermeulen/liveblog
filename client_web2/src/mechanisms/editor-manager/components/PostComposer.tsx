@@ -7,23 +7,19 @@ import {
   Star,
   Trophy,
   Type,
-  X,
 } from 'lucide-react';
 import { LbAlert } from '@/components/ui/LbAlert';
 import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
-import type { Blog, PollBody } from '@/mechanisms/liveblog-api';
-import { EmbedPreview, type EmbedMeta } from '../subsystems/embed-handlers';
+import type { Blog } from '@/mechanisms/liveblog-api';
 import { FreetypeFields } from '../subsystems/freetype-fields';
-import { PollBlockEditor } from '../subsystems/polls';
-import { RichTextBlockEditor } from '../subsystems/rich-text-editor';
-import { ScorecardBlockEditor, type ScorecardBody } from '../subsystems/scorecard';
 import { AF } from '@/copy';
 import type { ComposerState, EditorPostType, SirTrevorBlockType } from '../types';
 import { PostTagsSelector } from './PostTagsSelector';
 import { FeaturedImagePicker } from './FeaturedImagePicker';
 import type { FeaturedImageSource } from '../services/featuredImage';
+import { ComposerBlockList } from './ComposerBlockList';
 
 const BLOCK_TYPES: {
   type: SirTrevorBlockType;
@@ -49,6 +45,7 @@ export interface PostComposerProps {
   onAddBlock: (type: SirTrevorBlockType) => void;
   onRemoveBlock: (index: number) => void;
   onRemoveBlockIfEmpty: (index: number) => void;
+  onReorderBlock: (fromIndex: number, toIndex: number) => void;
   onUpdateBlock: (index: number, data: Record<string, unknown>) => void;
   onUploadImage: (index: number, file: File) => Promise<void> | void;
   onUploadScorecardAsset?: (
@@ -91,6 +88,7 @@ export function PostComposer({
   onAddBlock,
   onRemoveBlock,
   onRemoveBlockIfEmpty,
+  onReorderBlock,
   onUpdateBlock,
   onUploadImage,
   onUploadScorecardAsset,
@@ -216,132 +214,19 @@ export function PostComposer({
       )}
 
       {!isFreetypeMode && (
-        <div className="m-editor-composer__blocks">
-          {composer.blocks.map((block, index) => (
-            <div
-              key={index}
-              className={`m-editor-composer__block${block.type === 'Text' || block.type === 'Quote' ? ' m-editor-composer__block--rich-text' : ''}`}
-            >
-              {(block.type !== 'Text' && block.type !== 'Quote') || composer.blocks.length > 1 ? (
-                <div className="m-editor-composer__block-head">
-                  <span className="m-editor-composer__block-label">
-                    {block.type === 'Text'
-                      ? AF.editor.blocks.text
-                      : block.type === 'Quote'
-                        ? AF.editor.blocks.quote
-                        : block.type === 'Image'
-                          ? AF.editor.blocks.image
-                          : block.type === 'Embed'
-                            ? AF.editor.blocks.embed
-                            : block.type === 'Poll'
-                              ? AF.editor.blocks.poll
-                              : block.type === 'Scorecard'
-                                ? AF.editor.blocks.scorecard
-                                : block.type}
-                  </span>
-                  {composer.blocks.length > 1 && (
-                    <button
-                      type="button"
-                      className="m-editor-composer__block-remove"
-                      onClick={() => onRemoveBlock(index)}
-                      title={AF.editor.removeBlock}
-                      aria-label={AF.editor.removeBlock}
-                    >
-                      <X className="h-4 w-4" aria-hidden />
-                    </button>
-                  )}
-                </div>
-              ) : null}
-              {block.type === 'Text' || block.type === 'Quote' ? (
-                <RichTextBlockEditor
-                  id={`block-text-${index}`}
-                  value={String(block.data.text ?? '')}
-                  onChange={(text) => onUpdateBlock(index, { text })}
-                  onBlur={() => onRemoveBlockIfEmpty(index)}
-                  placeholder={AF.editor.writePost}
-                />
-              ) : block.type === 'Image' ? (
-                <LbFormField label={AF.editor.imageUrl} htmlFor={`block-image-${index}`}>
-                  <div className="mb-2">
-                    <LbButton
-                      type="button"
-                      variant="secondary"
-                      disabled={imageUploadingIndex === index}
-                      onClick={() =>
-                        document.getElementById(`block-image-file-${index}`)?.click()
-                      }
-                    >
-                      {imageUploadingIndex === index
-                        ? AF.editor.uploadingImage
-                        : AF.editor.uploadImage}
-                    </LbButton>
-                    <input
-                      id={`block-image-file-${index}`}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) void onUploadImage(index, file);
-                        e.currentTarget.value = '';
-                      }}
-                    />
-                  </div>
-                  <LbInput
-                    id={`block-image-${index}`}
-                    type="url"
-                    value={String(block.data.url ?? '')}
-                    onChange={(e) => onUpdateBlock(index, { url: e.target.value })}
-                    onBlur={() => onRemoveBlockIfEmpty(index)}
-                    placeholder="https://…"
-                  />
-                  {String(block.data.url ?? '').trim() ? (
-                    <img
-                      src={String(block.data.url)}
-                      alt=""
-                      className="mt-2 max-h-40 rounded-lg border border-mar-border object-contain"
-                    />
-                  ) : null}
-                </LbFormField>
-              ) : block.type === 'Poll' ? (
-                <div
-                  onBlur={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-                      onRemoveBlockIfEmpty(index);
-                    }
-                  }}
-                >
-                  <PollBlockEditor
-                    pollBody={(block.data.pollBody as PollBody | null) ?? null}
-                    onChange={(pollBody) => onUpdateBlock(index, { pollBody })}
-                  />
-                </div>
-              ) : block.type === 'Scorecard' ? (
-                <ScorecardBlockEditor
-                  scorecardBody={(block.data.scorecardBody as ScorecardBody | null) ?? null}
-                  onChange={(scorecardBody) => onUpdateBlock(index, { scorecardBody })}
-                  onUploadLogo={(side, file) => onUploadScorecardAsset?.(index, side, file)}
-                  onUploadBackground={(file) => onUploadScorecardAsset?.(index, 'background', file)}
-                  uploadingSide={scorecardUploading}
-                />
-              ) : (
-                <div
-                  onBlur={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-                      onRemoveBlockIfEmpty(index);
-                    }
-                  }}
-                >
-                  <EmbedPreview
-                    url={String(block.data.url ?? '')}
-                    embedMeta={(block.data.embedMeta as EmbedMeta | null) ?? null}
-                    onChange={(data) => onUpdateBlock(index, data)}
-                  />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <ComposerBlockList
+          blocks={composer.blocks}
+          blockIds={composer.blockIds}
+          currentPostId={composer.currentPost?._id}
+          onRemoveBlock={onRemoveBlock}
+          onRemoveBlockIfEmpty={onRemoveBlockIfEmpty}
+          onReorderBlock={onReorderBlock}
+          onUpdateBlock={onUpdateBlock}
+          onUploadImage={onUploadImage}
+          onUploadScorecardAsset={onUploadScorecardAsset}
+          imageUploadingIndex={imageUploadingIndex}
+          scorecardUploading={scorecardUploading}
+        />
       )}
 
       <div className="m-editor-composer__options" role="toolbar" aria-label={AF.editor.postOptions}>

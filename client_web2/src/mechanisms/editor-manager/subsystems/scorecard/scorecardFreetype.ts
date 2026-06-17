@@ -1,16 +1,27 @@
 import { getPathValue } from '@/mechanisms/freetypes-manager';
 import { scorecardPresetFor } from './scorecardPresets';
 import type { ScorecardBattingSide, ScorecardTeamSideDisplay } from './scorecardDisplay';
+import {
+  ensureCustomLists,
+  migrateLegacyBodyToLists,
+  syncListColumnIds,
+} from './scorecardCustomLists';
 import type {
   ScorecardBody,
+  ScorecardCustomList,
+  ScorecardListColumn,
+  ScorecardListPlacement,
+  ScorecardListRow,
   ScorecardPlayerRow,
   ScorecardScorer,
+  ScorecardSections,
   ScorecardTeam,
   ScorecardTeamExtra,
   ScorecardVariant,
 } from './scorecardTypes';
 import {
   defaultScorecardBody,
+  defaultSectionsForVariant,
   emptyBowlers,
   emptyExtras,
   emptyScorers,
@@ -80,17 +91,104 @@ function readTeam(prefix: 'home' | 'away', data: Record<string, unknown>): Score
 function readVariant(raw: unknown): ScorecardVariant {
   const v = String(raw ?? '').trim();
   if (v === 'cricket' || v === 'custom' || v === 'rugby') return v;
-  return 'rugby';
+  return 'custom';
 }
 
 function readBattingSide(raw: unknown): ScorecardBattingSide {
   return String(raw ?? '').trim() === 'away' ? 'away' : 'home';
 }
 
+function readSections(data: Record<string, unknown>, variant: ScorecardVariant): ScorecardSections {
+  const raw = getPathValue(data, 'match.sections');
+  if (raw && typeof raw === 'object') {
+    const s = raw as Record<string, unknown>;
+    return {
+      teamStats: Boolean(s.team_stats ?? s.teamStats),
+      primaryPlayers: s.primary_players !== false && s.primaryPlayers !== false,
+      secondaryPlayers: Boolean(s.secondary_players ?? s.secondaryPlayers),
+    };
+  }
+  return defaultSectionsForVariant(variant);
+}
+
 function readSideDisplay(raw: unknown): ScorecardTeamSideDisplay {
   const v = String(raw ?? '').trim();
   if (v === 'batters' || v === 'bowlers' || v === 'both' || v === 'none') return v;
   return 'auto';
+}
+
+function readPlacement(raw: unknown): ScorecardListPlacement {
+  const v = String(raw ?? '').trim();
+  if (v === 'team-inline' || v === 'full') return v;
+  return 'panel';
+}
+
+function readColumns(raw: unknown): ScorecardListColumn[] {
+  const columns: ScorecardListColumn[] = [];
+  if (Array.isArray(raw)) {
+    for (const row of raw) {
+      if (!row || typeof row !== 'object') continue;
+      const r = row as Record<string, unknown>;
+      columns.push({
+        id: String(r.id ?? '').trim() || `col-${columns.length}`,
+        label: String(r.label ?? '').trim(),
+      });
+    }
+  }
+  return columns.length ? columns : [{ id: 'field1', label: 'Veld 1' }];
+}
+
+function readListRows(raw: unknown, columns: ScorecardListColumn[]): ScorecardListRow[] {
+  const rows: ScorecardListRow[] = [];
+  if (Array.isArray(raw)) {
+    for (const row of raw) {
+      if (!row || typeof row !== 'object') continue;
+      const r = row as Record<string, unknown>;
+      const valuesRaw = r.values && typeof r.values === 'object' ? (r.values as Record<string, unknown>) : r;
+      const values: Record<string, string> = {};
+      for (const col of columns) {
+        values[col.id] = String(valuesRaw[col.id] ?? '').trim();
+      }
+      rows.push({ values });
+    }
+  }
+  return rows;
+}
+
+function readCustomLists(data: Record<string, unknown>): ScorecardCustomList[] {
+  const raw = getPathValue(data, 'match.lists');
+  if (!Array.isArray(raw)) return [];
+
+  const lists: ScorecardCustomList[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    const columns = readColumns(o.columns);
+    lists.push(
+      syncListColumnIds({
+        id: String(o.id ?? '').trim() || `list-${lists.length}`,
+        heading: String(o.heading ?? '').trim(),
+        placement: readPlacement(o.placement),
+        columns,
+        homeRows: readListRows(o.home_rows ?? o.homeRows, columns),
+        awayRows: readListRows(o.away_rows ?? o.awayRows, columns),
+        rows: readListRows(o.rows, columns),
+      }),
+    );
+  }
+  return lists;
+}
+
+function listToFreetype(list: ScorecardCustomList): Record<string, unknown> {
+  return {
+    id: list.id,
+    heading: list.heading,
+    placement: list.placement,
+    columns: list.columns.map((c) => ({ id: c.id, label: c.label })),
+    home_rows: list.homeRows.map((row) => ({ values: row.values })),
+    away_rows: list.awayRows.map((row) => ({ values: row.values })),
+    rows: list.rows.map((row) => ({ values: row.values })),
+  };
 }
 
 export function freetypeDataToScorecardBody(data: Record<string, unknown>): ScorecardBody {
@@ -100,9 +198,12 @@ export function freetypeDataToScorecardBody(data: Record<string, unknown>): Scor
 
   const variant = readVariant(getPathValue(data, 'match.variant'));
   const preset = scorecardPresetFor(variant);
+  const customLists = readCustomLists(data);
 
-  return {
+  const body: ScorecardBody = {
     variant,
+    customLists,
+    sections: readSections(data, variant),
     scorersLabel:
       String(getPathValue(data, 'match.scorers_label') ?? '').trim() || preset.scorersLabel,
     bowlersLabel:
@@ -119,6 +220,12 @@ export function freetypeDataToScorecardBody(data: Record<string, unknown>): Scor
     matchInfo: String(getPathValue(data, 'match.info') ?? '').trim(),
     backgroundUrl: bg,
   };
+
+  if (!body.customLists.length) {
+    body.customLists = migrateLegacyBodyToLists(body);
+  }
+
+  return body;
 }
 
 function teamToFreetype(team: ScorecardTeam): Record<string, unknown> {
@@ -126,32 +233,19 @@ function teamToFreetype(team: ScorecardTeam): Record<string, unknown> {
     name: team.name,
     score: team.score,
     img1: team.logoUrl ? { picture_url: team.logoUrl } : {},
-    scorers: team.scorers.map((s) => ({
-      name: s.name,
-      time: s.minute,
-      stat: s.stat,
-    })),
-    bowlers: team.bowlers.map((b) => ({
-      name: b.name,
-      figures: b.figures,
-    })),
-    extras: team.extras.map((e) => ({ label: e.label, value: e.value })),
   };
 }
 
 export function scorecardBodyToFreetypeData(body: ScorecardBody): Record<string, unknown> {
+  const lists = ensureCustomLists(body);
   return {
     home: teamToFreetype(body.home),
     away: teamToFreetype(body.away),
     match: {
       variant: body.variant,
-      scorers_label: body.scorersLabel,
-      bowlers_label: body.bowlersLabel,
-      scorer_detail_label: body.scorerDetailLabel,
+      lists: lists.map(listToFreetype),
       batting_side: body.battingSide,
       current_over: body.currentOver,
-      home_side_display: body.homeSideDisplay,
-      away_side_display: body.awaySideDisplay,
       quaters: body.matchQuarters,
       info: body.matchInfo,
     },
@@ -163,16 +257,13 @@ export function isScorecardBodyEmpty(body: ScorecardBody): boolean {
   const hasHome = Boolean(body.home.name.trim() || body.home.score.trim());
   const hasAway = Boolean(body.away.name.trim() || body.away.score.trim());
   const hasMeta = Boolean(body.matchQuarters.trim() || body.matchInfo.trim() || body.currentOver.trim());
-  const hasScorers =
-    body.home.scorers.some((s) => s.name.trim() || s.minute.trim() || s.stat.trim()) ||
-    body.away.scorers.some((s) => s.name.trim() || s.minute.trim() || s.stat.trim());
-  const hasBowlers =
-    body.home.bowlers.some((b) => b.name.trim() || b.figures.trim()) ||
-    body.away.bowlers.some((b) => b.name.trim() || b.figures.trim());
-  const hasExtras =
-    body.home.extras.some((e) => e.label.trim() || e.value.trim()) ||
-    body.away.extras.some((e) => e.label.trim() || e.value.trim());
-  return !hasHome && !hasAway && !hasMeta && !hasScorers && !hasBowlers && !hasExtras;
+  const hasLists = ensureCustomLists(body).some((list) =>
+    list.placement === 'full'
+      ? list.rows.some((row) => Object.values(row.values).some((v) => v.trim()))
+      : list.homeRows.some((row) => Object.values(row.values).some((v) => v.trim())) ||
+        list.awayRows.some((row) => Object.values(row.values).some((v) => v.trim())),
+  );
+  return !hasHome && !hasAway && !hasMeta && !hasLists;
 }
 
 export function normalizeScorecardBody(raw: unknown): ScorecardBody {
@@ -182,7 +273,7 @@ export function normalizeScorecardBody(raw: unknown): ScorecardBody {
     const base = defaultScorecardBody();
     const home = { ...emptyTeam(), ...(o.home as ScorecardTeam) };
     const away = { ...emptyTeam(), ...(o.away as ScorecardTeam) };
-    return {
+    const body: ScorecardBody = {
       ...base,
       ...o,
       home: {
@@ -198,6 +289,13 @@ export function normalizeScorecardBody(raw: unknown): ScorecardBody {
         extras: away.extras ?? emptyExtras(),
       },
       variant: readVariant(o.variant),
+      customLists: Array.isArray(o.customLists)
+        ? (o.customLists as ScorecardCustomList[]).map(syncListColumnIds)
+        : [],
+      sections:
+        o.sections && typeof o.sections === 'object'
+          ? (o.sections as ScorecardSections)
+          : defaultSectionsForVariant(readVariant(o.variant)),
       scorersLabel: String(o.scorersLabel ?? base.scorersLabel),
       bowlersLabel: String(o.bowlersLabel ?? base.bowlersLabel),
       scorerDetailLabel: String(o.scorerDetailLabel ?? base.scorerDetailLabel),
@@ -209,6 +307,10 @@ export function normalizeScorecardBody(raw: unknown): ScorecardBody {
       matchInfo: String(o.matchInfo ?? ''),
       backgroundUrl: String(o.backgroundUrl ?? ''),
     };
+    if (!body.customLists.length) {
+      body.customLists = migrateLegacyBodyToLists(body);
+    }
+    return body;
   }
   return freetypeDataToScorecardBody(o);
 }

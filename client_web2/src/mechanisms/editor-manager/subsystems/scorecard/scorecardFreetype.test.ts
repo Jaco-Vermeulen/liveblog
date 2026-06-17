@@ -48,6 +48,11 @@ describe('scorecardFreetype', () => {
     expect(restored.awaySideDisplay).toBe('batters');
     expect(restored.home.bowlers[0].name).toBe('Starc');
     expect(restored.home.extras[0].value).toBe('5.2');
+    expect(restored.sections).toEqual({
+      teamStats: true,
+      primaryPlayers: true,
+      secondaryPlayers: true,
+    });
   });
 
   it('detects empty scorecard', () => {

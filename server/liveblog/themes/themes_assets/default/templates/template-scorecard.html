@@ -3,11 +3,18 @@
 {% set away = sc.away if sc.away else {} %}
 {% set match = sc.match if sc.match else {} %}
 {% set variant = match.variant if match.variant else 'rugby' %}
-{% set scorers_heading = match.scorers_label if match.scorers_label else ('Kolwers' if variant == 'cricket' else 'Doelskoppe') %}
+{% set scorers_heading = match.scorers_label if match.scorers_label else ('Kolwers' if variant == 'cricket' else ('Spelers' if variant == 'custom' else 'Doelskoppe')) %}
 {% set bowlers_heading = match.bowlers_label if match.bowlers_label else 'Boulers' %}
 {% set minute_suffix = variant != 'cricket' and variant != 'custom' %}
-{% set show_stat = variant == 'cricket' or variant == 'custom' %}
-{% set show_bowlers = variant == 'cricket' or variant == 'custom' %}
+{# Templates, not modes: show the stat column / bowlers panel based on the data
+   actually entered, not on the chosen variant. #}
+{% set sc_flags = namespace(show_stat=false, show_bowlers=false) %}
+{% for s in (home.scorers if home.scorers else []) %}{% if s.stat %}{% set sc_flags.show_stat = true %}{% endif %}{% endfor %}
+{% for s in (away.scorers if away.scorers else []) %}{% if s.stat %}{% set sc_flags.show_stat = true %}{% endif %}{% endfor %}
+{% for b in (home.bowlers if home.bowlers else []) %}{% if b.name or b.figures %}{% set sc_flags.show_bowlers = true %}{% endif %}{% endfor %}
+{% for b in (away.bowlers if away.bowlers else []) %}{% if b.name or b.figures %}{% set sc_flags.show_bowlers = true %}{% endif %}{% endfor %}
+{% set show_stat = sc_flags.show_stat %}
+{% set show_bowlers = sc_flags.show_bowlers %}
 {% set bg = '' %}
 {% if sc.background and sc.background.img and sc.background.img.picture_url %}
   {% set bg = sc.background.img.picture_url %}
@@ -121,7 +128,7 @@
     </div>
   {% endif %}
 
-  {% if show_bowlers and ((home.bowlers and home.bowlers|length) or (away.bowlers and away.bowlers|length)) %}
+  {% if show_bowlers %}
     <div class="lb-scorecard-card__scorers-panel lb-scorecard-card__scorers-panel--bowlers">
       <p class="lb-scorecard-card__scorers-heading">{{ bowlers_heading }}</p>
       <div class="lb-scorecard-card__scorers-row">

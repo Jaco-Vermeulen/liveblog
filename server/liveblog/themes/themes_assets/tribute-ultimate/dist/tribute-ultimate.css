@@ -628,11 +628,18 @@ body.lb-wrapBody {
 }
 .lb-timeline .iframely-responsive {
   width: 100%;
-  min-height: 280px;
 }
 .lb-timeline .iframely-responsive iframe {
   width: 100% !important;
-  min-height: 280px;
+}
+.lb-timeline .iframely-embed:not(:has(iframe)) .iframely-responsive {
+  min-height: 133px;
+}
+.lb-timeline .item--embed__consent-wrapper {
+  min-height: 0;
+}
+.lb-timeline .item--embed__consent-wrapper:has(.lb_consent--placeholder) {
+  min-height: 350px;
 }
 .lb-timeline .fb-post {
   display: inline-block;

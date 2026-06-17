@@ -1,6 +1,7 @@
 import type { PollBody, PostItem } from '@/mechanisms/liveblog-api';
 import { EmbedHtml, PostItemEmbed } from '../subsystems/embed-handlers';
 import { isRichTextHtml } from '../subsystems/rich-text-editor';
+import { imagePreviewHtml } from '../services/previewItemLayout';
 import { PollPreviewBlock } from './PollPreviewBlock';
 
 function isFreetypeItem(item: PostItem): boolean {
@@ -20,7 +21,7 @@ export interface PreviewPostItemProps {
 
 export function PreviewPostItem({ item }: PreviewPostItemProps) {
   if (isFreetypeItem(item)) {
-    return <EmbedHtml html={item.text!} className="lb-post__freetype" />;
+    return <EmbedHtml html={item.text!} className="m-embed-html" />;
   }
 
   if (item.item_type === 'embed') {
@@ -32,8 +33,12 @@ export function PreviewPostItem({ item }: PreviewPostItemProps) {
     return <PollPreviewBlock pollBody={pollBody} />;
   }
 
-  if (item.item_type === 'image' && item.text) {
-    return <EmbedHtml html={item.text} className="lb-post__image" />;
+  if (item.item_type === 'image') {
+    const html = imagePreviewHtml(item);
+    if (html) {
+      return <EmbedHtml html={html} className="m-embed-html" />;
+    }
+    return null;
   }
 
   const text = item.text?.trim() ?? '';
@@ -46,21 +51,33 @@ export function PreviewPostItem({ item }: PreviewPostItemProps) {
   if (isQuote) {
     if (isRichTextHtml(text)) {
       return (
-        <blockquote className="lb-post__quote">
-          <EmbedHtml html={text} className="lb-post__rich-text" />
-        </blockquote>
+        <div className="item--embed-quote">
+          <blockquote>
+            <EmbedHtml html={text} className="m-embed-html" />
+          </blockquote>
+        </div>
       );
     }
     return (
-      <blockquote className="lb-post__quote">
-        <p>{text}</p>
-      </blockquote>
+      <div className="item--embed-quote">
+        <blockquote>
+          <p>{text}</p>
+        </blockquote>
+      </div>
     );
   }
 
   if (isRichTextHtml(text)) {
-    return <EmbedHtml html={text} className="lb-post__rich-text" />;
+    return (
+      <article>
+        <EmbedHtml html={text} className="m-embed-html lb-post__rich-text" />
+      </article>
+    );
   }
 
-  return <p className="lb-post__text">{text}</p>;
+  return (
+    <article>
+      <p>{text}</p>
+    </article>
+  );
 }

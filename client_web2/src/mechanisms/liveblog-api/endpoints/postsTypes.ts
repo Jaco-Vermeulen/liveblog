@@ -75,6 +75,8 @@ export interface Post extends EveResource {
     string,
     { href?: string; width?: number; height?: number }
   >;
+  post_items_type?: string | null;
+  post_items_icon?: string | null;
 }
 
 export interface PostItemPayload {

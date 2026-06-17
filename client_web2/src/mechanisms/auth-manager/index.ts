@@ -1,3 +1,4 @@
+export { AdminReactQueryDevtools } from './components/AdminReactQueryDevtools';
 export { AuthProvider, getLoginErrorCode } from './context/AuthProvider';
 export { PrivilegesProvider, usePrivileges } from './context/PrivilegesProvider';
 export { useAuth } from './hooks/useAuth';
@@ -6,6 +7,7 @@ export { ProtectedRoute } from './components/ProtectedRoute';
 export { PrivilegeRoute } from './components/PrivilegeRoute';
 export { AccessDeniedPage } from './components/AccessDeniedPage';
 export { ResetPasswordPage } from './components/ResetPasswordPage';
+export { ResetPasswordTokenRedirect } from './components/ResetPasswordTokenRedirect';
 export { SecureLoginPage } from './components/SecureLoginPage';
 export { ProfilePage } from './components/ProfilePage';
 export { isAdministrator, userHasPrivileges } from './services/privileges';

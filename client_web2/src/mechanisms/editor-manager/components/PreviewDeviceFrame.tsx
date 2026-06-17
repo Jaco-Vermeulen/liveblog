@@ -9,6 +9,7 @@ import {
 } from '../services/deviceViewports';
 import type { PreviewEmbedHandlers } from '../services/previewEmbedBridge';
 import type { PreviewDeviceMode, PreviewDeviceOrientation } from '../types';
+import { DraftPreviewPortal } from './DraftPreviewPortal';
 import { ThemeIframePreview } from './ThemeIframePreview';
 
 export interface PreviewDeviceFrameProps {
@@ -18,6 +19,7 @@ export interface PreviewDeviceFrameProps {
   refreshToken?: number;
   embedHandlers: PreviewEmbedHandlers | null;
   draftSlot?: ReactNode;
+  draftPortalEnabled?: boolean;
   /** React fallback when iframe is cross-origin or embed URL missing */
   children: ReactNode;
 }
@@ -29,10 +31,12 @@ export function PreviewDeviceFrame({
   refreshToken = 0,
   embedHandlers,
   draftSlot,
+  draftPortalEnabled = false,
   children,
 }: PreviewDeviceFrameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [hostSize, setHostSize] = useState({ width: 0, height: 0 });
   const [useFallback, setUseFallback] = useState(false);
 
@@ -139,8 +143,14 @@ export function PreviewDeviceFrame({
       >
         {useLiveTheme && iframeSrc ? (
           <div className="lb-preview-iframe-stack">
-            {draftSlot ? <div className="lb-preview-draft-overlay">{draftSlot}</div> : null}
+            <DraftPreviewPortal
+              iframeRef={iframeRef}
+              enabled={draftPortalEnabled && Boolean(draftSlot)}
+            >
+              {draftSlot}
+            </DraftPreviewPortal>
             <ThemeIframePreview
+              ref={iframeRef}
               src={iframeSrc}
               handlers={embedHandlers}
               onNeedsFallback={() => setUseFallback(true)}

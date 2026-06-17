@@ -32,7 +32,7 @@
   {% block post_header %}
   <div class="lb-post-header">
 
-    <div class="lb-type lb-type--{{ post.post_items_type }}"></div>
+    <div class="lb-type lb-type--{{ post.post_items_type }}{% if post.post_items_icon %} lb-type--favicon{% endif %}"{% if post.post_items_icon %} style="background-image: url('{{ post.post_items_icon }}'); background-size: 65%; background-position: center; background-repeat: no-repeat; background-color: #fff;"{% endif %}></div>
 
     <div class="lb-post-date-icons">
       {% if post.sticky and post.lb_highlight %}

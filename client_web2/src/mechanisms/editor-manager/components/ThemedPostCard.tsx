@@ -2,6 +2,8 @@ import { EyeOff, Pencil, Pin, Send, Star, Trash2 } from 'lucide-react';
 import type { Post, PostItem } from '@/mechanisms/liveblog-api';
 import { PostItemEmbed, EmbedHtml } from '../subsystems/embed-handlers';
 import { isRichTextHtml } from '../subsystems/rich-text-editor';
+import { resolvePostBadge } from '../services/postItemsType';
+import { PostTypeBadge } from './PostTypeBadge';
 
 export interface ThemedPostCardProps {
   post: Post;
@@ -66,7 +68,8 @@ export function ThemedPostCard({
   onToggleHighlight,
 }: ThemedPostCardProps) {
   const mainItem = post.mainItem?.item;
-  const type = mainItem?.item_type ?? 'text';
+  const { postItemsType, postItemsIcon } = resolvePostBadge(post);
+  const type = postItemsType ?? mainItem?.item_type ?? 'text';
   const author = authorLabel(post);
   const time = formatPostTime(post);
 
@@ -141,7 +144,7 @@ export function ThemedPostCard({
       ) : null}
 
       <div className="lb-post-header">
-        <div className={`lb-type lb-type--${type}`} />
+        <PostTypeBadge postItemsType={postItemsType} postItemsIcon={postItemsIcon} />
         <div className="lb-post-date-icons">
           {post.sticky ? <span className="lb-post-pin-indicator" aria-hidden /> : null}
           {post.lb_highlight ? <span className="lb-post-highlight-indicator" aria-hidden /> : null}

@@ -28,16 +28,25 @@ export function usesSplitInningsPanel(body: ScorecardBody): boolean {
 export function resolveTeamDisplay(side: 'home' | 'away', body: ScorecardBody): ResolvedTeamDisplay {
   const mode = side === 'home' ? body.homeSideDisplay : body.awaySideDisplay;
 
-  if (mode === 'batters') return { batters: true, bowlers: false };
-  if (mode === 'bowlers') return { batters: false, bowlers: true };
-  if (mode === 'both') return { batters: true, bowlers: true };
+  if (mode === 'batters') return { batters: body.sections.primaryPlayers, bowlers: false };
+  if (mode === 'bowlers') return { batters: false, bowlers: body.sections.secondaryPlayers };
+  if (mode === 'both') {
+    return { batters: body.sections.primaryPlayers, bowlers: body.sections.secondaryPlayers };
+  }
   if (mode === 'none') return { batters: false, bowlers: false };
 
-  if (body.variant === 'rugby') return { batters: true, bowlers: false };
+  // mode === 'auto'
+  if (body.variant === 'cricket') {
+    const batting = body.battingSide;
+    if (side === batting) return { batters: body.sections.primaryPlayers, bowlers: false };
+    return { batters: false, bowlers: body.sections.secondaryPlayers };
+  }
 
-  const batting = body.battingSide;
-  if (side === batting) return { batters: true, bowlers: false };
-  return { batters: false, bowlers: true };
+  // Rugby / custom: respect section toggles; bowlers only when the section is enabled
+  // and the team has data entered.
+  const team = side === 'home' ? body.home : body.away;
+  const secondary = body.sections.secondaryPlayers && teamHasBowlers(team);
+  return { batters: body.sections.primaryPlayers, bowlers: secondary };
 }
 
 export function teamHasBatters(team: ScorecardTeam): boolean {

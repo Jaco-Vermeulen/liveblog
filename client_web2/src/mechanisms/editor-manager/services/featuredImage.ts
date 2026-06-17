@@ -61,23 +61,27 @@ function mediaFromImageBlock(block: SirTrevorBlock) {
   };
 }
 
+function clearFeaturedImagePatch():
+  | Pick<Post, 'featured_image' | 'featured_image_url' | 'featured_image_renditions'>
+  | Record<string, never> {
+  return {
+    featured_image: null as unknown as string,
+    featured_image_url: null as unknown as string,
+    featured_image_renditions: {} as Post['featured_image_renditions'],
+  };
+}
+
+function postHasFeaturedImage(post: Post | null | undefined): boolean {
+  return Boolean(post?.featured_image_url?.trim() || post?.featured_image?.trim());
+}
+
 export function resolveFeaturedImagePatch(
   source: FeaturedImageSource,
   blocks: SirTrevorBlock[],
+  existingPost?: Post | null,
 ): Pick<Post, 'featured_image' | 'featured_image_url' | 'featured_image_renditions'> | null {
-  if (source.type === 'none') {
-    return {
-      featured_image: null as unknown as string,
-      featured_image_url: null as unknown as string,
-      featured_image_renditions: null as unknown as Post['featured_image_renditions'],
-    };
-  }
-  if (source.type === 'blog') {
-    return {
-      featured_image: null as unknown as string,
-      featured_image_url: null as unknown as string,
-      featured_image_renditions: null as unknown as Post['featured_image_renditions'],
-    };
+  if (source.type === 'none' || source.type === 'blog') {
+    return postHasFeaturedImage(existingPost) ? clearFeaturedImagePatch() : {};
   }
   if (source.type === 'custom') {
     return {
