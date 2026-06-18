@@ -55,6 +55,8 @@ export interface ComposerState {
   scheduleEnabled: boolean;
   scheduledDate: string | null;
   isDirty: boolean;
+  /** Bumped whenever a post is loaded into the composer to remount block editors. */
+  editSession: number;
   currentPost: Post | null;
   selectedPostType: EditorPostType;
   freetypeData: Record<string, unknown>;

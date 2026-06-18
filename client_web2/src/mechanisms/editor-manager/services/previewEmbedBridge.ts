@@ -1,4 +1,5 @@
 import type { Post } from '@/mechanisms/liveblog-api';
+import { canShowPublishAction } from './postPublishActions';
 
 export const PREVIEW_EMBED_ADMIN_STYLE_ID = 'lb-admin-preview-tools';
 export const PREVIEW_EMBED_MOBILE_STYLE_ID = 'lb-admin-preview-mobile';
@@ -74,12 +75,31 @@ export function findPostIdInArticle(article: Element): string | null {
   const fromAttr = article.getAttribute('data-post-id')?.trim();
   if (fromAttr && fromAttr.length >= 8) return fromAttr;
 
-  const link =
-    article.querySelector<HTMLAnchorElement>('.lb-post-permalink a[id]') ??
-    article.querySelector<HTMLAnchorElement>('a[id]');
+  const link = article.querySelector<HTMLAnchorElement>('.lb-post-permalink a[id]');
   const id = link?.id?.trim();
   if (!id || id.length < 8) return null;
   return id;
+}
+
+function resolvePostFromHandlers(
+  handlers: PreviewEmbedHandlers,
+  postId: string,
+): Post | undefined {
+  const direct = handlers.postsById.get(postId);
+  if (direct) return direct;
+
+  for (const [id, post] of handlers.postsById) {
+    if (id === postId || id.endsWith(postId) || postId.endsWith(id)) {
+      return post;
+    }
+  }
+  return undefined;
+}
+
+function clearPostToolbar(article: HTMLElement): void {
+  article.classList.remove('lb-post--admin-preview');
+  article.removeAttribute(INJECTED_POST_ATTR);
+  article.querySelector('.lb-post-admin-actions')?.remove();
 }
 
 export function canAccessIframeDocument(iframe: HTMLIFrameElement): boolean {
@@ -175,7 +195,7 @@ function buildToolbar(
     }),
   );
 
-  if (post.post_status !== 'open' && handlers.onPublish) {
+  if (canShowPublishAction(post) && handlers.onPublish) {
     toolbar.appendChild(
       actionButton(doc, {
         action: 'publish',
@@ -216,7 +236,7 @@ function updateToolbarState(toolbar: Element, post: Post): void {
   if (hlBtn) hlBtn.title = post.lb_highlight ? 'Verwyder beklemtoning' : 'Beklemtoon';
 
   const publishBtn = toolbar.querySelector('[data-action="publish"]');
-  if (publishBtn && post.post_status === 'open') {
+  if (publishBtn && !canShowPublishAction(post)) {
     publishBtn.remove();
   }
 }
@@ -225,25 +245,31 @@ function ensurePostToolbar(article: HTMLElement, handlers: PreviewEmbedHandlers)
   const postId = findPostIdInArticle(article);
   if (!postId) return;
 
-  const post = handlers.postsById.get(postId);
-  if (!post) return;
+  const post = resolvePostFromHandlers(handlers, postId);
+  if (!post) {
+    clearPostToolbar(article);
+    return;
+  }
 
   article.classList.add('lb-post--admin-preview');
 
   let toolbar = article.querySelector('.lb-post-admin-actions');
-  if (!toolbar) {
+  const wantsPublish = canShowPublishAction(post) && Boolean(handlers.onPublish);
+  const hasPublish = Boolean(toolbar?.querySelector('[data-action="publish"]'));
+
+  if (!toolbar || wantsPublish !== hasPublish) {
+    toolbar?.remove();
     toolbar = buildToolbar(article.ownerDocument, post, postId, handlers);
     article.appendChild(toolbar);
     article.setAttribute(INJECTED_POST_ATTR, '1');
-  } else {
-    updateToolbarState(toolbar, post);
+    return;
   }
+
+  updateToolbarState(toolbar, post);
 }
 
 function scanPosts(doc: Document, handlers: PreviewEmbedHandlers): void {
-  const nodes = doc.querySelectorAll<HTMLElement>(
-    'article.lb-post, .lb-post.list-group-item, .lb-posts .lb-post',
-  );
+  const nodes = doc.querySelectorAll<HTMLElement>('article[data-post-id]');
   nodes.forEach((article) => ensurePostToolbar(article, handlers));
 }
 

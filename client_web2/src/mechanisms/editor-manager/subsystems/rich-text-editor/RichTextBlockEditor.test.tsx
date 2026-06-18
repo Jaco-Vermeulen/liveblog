@@ -1,7 +1,7 @@
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RichTextBlockEditor } from './RichTextBlockEditor';
-import { RICH_TEXT_COMPACT_MIN_WIDTH } from './useRichTextCompactToolbar';
+import { RICH_TEXT_COMPACT_FORCE_WIDTH } from './useRichTextCompactToolbar';
 
 const resizeObservers: ResizeObserverMock[] = [];
 
@@ -82,7 +82,7 @@ describe('RichTextBlockEditor', () => {
       />,
     );
 
-    setEditorWidth(RICH_TEXT_COMPACT_MIN_WIDTH + 40);
+    setEditorWidth(RICH_TEXT_COMPACT_FORCE_WIDTH + 80);
 
     const body = document.querySelector('.m-rich-text-editor__body') as HTMLDivElement;
     const link = body.querySelector('a')!;
@@ -104,10 +104,10 @@ describe('RichTextBlockEditor', () => {
     expect(linkToolbarBtn.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('shows the overflow formatting menu when the editor is narrower than the compact threshold', () => {
+  it('shows the overflow formatting menu only when the editor is very narrow', () => {
     render(<RichTextBlockEditor value="" onChange={() => {}} />);
 
-    setEditorWidth(RICH_TEXT_COMPACT_MIN_WIDTH - 1);
+    setEditorWidth(RICH_TEXT_COMPACT_FORCE_WIDTH - 1);
 
     expect(document.querySelector('.m-rich-text-editor')).toHaveAttribute('data-compact', 'true');
     expect(document.querySelector('.m-rich-text-editor__menu-toggle')).not.toBeNull();
@@ -115,6 +115,18 @@ describe('RichTextBlockEditor', () => {
 
     fireEvent.click(document.querySelector('.m-rich-text-editor__menu-toggle')!);
     expect(document.querySelector('.m-rich-text-editor__overflow-panel')).not.toBeNull();
+  });
+
+  it('keeps the full toolbar on a typical split-view editor width', async () => {
+    render(<RichTextBlockEditor value="" onChange={() => {}} />);
+
+    setEditorWidth(520);
+
+    await waitFor(() => {
+      expect(document.querySelector('.m-rich-text-editor')).toHaveAttribute('data-compact', 'false');
+    });
+    expect(document.querySelector('.m-rich-text-editor__menu-toggle')).toBeNull();
+    expect(document.querySelector('.m-rich-text-editor__group')).not.toBeNull();
   });
 
   it('opens a custom context menu on right-click with clipboard and formatting actions', () => {

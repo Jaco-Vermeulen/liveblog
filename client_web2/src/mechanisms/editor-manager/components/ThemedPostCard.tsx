@@ -2,6 +2,7 @@ import { EyeOff, Pencil, Pin, Send, Star, Trash2 } from 'lucide-react';
 import type { Post, PostItem } from '@/mechanisms/liveblog-api';
 import { PostItemEmbed, EmbedHtml } from '../subsystems/embed-handlers';
 import { isRichTextHtml } from '../subsystems/rich-text-editor';
+import { canShowPublishAction, canShowUnpublishAction } from '../services/postPublishActions';
 import { resolvePostBadge } from '../services/postItemsType';
 import { PostTypeBadge } from './PostTypeBadge';
 
@@ -119,12 +120,12 @@ export function ThemedPostCard({
               <Pencil aria-hidden />
             </button>
           ) : null}
-          {post.post_status !== 'open' && onPublish ? (
+          {canShowPublishAction(post) && onPublish ? (
             <button type="button" className="lb-post-admin-actions__btn" onClick={onPublish} title="Publiseer" aria-label="Publiseer">
               <Send aria-hidden />
             </button>
           ) : null}
-          {post.post_status === 'open' && onUnpublish ? (
+          {canShowUnpublishAction(post) && onUnpublish ? (
             <button type="button" className="lb-post-admin-actions__btn" onClick={onUnpublish} title="Ontpubliseer" aria-label="Ontpubliseer">
               <EyeOff aria-hidden />
             </button>

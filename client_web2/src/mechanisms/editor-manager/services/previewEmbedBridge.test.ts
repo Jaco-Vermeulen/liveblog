@@ -32,9 +32,9 @@ describe('findPostIdInArticle', () => {
     expect(findPostIdInArticle(article)).toBe('post-abc12345');
   });
 
-  it('returns null when id is too short', () => {
+  it('returns null when only a non-permalink anchor is present', () => {
     const article = document.createElement('article');
-    article.innerHTML = '<a id="short"></a>';
+    article.innerHTML = '<div class="items-container"><a id="short"></a></div>';
     expect(findPostIdInArticle(article)).toBeNull();
   });
 });
@@ -66,5 +66,59 @@ describe('syncEmbedEditorTools', () => {
 
     teardown();
     expect(doc.querySelector('.lb-post-admin-actions')).toBeNull();
+  });
+
+  it('does not add publish on open posts', () => {
+    const doc = document.implementation.createHTMLDocument('embed');
+    doc.body.innerHTML = `
+      <article class="lb-post list-group-item" data-post-id="post-openpost1">
+      </article>
+    `;
+
+    const teardown = syncEmbedEditorTools(doc, {
+      postsById: postsToMap([
+        mockPost('post-openpost1', {
+          post_status: 'open',
+          published_date: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      ]),
+      allowPinHighlight: true,
+      onEdit: vi.fn(),
+      onPublish: vi.fn(),
+    });
+
+    expect(doc.querySelector('[data-action="publish"]')).toBeNull();
+    teardown();
+  });
+
+  it('omits publish after a post is published', () => {
+    const doc = document.implementation.createHTMLDocument('embed');
+    doc.body.innerHTML = `
+      <article class="lb-post list-group-item" data-post-id="post-draftpost">
+      </article>
+    `;
+
+    const handlers = {
+      postsById: postsToMap([
+        mockPost('post-draftpost', { post_status: 'draft' }),
+      ]),
+      allowPinHighlight: false,
+      onEdit: vi.fn(),
+      onPublish: vi.fn(),
+    };
+
+    const teardown = syncEmbedEditorTools(doc, handlers);
+    expect(doc.querySelector('[data-action="publish"]')).toBeTruthy();
+
+    handlers.postsById = postsToMap([
+      mockPost('post-draftpost', {
+        post_status: 'open',
+        published_date: new Date().toISOString(),
+      }),
+    ]);
+    syncEmbedEditorTools(doc, handlers);
+
+    expect(doc.querySelector('[data-action="publish"]')).toBeNull();
+    teardown();
   });
 });

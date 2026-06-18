@@ -34,6 +34,7 @@ export interface ComposerBlockListProps {
   blocks: SirTrevorBlock[];
   blockIds: string[];
   currentPostId?: string;
+  editSession?: number;
   onRemoveBlock: (index: number) => void;
   onRemoveBlockIfEmpty: (index: number) => void;
   onUpdateBlock: (index: number, data: Record<string, unknown>) => void;
@@ -52,6 +53,7 @@ export function ComposerBlockList({
   blocks,
   blockIds,
   currentPostId,
+  editSession = 0,
   onRemoveBlock,
   onRemoveBlockIfEmpty,
   onUpdateBlock,
@@ -177,7 +179,7 @@ export function ComposerBlockList({
             ) : null}
             {block.type === 'Text' || block.type === 'Quote' ? (
               <RichTextBlockEditor
-                key={`${currentPostId ?? 'new'}-rte-${blockKey}`}
+                key={`${editSession}-${currentPostId ?? 'new'}-rte-${blockKey}`}
                 id={`block-text-${index}`}
                 value={String(block.data.text ?? '')}
                 onChange={(text) => onUpdateBlock(index, { text })}

@@ -1,7 +1,10 @@
 import { useEffect, useState, type RefObject } from 'react';
 
-/** Minimum editor width (px) before switching to the overflow formatting menu. */
-export const RICH_TEXT_COMPACT_MIN_WIDTH = 680;
+/**
+ * Use the overflow formatting menu only below this width.
+ * Typical split-view compose columns (~500px on a 1366px laptop) keep the full toolbar.
+ */
+export const RICH_TEXT_COMPACT_FORCE_WIDTH = 380;
 
 export function useRichTextCompactToolbar(
   rootRef: RefObject<HTMLElement | null>,
@@ -13,7 +16,7 @@ export function useRichTextCompactToolbar(
     if (!root) return;
 
     const update = () => {
-      setCompact(root.clientWidth < RICH_TEXT_COMPACT_MIN_WIDTH);
+      setCompact(root.clientWidth < RICH_TEXT_COMPACT_FORCE_WIDTH);
     };
 
     update();

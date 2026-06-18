@@ -15,6 +15,10 @@ export type {
 } from './scorecardDisplay';
 export type {
   ScorecardBody,
+  ScorecardCustomList,
+  ScorecardListColumn,
+  ScorecardListPlacement,
+  ScorecardListRow,
   ScorecardPlayerRow,
   ScorecardScorer,
   ScorecardTeam,

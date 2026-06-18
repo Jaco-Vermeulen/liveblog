@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Blog, Post } from '@/mechanisms/liveblog-api';
 import { uploadArchiveMedia, uploadErrorMessage } from '@/mechanisms/liveblog-api';
 import { freetypeDataToPostItem, useFreetypesList } from '@/mechanisms/freetypes-manager';
@@ -56,6 +56,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduledDate, setScheduledDate] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [editSession, setEditSession] = useState(0);
   const [currentPost, setCurrentPost] = useState<Post | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUploadingIndex, setImageUploadingIndex] = useState<number | null>(null);
@@ -84,6 +85,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
     scheduleEnabled,
     scheduledDate,
     isDirty,
+    editSession,
     currentPost,
     selectedPostType,
     freetypeData,
@@ -116,17 +118,17 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
     }
   }, []);
 
-  const loadPost = useCallback(
-    (post: Post | null) => {
-      blurComposerEditor();
-      setCurrentPost(post);
-      if (post) {
-        const scorecardBody = loadScorecardFromPost(post);
-        if (scorecardBody) {
-          setSelectedPostType(DEFAULT_POST_TYPE);
-          setFreetypeData({});
-          setEntries([entryFromBlock({ type: 'Scorecard', data: { scorecardBody } })]);
-        } else {
+  const currentPostIdRef = useRef<string | null>(null);
+  currentPostIdRef.current = currentPost?._id ?? null;
+
+  const applyLoadedPost = useCallback(
+    (post: Post) => {
+      const scorecardBody = loadScorecardFromPost(post);
+      if (scorecardBody) {
+        setSelectedPostType(DEFAULT_POST_TYPE);
+        setFreetypeData({});
+        setEntries([entryFromBlock({ type: 'Scorecard', data: { scorecardBody } })]);
+      } else {
         const loaded = loadFreetypeFromPost(post, freetypes);
         if (loaded) {
           setSelectedPostType(loaded.freetype);
@@ -138,32 +140,56 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
           const loadedBlocks = postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()];
           setEntries(toEntries(loadedBlocks));
         }
-        }
-        setHeadline(post.headline ?? '');
-        setShowHeadline(Boolean(post.show_headline));
-        setFeaturedImageSource(featuredImageSourceFromPost(post));
-        setSticky(Boolean(post.sticky));
-        setHighlight(Boolean(post.lb_highlight));
-        setTags(Array.isArray(post.tags) ? [...post.tags] : []);
-        const future = scheduleEnabledFromPost(post.published_date);
-        setScheduleEnabled(future);
-        setScheduledDate(future ? post.published_date ?? null : null);
-      } else {
-        setSelectedPostType(DEFAULT_POST_TYPE);
-        setFreetypeData({});
-        setEntries([entryFromBlock(defaultBlock())]);
-        setHeadline('');
-        setShowHeadline(false);
-        setFeaturedImageSource({ type: 'none' });
-        setSticky(false);
-        setHighlight(false);
-        setTags([]);
-        setScheduleEnabled(false);
-        setScheduledDate(null);
       }
-      setIsDirty(false);
+      setHeadline(post.headline ?? '');
+      setShowHeadline(Boolean(post.show_headline));
+      setFeaturedImageSource(featuredImageSourceFromPost(post));
+      setSticky(Boolean(post.sticky));
+      setHighlight(Boolean(post.lb_highlight));
+      setTags(Array.isArray(post.tags) ? [...post.tags] : []);
+      const future = scheduleEnabledFromPost(post.published_date);
+      setScheduleEnabled(future);
+      setScheduledDate(future ? post.published_date ?? null : null);
     },
-    [blurComposerEditor, freetypes],
+    [freetypes],
+  );
+
+  const clearComposer = useCallback(() => {
+    setSelectedPostType(DEFAULT_POST_TYPE);
+    setFreetypeData({});
+    setEntries([entryFromBlock(defaultBlock())]);
+    setHeadline('');
+    setShowHeadline(false);
+    setFeaturedImageSource({ type: 'none' });
+    setSticky(false);
+    setHighlight(false);
+    setTags([]);
+    setScheduleEnabled(false);
+    setScheduledDate(null);
+  }, []);
+
+  const loadPost = useCallback(
+    (post: Post | null) => {
+      blurComposerEditor();
+      setEditSession((session) => session + 1);
+
+      if (!post) {
+        setCurrentPost(null);
+        clearComposer();
+        setIsDirty(false);
+        return;
+      }
+
+      const reloadingSamePost = currentPostIdRef.current === post._id;
+      setCurrentPost(post);
+      applyLoadedPost(post);
+      setIsDirty(false);
+
+      if (reloadingSamePost) {
+        setEditSession((session) => session + 1);
+      }
+    },
+    [applyLoadedPost, blurComposerEditor, clearComposer],
   );
 
   const createBlock = (type: SirTrevorBlockType): SirTrevorBlock => {

@@ -218,6 +218,7 @@ export function PostComposer({
           blocks={composer.blocks}
           blockIds={composer.blockIds}
           currentPostId={composer.currentPost?._id}
+          editSession={composer.editSession}
           onRemoveBlock={onRemoveBlock}
           onRemoveBlockIfEmpty={onRemoveBlockIfEmpty}
           onReorderBlock={onReorderBlock}

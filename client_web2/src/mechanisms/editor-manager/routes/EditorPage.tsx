@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/mechanisms/auth-manager';
 import { LbAlert } from '@/components/ui/LbAlert';
@@ -46,6 +46,14 @@ export function EditorPage() {
   const postsApi = usePosts(id ?? '');
   const { hasWebhook } = useBlogHasWebhook(id ?? '');
   const composerApi = usePostComposer(blog, hasWebhook);
+
+  const handlePostSelect = useCallback(
+    (post: Post) => {
+      setViewMode((mode) => (mode === 'preview' ? 'split' : mode));
+      composerApi.loadPost(post);
+    },
+    [composerApi.loadPost, setViewMode],
+  );
   const { globalTags, allowMultipleTags, isLoading: tagsSettingsLoading } =
     useEditorLiveblogSettings();
 
@@ -173,7 +181,7 @@ export function EditorPage() {
   const canEditPosts = blog ? canPublishPost(authState.user, blog) : false;
 
   const editingPostIdForPreview =
-    composerApi.isEditing && composerApi.composer.isDirty && composerApi.composer.currentPost
+    composerApi.isEditing && composerApi.composer.currentPost
       ? composerApi.composer.currentPost._id
       : null;
 
@@ -197,7 +205,7 @@ export function EditorPage() {
           hasMore={pinnedTimelineApi.hasMore}
           allowPinHighlight={canEditPosts}
           variant={variant}
-          onPostSelect={composerApi.loadPost}
+          onPostSelect={handlePostSelect}
           onLoadMore={() => void pinnedTimelineApi.fetchNextPage()}
           onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
           onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
@@ -212,7 +220,7 @@ export function EditorPage() {
         hasMore={mainTimelineApi.hasMore}
         allowPinHighlight={canEditPosts}
         variant={variant}
-        onPostSelect={composerApi.loadPost}
+        onPostSelect={handlePostSelect}
         onLoadMore={() => void mainTimelineApi.fetchNextPage()}
         onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
         onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
@@ -261,7 +269,7 @@ export function EditorPage() {
             posts={previewPosts}
             draftPortalEnabled={draftPortalEnabled}
             allowPinHighlight={canEditPosts}
-            onPostSelect={composerApi.loadPost}
+            onPostSelect={handlePostSelect}
             onDeletePost={canEditPosts ? (post) => void handleDelete(post) : undefined}
             onPublishPost={canEditPosts ? (post) => void handlePublish(post) : undefined}
             onTogglePin={canEditPosts ? (post) => void handleTogglePin(post) : undefined}

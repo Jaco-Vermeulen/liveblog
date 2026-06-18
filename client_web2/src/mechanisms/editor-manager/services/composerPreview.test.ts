@@ -15,6 +15,7 @@ function makeComposer(overrides: Partial<ComposerState> = {}): ComposerState {
     scheduleEnabled: false,
     scheduledDate: null,
     isDirty: false,
+    editSession: 0,
     currentPost: null,
     selectedPostType: 'Default',
     freetypeData: {},
