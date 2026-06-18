@@ -72,9 +72,24 @@ export function savePost(post: Partial<Post>, existing?: Post): Promise<Post> {
 
 export { buildNewPostGroups, buildPostPatchBody } from '../postPatch';
 
-export function enrichPost(post: Post): Post {
+function mainGroupRefs(post: Post) {
   const mainGroup = post.groups?.find((g) => g.id === 'main') ?? post.groups?.[1];
-  const refs = mainGroup?.refs ?? [];
+  return mainGroup?.refs ?? [];
+}
+
+/** Keep post body when websocket/API updates omit `groups` (metadata-only patches). */
+export function mergePostUpdate(existing: Post, incoming: Post): Post {
+  const incomingHasItems = mainGroupRefs(incoming).some((ref) => ref.item != null);
+  const merged: Post = {
+    ...existing,
+    ...incoming,
+    groups: incomingHasItems ? (incoming.groups ?? existing.groups) : existing.groups,
+  };
+  return enrichPost(merged);
+}
+
+export function enrichPost(post: Post): Post {
+  const refs = mainGroupRefs(post);
   const multipleItems = refs.length > 1 ? refs.length - 1 : false;
 
   const items = refs

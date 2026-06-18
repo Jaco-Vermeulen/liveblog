@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  enrichPosts,
-  listBlogPosts,
-  sortPostsClient,
-  type Post,
-  type TimelineSort,
-} from '@/mechanisms/liveblog-api';
+import { enrichPosts, listBlogPosts, mergePostUpdate, sortPostsClient, type Post, type TimelineSort } from '@/mechanisms/liveblog-api';
 import type { EditorPanel, TimelineState } from '../types';
 
 const MAX_RESULTS = 15;
@@ -121,7 +115,7 @@ export function useTimeline(
   const updatePost = useCallback((post: Post) => {
     setPages((prev) =>
       prev.map((page) =>
-        page.map((p) => (p._id === post._id ? post : p)),
+        page.map((p) => (p._id === post._id ? mergePostUpdate(p, post) : p)),
       ),
     );
   }, []);

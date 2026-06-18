@@ -62,7 +62,18 @@ describe('usePostComposer', () => {
 
     const sameReference = post;
     act(() => {
-      result.current.loadPost(sameReference);
+      result.current.loadPost({
+        ...sameReference,
+        mainItem: undefined,
+        items: [],
+        groups: [
+          { id: 'root', refs: [{ idRef: 'main' }] },
+          {
+            id: 'main',
+            refs: [{ item: { item_type: 'text', text: '<p>Original text</p>' } }],
+          },
+        ],
+      });
     });
 
     expect(result.current.isEditing).toBe(true);

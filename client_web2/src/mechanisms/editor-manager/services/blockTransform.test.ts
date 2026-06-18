@@ -112,10 +112,30 @@ describe('blockTransform', () => {
 
   it('round-trips text posts to blocks', () => {
     const blocks = postToBlocks({
+      _id: 'p1',
+      blog: 'b1',
+      post_status: 'open',
+      groups: [],
       mainItem: { item: { item_type: 'text', text: 'Saved' } },
     });
     expect(blocks[0]?.type).toBe('Text');
     expect(blocks[0]?.data.text).toBe('Saved');
+  });
+
+  it('reads post items from groups when mainItem is missing', () => {
+    const blocks = postToBlocks({
+      _id: 'p1',
+      blog: 'b1',
+      post_status: 'open',
+      groups: [
+        { id: 'root', refs: [{ idRef: 'main' }] },
+        {
+          id: 'main',
+          refs: [{ item: { item_type: 'text', text: 'From groups' } }],
+        },
+      ],
+    });
+    expect(blocks[0]?.data.text).toBe('From groups');
   });
 
   it('detects freetype field content', () => {

@@ -150,6 +150,7 @@ export {
   createItem,
   enrichPost,
   enrichPosts,
+  mergePostUpdate,
   getPost,
   listBlogPosts,
   savePost,

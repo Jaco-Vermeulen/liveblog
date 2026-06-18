@@ -152,14 +152,8 @@ function blockToPostItem(block: SirTrevorBlock): PostItem | null {
   }
 }
 
-export function postToBlocks(post: { mainItem?: { item: PostItem }; items?: Array<{ item: PostItem }> }): SirTrevorBlock[] {
-  const entries = post.items?.length
-    ? post.items.map((r) => r.item)
-    : post.mainItem?.item
-      ? [post.mainItem.item]
-      : [];
-
-  return entries
+export function postToBlocks(post: Post): SirTrevorBlock[] {
+  return collectPostItems(post)
     .map((item) => itemToBlock(item))
     .filter((b): b is SirTrevorBlock => b !== null);
 }
@@ -177,7 +171,7 @@ export function freetypeHasContent(
   });
 }
 
-function collectPostItems(post: Post): PostItem[] {
+export function collectPostItems(post: Post): PostItem[] {
   const fromFlat = post.items?.map((row) => row.item).filter(Boolean) as PostItem[] | undefined;
   if (fromFlat?.length) return fromFlat;
 
@@ -202,7 +196,7 @@ export function loadFreetypeFromPost(
   post: Post,
   freetypes: Freetype[],
 ): { freetype: Freetype; data: Record<string, unknown> } | null {
-  const item = post.mainItem?.item ?? post.items?.[0]?.item;
+  const item = collectPostItems(post).find((entry) => entry.group_type === 'freetype');
   if (!item || item.group_type !== 'freetype') return null;
   if (item.item_type === SCORECARD_FREETYPE_NAME) return null;
   const freetype = freetypes.find((ft) => ft.name === item.item_type);

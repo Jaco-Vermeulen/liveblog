@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Blog, Post } from '@/mechanisms/liveblog-api';
+import { enrichPost } from '@/mechanisms/liveblog-api';
 import { uploadArchiveMedia, uploadErrorMessage } from '@/mechanisms/liveblog-api';
 import { freetypeDataToPostItem, useFreetypesList } from '@/mechanisms/freetypes-manager';
 import { DEFAULT_POST_TYPE } from '../subsystems/freetype-fields';
@@ -119,17 +120,19 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   }, []);
 
   const currentPostIdRef = useRef<string | null>(null);
+  const suppressComposerBlurRef = useRef(false);
   currentPostIdRef.current = currentPost?._id ?? null;
 
   const applyLoadedPost = useCallback(
     (post: Post) => {
-      const scorecardBody = loadScorecardFromPost(post);
+      const enriched = enrichPost(post);
+      const scorecardBody = loadScorecardFromPost(enriched);
       if (scorecardBody) {
         setSelectedPostType(DEFAULT_POST_TYPE);
         setFreetypeData({});
         setEntries([entryFromBlock({ type: 'Scorecard', data: { scorecardBody } })]);
       } else {
-        const loaded = loadFreetypeFromPost(post, freetypes);
+        const loaded = loadFreetypeFromPost(enriched, freetypes);
         if (loaded) {
           setSelectedPostType(loaded.freetype);
           setFreetypeData(loaded.data);
@@ -137,19 +140,19 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
         } else {
           setSelectedPostType(DEFAULT_POST_TYPE);
           setFreetypeData({});
-          const loadedBlocks = postToBlocks(post).length ? postToBlocks(post) : [defaultBlock()];
+          const loadedBlocks = postToBlocks(enriched).length ? postToBlocks(enriched) : [defaultBlock()];
           setEntries(toEntries(loadedBlocks));
         }
       }
-      setHeadline(post.headline ?? '');
-      setShowHeadline(Boolean(post.show_headline));
-      setFeaturedImageSource(featuredImageSourceFromPost(post));
-      setSticky(Boolean(post.sticky));
-      setHighlight(Boolean(post.lb_highlight));
-      setTags(Array.isArray(post.tags) ? [...post.tags] : []);
-      const future = scheduleEnabledFromPost(post.published_date);
+      setHeadline(enriched.headline ?? '');
+      setShowHeadline(Boolean(enriched.show_headline));
+      setFeaturedImageSource(featuredImageSourceFromPost(enriched));
+      setSticky(Boolean(enriched.sticky));
+      setHighlight(Boolean(enriched.lb_highlight));
+      setTags(Array.isArray(enriched.tags) ? [...enriched.tags] : []);
+      const future = scheduleEnabledFromPost(enriched.published_date);
       setScheduleEnabled(future);
-      setScheduledDate(future ? post.published_date ?? null : null);
+      setScheduledDate(future ? enriched.published_date ?? null : null);
     },
     [freetypes],
   );
@@ -170,6 +173,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
 
   const loadPost = useCallback(
     (post: Post | null) => {
+      suppressComposerBlurRef.current = true;
       blurComposerEditor();
       setEditSession((session) => session + 1);
 
@@ -177,6 +181,9 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
         setCurrentPost(null);
         clearComposer();
         setIsDirty(false);
+        queueMicrotask(() => {
+          suppressComposerBlurRef.current = false;
+        });
         return;
       }
 
@@ -188,6 +195,10 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
       if (reloadingSamePost) {
         setEditSession((session) => session + 1);
       }
+
+      queueMicrotask(() => {
+        suppressComposerBlurRef.current = false;
+      });
     },
     [applyLoadedPost, blurComposerEditor, clearComposer],
   );
@@ -234,6 +245,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   }, []);
 
   const removeBlockIfEmpty = useCallback((index: number) => {
+    if (suppressComposerBlurRef.current) return;
     setEntries((prev) => {
       if (prev.length <= 1) return prev;
       const entry = prev[index];

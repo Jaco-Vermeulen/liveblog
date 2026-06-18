@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { __resetLoggerForTests } from '@/mechanisms/request-logger';
 import { postsItemPath } from '../paths';
 import { buildPostsQueryCriteria } from './postsCriteria';
-import { enrichPost, listBlogPosts, savePost, serializePostsQueryCriteria } from './posts';
+import { enrichPost, listBlogPosts, mergePostUpdate, savePost, serializePostsQueryCriteria } from './posts';
 
 afterEach(() => {
   __resetLoggerForTests();
@@ -107,5 +107,31 @@ describe('enrichPost', () => {
 
     expect(post.mainItem?.item.text).toBe('Hello');
     expect(post.multipleItems).toBe(false);
+  });
+
+  it('mergePostUpdate keeps existing body when incoming update omits groups', () => {
+    const existing = enrichPost({
+      _id: 'p1',
+      blog: 'b1',
+      post_status: 'open',
+      groups: [
+        { id: 'root', refs: [{ idRef: 'main' }] },
+        {
+          id: 'main',
+          refs: [{ item: { item_type: 'text', text: 'Saved body' } }],
+        },
+      ],
+    });
+
+    const merged = mergePostUpdate(existing, {
+      _id: 'p1',
+      blog: 'b1',
+      post_status: 'open',
+      groups: [],
+      content_updated_date: '2026-06-18T10:00:00Z',
+    });
+
+    expect(merged.content_updated_date).toBe('2026-06-18T10:00:00Z');
+    expect(merged.mainItem?.item.text).toBe('Saved body');
   });
 });
