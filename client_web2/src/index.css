@@ -2080,6 +2080,7 @@
     justify-content: flex-start;
   }
 
+  .m-scorecard-card__scorers-panel {
     margin-top: 0.85rem;
     padding-top: 0.75rem;
     border-top: 1px solid rgba(255, 253, 248, 0.2);
