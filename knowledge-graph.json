@@ -5,7 +5,7 @@
   "elastic_recovery": {
     "module": "server/liveblog/elastic_recovery.py",
     "behavior": "On HTTP 500, runs index_from_mongo --all in-process and retries the request once transparently",
-    "setting": "ELASTIC_AUTO_REINDEX_ON_500 (default true)",
+    "setting": "ELASTIC_AUTO_REINDEX_ON_500 (default false — disabled for production throughput)",
     "cooldown_sec": 30
   },
   "webhooks": {
@@ -70,8 +70,8 @@
   },
   "docker": {
     "compose_file": "docker-compose.yml",
-    "default_command": "docker compose up -d",
-    "profiles": "none — all services start by default",
+    "default_command": "docker compose up -d --build",
+    "profiles": "dev — optional client-dev (Vite hot reload)",
     "automatic_steps": [
       "infra healthchecks",
       "pip install (image build)",
@@ -80,7 +80,7 @@
       "register_local_themes",
       "elasticsearch index + rebuild_elastic_index",
       "honcho (gunicorn, wamp, celery, beat)",
-      "npm ci + Vite dev (client_web2)"
+      "npm ci + vite build → nginx (client_web2 prod image)"
     ],
     "init_marker": "data/.liveblog-initialized",
     "urls": {

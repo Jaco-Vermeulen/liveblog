@@ -1,5 +1,11 @@
 import type { StyleSettings, Theme, ThemeStyleGroup } from '@/mechanisms/liveblog-api';
 
+function usesSameOriginThemeAssets(): boolean {
+  const api = import.meta.env.VITE_LIVEBLOG_API_URL as string | undefined;
+  const trimmed = api?.trim();
+  return !trimmed || trimmed === '/api';
+}
+
 /**
  * Rewrites theme asset URLs to same-origin paths in dev so Vite proxies
  * `/themes_assets` and `/themes_uploads` to the liveblog server.
@@ -13,10 +19,10 @@ export function normalizeThemeAssetUrl(url: string): string {
 
     const path = `${parsed.pathname}${parsed.search}`;
     if (path.startsWith('/themes_assets/') || path.startsWith('/themes_uploads/')) {
-      if (import.meta.env.DEV) return path;
+      if (import.meta.env.DEV || usesSameOriginThemeAssets()) return path;
     }
 
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV || usesSameOriginThemeAssets()) {
       const apiBase = import.meta.env.VITE_LIVEBLOG_API_URL ?? 'http://localhost:5000/api';
       const serverOrigin = apiBase.replace(/\/api\/?$/i, '');
       try {

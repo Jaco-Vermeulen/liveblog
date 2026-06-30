@@ -24,20 +24,26 @@ export function setOnUnauthorized(handler: () => void) {
   onUnauthorized = handler;
 }
 
-function getApiBase(): string {
+function usesSameOriginApi(): boolean {
   const fromEnv = import.meta.env.VITE_LIVEBLOG_API_URL as string | undefined;
-  if (fromEnv) {
-    return fromEnv.replace(/\/$/, '');
-  }
-  return 'http://localhost:5000/api';
+  const trimmed = fromEnv?.trim();
+  return !trimmed || trimmed === '/api';
 }
 
-/** Dev: relative /api paths for Vite proxy; prod: full base URL */
+function getApiBase(): string {
+  const fromEnv = import.meta.env.VITE_LIVEBLOG_API_URL as string | undefined;
+  if (usesSameOriginApi()) {
+    return '/api';
+  }
+  return fromEnv!.replace(/\/$/, '');
+}
+
+/** Dev + production behind reverse proxy: relative /api; else full base URL */
 export function resolveUrl(path: string): string {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   const withoutApi = normalized.replace(/^\/api/, '');
 
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV || usesSameOriginApi()) {
     return `/api${withoutApi}`;
   }
 

@@ -1,4 +1,4 @@
 rest: gunicorn -c gunicorn_config.py wsgi
 wamp: python3 -u ws.py
-work: celery -A worker worker -E --loglevel=info
+work: celery -A worker worker -E --loglevel=info --concurrency=${CELERY_WORKER_CONCURRENCY:-4}
 beat: celery -A worker beat --pid=

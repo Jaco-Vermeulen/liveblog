@@ -135,7 +135,8 @@ if env("ELASTIC_PORT"):
     ELASTICSEARCH_URL = env("ELASTIC_PORT").replace("tcp:", "http:")
 ELASTICSEARCH_FORCE_REFRESH = env("ELASTICSEARCH_FORCE_REFRESH", "True")
 # On HTTP 500, run index_from_mongo --all and retry the request once (transparent).
-ELASTIC_AUTO_REINDEX_ON_500 = env("ELASTIC_AUTO_REINDEX_ON_500", True)
+# Disabled by default — blocks a gunicorn worker for up to 10 minutes under load.
+ELASTIC_AUTO_REINDEX_ON_500 = env("ELASTIC_AUTO_REINDEX_ON_500", False)
 
 REDIS_URL = env("REDIS_URL", "redis://localhost:6379")
 if env("REDIS_PORT"):

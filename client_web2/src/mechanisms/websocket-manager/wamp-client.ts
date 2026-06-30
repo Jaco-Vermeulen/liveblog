@@ -10,7 +10,15 @@ export const RECONNECT_INTERVAL_MS = 5000;
 
 export function getDefaultWsUrl(): string {
   const fromEnv = import.meta.env.VITE_LIVEBLOG_WS_URL as string | undefined;
-  return fromEnv?.trim() || 'ws://localhost:5100';
+  const trimmed = fromEnv?.trim();
+  if (trimmed && trimmed !== 'same-origin') {
+    return trimmed;
+  }
+  if (typeof window !== 'undefined') {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${window.location.host}/ws`;
+  }
+  return 'ws://localhost:5100';
 }
 
 export type WsClientCallbacks = {

@@ -1,8 +1,9 @@
 # Liveblog — one command runs everything:
 #
-#   docker compose up -d
+#   docker compose up -d --build
 #
 # Then open http://localhost:9000 (client_web2 admin — admin / admin)
+# Production: static Vite build + nginx. Dev hot-reload: docker compose --profile dev up client-dev
 #
 # Re-seed data: docker compose run --rm -e LIVEBLOG_FORCE_INIT=1 init
 
@@ -25,7 +26,12 @@ x-liveblog-env: &liveblog-env
   # Single worker in Docker dev — reload + Windows volume mounts otherwise spawn dozens of stale gunicorn workers (auth 404 / instant "session expired").
   SUPERDESK_RELOAD: ${SUPERDESK_RELOAD:-False}
   WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
-  WEB_TIMEOUT: ${WEB_TIMEOUT:-600}
+  WEB_TIMEOUT: ${WEB_TIMEOUT:-120}
+  WEB_MAX_REQUESTS: ${WEB_MAX_REQUESTS:-1000}
+  WEB_MAX_REQUESTS_JITTER: ${WEB_MAX_REQUESTS_JITTER:-50}
+  CELERY_WORKER_CONCURRENCY: ${CELERY_WORKER_CONCURRENCY:-4}
+  # Blocks a gunicorn worker for minutes — use ensure-elastic-sync at startup instead.
+  ELASTIC_AUTO_REINDEX_ON_500: ${ELASTIC_AUTO_REINDEX_ON_500:-False}
   SYNDICATION: ${SYNDICATION:-True}
   LIVEBLOG_DEBUG: ${LIVEBLOG_DEBUG:-True}
   EMBED_PROTOCOL: ${EMBED_PROTOCOL:-}
@@ -158,10 +164,35 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.client
+      args:
+        VITE_LIVEBLOG_API_URL: ${VITE_LIVEBLOG_API_URL:-/api}
+        VITE_LIVEBLOG_WS_URL: ${VITE_LIVEBLOG_WS_URL:-same-origin}
+        VITE_IFRAMELY_KEY: ${IFRAMELY_KEY:-}
+        VITE_MARKETPLACE: ${VITE_MARKETPLACE:-}
+        VITE_SYNDICATION: ${VITE_SYNDICATION:-}
     container_name: liveblog-client
+    ports:
+      - "9000:9000"
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9000/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  # Optional Vite dev server with hot reload — docker compose --profile dev up client-dev
+  client-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.client.dev
+    container_name: liveblog-client-dev
     environment:
       <<: *liveblog-env
-      # Vite dev proxy (inside Docker network) — browser uses relative /api on :9000
       VITE_LIVEBLOG_API_URL: http://server:5000/api
       VITE_LIVEBLOG_WS_URL: ${SUPERDESK_WS_URL:-ws://localhost:5100}
       VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-live.maroelamedia.co.za,maroelablog.jnb1.cloudlet.cloud}

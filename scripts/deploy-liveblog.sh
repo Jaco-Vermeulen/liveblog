@@ -33,11 +33,14 @@ API_PORT="5000"
 WS_PORT="5100"
 UI_PORT="9000"
 
-LIVEBLOG_DEBUG="true"
+LIVEBLOG_DEBUG="false"
 EMBED_PROTOCOL=""
-SUPERDESK_TESTING="true"
-WEB_CONCURRENCY="1"
-WEB_TIMEOUT="600"
+SUPERDESK_TESTING="false"
+SUPERDESK_RELOAD="false"
+WEB_CONCURRENCY=""
+WEB_TIMEOUT="120"
+ELASTIC_AUTO_REINDEX_ON_500="false"
+CELERY_WORKER_CONCURRENCY=""
 IFRAMELY_KEY="a5ee9a89addd13b7a2e3a48c23e74e8d"
 
 AMAZON_ACCESS_KEY_ID=""
@@ -249,6 +252,11 @@ write_nginx_locations() {
   cat <<NGX
     location /api {
         proxy_pass http://liveblog_api;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
         proxy_redirect off;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -257,7 +265,7 @@ write_nginx_locations() {
     }
 
     location = /embed.js {
-        proxy_pass http://liveblog_ui;
+        proxy_pass http://liveblog_api;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
@@ -520,9 +528,12 @@ SUPERDESK_CLIENT_URL=${SUPERDESK_CLIENT_URL}
 LIVEBLOG_DEBUG=${LIVEBLOG_DEBUG}
 EMBED_PROTOCOL=${EMBED_PROTOCOL}
 SUPERDESK_TESTING=${SUPERDESK_TESTING}
+SUPERDESK_RELOAD=${SUPERDESK_RELOAD}
 LIVEBLOG_MULTI_HOST=true
 WEB_CONCURRENCY=${WEB_CONCURRENCY}
 WEB_TIMEOUT=${WEB_TIMEOUT}
+ELASTIC_AUTO_REINDEX_ON_500=${ELASTIC_AUTO_REINDEX_ON_500}
+CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY}
 IFRAMELY_KEY=${IFRAMELY_KEY}
 EOF
   if [[ -n "${AMAZON_ACCESS_KEY_ID}" ]]; then
@@ -595,7 +606,7 @@ compose_up() {
   wait_for_server_healthy
   docker compose up -d client
   fix_selinux_nginx
-  log "Containers up (client_web2 Vite may take a minute on first npm install)"
+  log "Containers up (client nginx + static build; first --build may take a few minutes)"
 }
 
 register_bundled_themes() {
@@ -643,12 +654,28 @@ print_done() {
   echo "================================================================================"
 }
 
+apply_worker_scaling() {
+  local cpus
+  cpus=$(nproc 2>/dev/null || echo 2)
+  if [[ -z "${WEB_CONCURRENCY}" ]]; then
+    WEB_CONCURRENCY=$(( cpus * 2 + 1 ))
+    [[ "${WEB_CONCURRENCY}" -lt 2 ]] && WEB_CONCURRENCY=2
+    log "WEB_CONCURRENCY auto: ${WEB_CONCURRENCY} (${cpus} CPUs)"
+  fi
+  if [[ -z "${CELERY_WORKER_CONCURRENCY}" ]]; then
+    CELERY_WORKER_CONCURRENCY=$(( cpus * 2 ))
+    [[ "${CELERY_WORKER_CONCURRENCY}" -lt 2 ]] && CELERY_WORKER_CONCURRENCY=2
+    log "CELERY_WORKER_CONCURRENCY auto: ${CELERY_WORKER_CONCURRENCY}"
+  fi
+}
+
 main() {
   ensure_latest_deploy_script
   resolve_public_host
   install_docker
   build_urls
   clone_or_pull
+  apply_worker_scaling
   write_env
   compose_up
   register_bundled_themes

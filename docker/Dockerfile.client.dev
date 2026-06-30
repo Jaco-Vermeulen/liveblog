@@ -1,0 +1,22 @@
+# Liveblog admin client — Vite dev server with hot reload (optional).
+#   docker compose --profile dev up client-dev
+FROM node:20-bookworm-slim
+
+ENV NODE_ENV=development \
+    npm_config_loglevel=warn \
+    CLIENT_PORT=9000 \
+    VITE_DEV_HOST=0.0.0.0
+
+WORKDIR /opt/client
+
+COPY client_web2/package.json client_web2/package-lock.json* ./
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+COPY client_web2/ /opt/client/
+COPY docker/scripts/client-entrypoint.sh /docker/scripts/client-entrypoint.sh
+RUN sed -i 's/\r$//' /docker/scripts/client-entrypoint.sh \
+    && chmod +x /docker/scripts/client-entrypoint.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["/bin/bash", "/docker/scripts/client-entrypoint.sh"]

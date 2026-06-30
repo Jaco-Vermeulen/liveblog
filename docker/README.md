@@ -2,15 +2,17 @@
 
 Everything is defined in [../docker-compose.yml](../docker-compose.yml).
 
-## Run
+## Run (production client)
 
 ```sh
-docker compose up -d
+docker compose up -d --build
 ```
 
-Open http://localhost:9000 — **admin** / **admin** (React **client_web2** admin)
+Open http://localhost:9000 — **admin** / **admin** (React **client_web2** admin, nginx + static build)
 
 No profiles, no extra flags, no manual `manage.py` or `npm` steps on the host.
+
+**Deploy on server:** `git pull && docker compose up -d --build`
 
 ## Services
 
@@ -18,10 +20,20 @@ No profiles, no extra flags, no manual `manage.py` or `npm` steps on the host.
 |---------|------|
 | `redis`, `mongodb`, `elasticsearch` | Infrastructure |
 | `init` | One-shot: seed DB, admin user, themes, ES index (skips if `data/.liveblog-initialized` exists) |
-| `server` | `honcho` + Procfile-dev (API :5000, WS :5100) |
-| `client` | Vite dev server for `client_web2` (:9000) |
+| `server` | `honcho` + Procfile-dev (API :5000, WS :5100, Celery) |
+| `client` | **Production** — `npm run build` baked into image, nginx on :9000 (proxies `/api`, `/ws`, `/embed/`) |
 
 Startup order: infra healthy → `init` completes → `server` healthy → `client` starts.
+
+## Optional dev client (hot reload)
+
+```sh
+docker compose --profile dev up -d client-dev
+```
+
+Uses [Dockerfile.client.dev](Dockerfile.client.dev) — Vite dev server with volume-mounted `client_web2/`.
+
+For host-only frontend dev: `cd client_web2 && npm run dev`.
 
 ## Commands
 
@@ -35,14 +47,21 @@ docker compose build --no-cache server client
 ## Images
 
 - [Dockerfile.server](Dockerfile.server) — Python 3.6, `pip install -r requirements.txt` at build
-- [Dockerfile.client](Dockerfile.client) — Node 20, `client_web2` (`npm ci` at build when `package-lock.json` is present)
+- [Dockerfile.client](Dockerfile.client) — Node 20 build → nginx alpine serves `dist/`
+- [Dockerfile.client.dev](Dockerfile.client.dev) — optional Vite dev server
+- [nginx-client.conf](nginx-client.conf) — SPA + API/WS reverse proxy inside client container
 
 ## Legacy admin
 
 The AngularJS client in `client/` is **not** started by compose on `main`. For the old Grunt-based admin, use the `legacy` branch or run it manually (see [README-host-dev.md](../README-host-dev.md)).
 
-## Nginx (not used by compose)
+## Host nginx (production deploy)
 
-`docker compose up` does **not** use nginx. The UI, API, and WebSocket are exposed directly on ports 9000, 5000, and 5100.
+`deploy-liveblog.sh` terminates TLS and reverse-proxies:
 
-`nginx.conf`, `superdesk_vhost.conf`, and `start.sh` were restored from git for the legacy root [Dockerfile](../Dockerfile) (production single-container setup). That root image is deprecated and is **not** built or run by compose.
+- `/api`, `/embed/`, `/embed.js`, `/themes_uploads` → API :5000
+- `/ws` → WebSocket :5100
+- `/` → UI :9000 (static nginx client)
+- `/themes_assets/` → static files from disk
+
+The client image uses same-origin `/api` and `same-origin` WebSocket URLs so one build works on any public hostname.
