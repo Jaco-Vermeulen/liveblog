@@ -206,7 +206,7 @@ def embed_js():
     response = send_file(
         EMBED_JS_PATH,
         mimetype="application/javascript",
-        max_age=300,
+        cache_timeout=300,
     )
     response.headers["Access-Control-Allow-Origin"] = "*"
     return response

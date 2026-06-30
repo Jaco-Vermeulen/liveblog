@@ -59,7 +59,8 @@ The AngularJS client in `client/` is **not** started by compose on `main`. For t
 
 `deploy-liveblog.sh` terminates TLS and reverse-proxies:
 
-- `/api`, `/embed/`, `/embed.js`, `/themes_uploads` → API :5000
+- `/api`, `/embed/`, `/themes_uploads` → API :5000
+- `/embed.js` → UI :9000 (static file in client image; API route also available)
 - `/ws` → WebSocket :5100
 - `/` → UI :9000 (static nginx client)
 - `/themes_assets/` → static files from disk
