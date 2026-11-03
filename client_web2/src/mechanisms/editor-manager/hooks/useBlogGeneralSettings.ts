@@ -66,9 +66,20 @@ function themeNameFromBlog(blog: Blog): string {
   return '';
 }
 
+function placementTagsFromBlog(blog: Blog): string[] | null | undefined {
+  if ('placement_tags' in blog) {
+    return blog.placement_tags;
+  }
+  const prefs = blog.blog_preferences as { placement_tags?: string[] | null } | undefined;
+  if (prefs && 'placement_tags' in prefs) {
+    return prefs.placement_tags;
+  }
+  return undefined;
+}
+
 export function blogToGeneralForm(blog: Blog): BlogGeneralForm {
   const prefs = blog.blog_preferences ?? {};
-  const placement = blog.placement_tags;
+  const placement = placementTagsFromBlog(blog);
   return {
     title: blog.title,
     description: blog.description ?? '',
@@ -94,14 +105,17 @@ export function buildBlogPatchFromForm(blog: Blog, form: BlogGeneralForm): Parti
       ? blog.original_creator._id
       : blog.original_creator;
 
+  const placementTags = parsePlacementTagsInput(form.placementTags);
+
+  // Persist on the blog and inside blog_preferences so webhook reads still work
+  // if one of the two paths is dropped by schema/ES mapping quirks.
   const blog_preferences = {
     ...blog.blog_preferences,
     theme: form.themeName,
     language: form.language || undefined,
     embed_height_responsive_default: form.embedResponsive,
+    placement_tags: placementTags,
   };
-
-  const placementTags = parsePlacementTagsInput(form.placementTags);
 
   const patch: Partial<Blog> = {
     title: form.title,

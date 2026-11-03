@@ -38,12 +38,24 @@ def post_webhook_payload(webhook, post, blog=None):
     )
     destination = resolve_webhook_delivery_url(webhook.get("destination_url"))
 
+    sent = {}
+    if isinstance(payload, dict):
+        if "blogKey" in payload:
+            sent["blogKey"] = payload.get("blogKey")
+        if "pageUri" in payload:
+            sent["pageUri"] = payload.get("pageUri")
+        # Explicit null when omitted so callers can tell "not attached" from "[]".
+        sent["placementTags"] = payload.get("placementTags")
+
     result = {
         "ok": False,
         "status_code": None,
         "destination": destination,
         "response_body": "",
-        "blogKey": None,
+        "blogKey": sent.get("blogKey"),
+        "placementTags": sent.get("placementTags"),
+        "pageUri": sent.get("pageUri"),
+        "sent": sent,
         "error": None,
     }
 
@@ -70,9 +82,14 @@ def post_webhook_payload(webhook, post, blog=None):
 
     parsed = _parse_response_json(response)
     if parsed:
+        # Prefer consumer echo when present; keep what we sent otherwise.
         blog_key = parsed.get("blogKey") or parsed.get("blog_key")
         if blog_key is not None:
             result["blogKey"] = str(blog_key)
+        if "placementTags" in parsed:
+            result["placementTags"] = parsed.get("placementTags")
+        elif "tags" in parsed and isinstance(parsed.get("tags"), list):
+            result["placementTags"] = parsed.get("tags")
 
     logger.info(
         "Webhook %s response: status=%s body=%s",

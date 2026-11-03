@@ -298,14 +298,7 @@ def resolve_page_uri(blog, blog_key):
     return "/regstreeks/{}/".format(blog_key)
 
 
-def resolve_placement_tags(blog):
-    """
-    Return placement list when configured; None means omit the envelope field
-    so the consumer keeps legacy category matching.
-    """
-    if "placement_tags" not in blog:
-        return None
-    raw = blog.get("placement_tags")
+def _normalize_placement_tag_list(raw):
     if raw is None:
         return None
     tags = []
@@ -316,6 +309,22 @@ def resolve_placement_tags(blog):
         if text:
             tags.append(text)
     return tags
+
+
+def resolve_placement_tags(blog):
+    """
+    Return placement list when configured; None means omit the envelope field
+    so the consumer keeps legacy category matching.
+
+    Reads top-level ``placement_tags`` first, then ``blog_preferences.placement_tags``
+    (settings save both so the field survives even if one store path drops it).
+    """
+    prefs = blog.get("blog_preferences") or {}
+    if "placement_tags" in blog:
+        return _normalize_placement_tag_list(blog.get("placement_tags"))
+    if isinstance(prefs, dict) and "placement_tags" in prefs:
+        return _normalize_placement_tag_list(prefs.get("placement_tags"))
+    return None
 
 
 def resolve_embed_uri(blog, blog_key):
@@ -332,8 +341,12 @@ def resolve_embed_uri(blog, blog_key):
 def build_news_card_payload(post, blog=None):
     """Build WP GraphQL-compatible news card payload for a single post."""
     if blog is None:
-        blogs = get_resource_service("client_blogs")
-        blog = blogs.find_one(req=None, _id=post.get("blog")) or {}
+        # Prefer admin ``blogs`` (full document); fall back to client_blogs.
+        blogs = get_resource_service("blogs")
+        blog = blogs.find_one(req=None, _id=post.get("blog"))
+        if not blog:
+            blogs = get_resource_service("client_blogs")
+            blog = blogs.find_one(req=None, _id=post.get("blog")) or {}
 
     items = extract_post_items_data(post)
     database_id = post_id_to_database_id(post["_id"])

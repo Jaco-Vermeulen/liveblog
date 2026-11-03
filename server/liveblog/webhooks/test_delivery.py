@@ -106,7 +106,7 @@ def run_webhook_test(webhook_id):
 
     webhooks = get_resource_service("webhooks")
     posts = get_resource_service("posts")
-    blogs = get_resource_service("client_blogs")
+    blogs = get_resource_service("blogs")
 
     webhook = webhooks.find_one(req=None, _id=webhook_id)
     if not webhook:
@@ -128,14 +128,19 @@ def run_webhook_test(webhook_id):
         return None, "Test post not found.", 404
 
     blog = blogs.find_one(req=None, _id=post.get("blog"))
+    if not blog:
+        blog = get_resource_service("client_blogs").find_one(
+            req=None, _id=post.get("blog")
+        )
     delivery = post_webhook_payload(webhook, post, blog=blog)
 
     logger.info(
-        "Webhook test %s post=%s ok=%s status=%s",
+        "Webhook test %s post=%s ok=%s status=%s sent_placement=%s",
         webhook_id,
         post_id,
         delivery.get("ok"),
         delivery.get("status_code"),
+        delivery.get("placementTags"),
     )
 
     return {
@@ -148,6 +153,9 @@ def run_webhook_test(webhook_id):
         "status_code": delivery.get("status_code"),
         "response_body": delivery.get("response_body") or "",
         "blogKey": delivery.get("blogKey"),
+        "placementTags": delivery.get("placementTags"),
+        "pageUri": delivery.get("pageUri"),
+        "sent": delivery.get("sent") or {},
         "error": delivery.get("error"),
     }, None, 200
 

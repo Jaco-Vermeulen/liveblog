@@ -17,7 +17,7 @@ def deliver_webhook(self, webhook_id, post_id, action):
 
     webhooks = get_resource_service("webhooks")
     posts = get_resource_service("posts")
-    blogs = get_resource_service("client_blogs")
+    blogs = get_resource_service("blogs")
 
     webhook = webhooks.find_one(req=None, _id=webhook_id)
     if not webhook or not webhook.get("enabled"):
@@ -38,6 +38,8 @@ def deliver_webhook(self, webhook_id, post_id, action):
         return
 
     blog = blogs.find_one(req=None, _id=blog_id)
+    if not blog:
+        blog = get_resource_service("client_blogs").find_one(req=None, _id=blog_id)
     result = post_webhook_payload(webhook, post, blog=blog)
 
     if result.get("status_code") is not None and result["status_code"] >= 500:

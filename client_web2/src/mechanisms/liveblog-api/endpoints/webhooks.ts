@@ -35,6 +35,14 @@ export interface WebhookTestResult {
   status_code?: number | null;
   response_body?: string;
   blogKey?: string | null;
+  /** What we attached on the root payload (null/undefined = field omitted). */
+  placementTags?: string[] | null;
+  pageUri?: string | null;
+  sent?: {
+    blogKey?: string;
+    placementTags?: string[] | null;
+    pageUri?: string;
+  };
   error?: string | null;
 }
 

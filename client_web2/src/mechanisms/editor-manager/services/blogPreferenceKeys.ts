@@ -4,6 +4,7 @@ export const BLOG_PREFERENCE_SETTINGS_KEYS = new Set([
   'embed_height_responsive_default',
   'last_scorecard',
   'theme',
+  'placement_tags',
 ]);
 
 export function isBlogPreferenceSettingKey(key: string): boolean {

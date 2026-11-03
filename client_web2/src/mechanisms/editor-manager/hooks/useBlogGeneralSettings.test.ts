@@ -72,6 +72,7 @@ describe('buildBlogPatchFromForm', () => {
     const patch = buildBlogPatchFromForm(blog, form);
     expect(patch.blog_key).toBe('verkiesing-2026');
     expect(patch.placement_tags).toEqual(['topstories', 'sa-nuus']);
+    expect(patch.blog_preferences?.placement_tags).toEqual(['topstories', 'sa-nuus']);
     expect(patch.main_page_url).toBe('/regstreeks/verkiesing-2026/');
   });
 });

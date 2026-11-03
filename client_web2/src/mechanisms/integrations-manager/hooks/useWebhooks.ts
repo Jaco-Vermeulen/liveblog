@@ -117,9 +117,15 @@ export function useWebhooks() {
     setMessage(null);
     try {
       const result = await testWebhook(webhook);
+      const placement =
+        result.sent?.placementTags ?? result.placementTags ?? null;
       if (result.ok) {
         setMessage(
-          AF.integrations.webhooks.testOk(result.status_code ?? 200, result.blogKey),
+          AF.integrations.webhooks.testOk(
+            result.status_code ?? 200,
+            result.sent?.blogKey ?? result.blogKey,
+            placement,
+          ),
         );
       } else {
         const detail =

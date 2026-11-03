@@ -766,10 +766,18 @@ export const AF = {
       removed: 'Webhook verwyder.',
       test: 'Toets',
       testing: 'Besig…',
-      testOk: (status: number, blogKey?: string | null) =>
-        blogKey
-          ? `Webhook sukses (HTTP ${status}, blogKey: ${blogKey}).`
-          : `Webhook sukses (HTTP ${status}).`,
+      testOk: (status: number, blogKey?: string | null, placementTags?: string[] | null) => {
+        const parts = [`HTTP ${status}`];
+        if (blogKey) parts.push(`blogKey: ${blogKey}`);
+        if (placementTags && placementTags.length) {
+          parts.push(`placementTags: [${placementTags.join(', ')}]`);
+        } else if (placementTags && placementTags.length === 0) {
+          parts.push('placementTags: []');
+        } else {
+          parts.push('placementTags: (nie gestuur)');
+        }
+        return `Webhook sukses (${parts.join(', ')}).`;
+      },
       testFailed: (detail: string) => `Webhook het misluk: ${detail}`,
       disabled: 'Gedeaktiveer',
       allBlogs: 'Alle blogs',

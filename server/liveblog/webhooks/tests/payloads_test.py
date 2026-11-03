@@ -194,6 +194,24 @@ class WebhookPayloadsTestCase(unittest.TestCase):
       ["topstories", "sa-nuus"],
     )
 
+  def test_resolve_placement_tags_falls_back_to_blog_preferences(self):
+    self.assertEqual(
+      resolve_placement_tags(
+        {"title": "X", "blog_preferences": {"placement_tags": ["topstories"]}}
+      ),
+      ["topstories"],
+    )
+    # Top-level wins over preferences
+    self.assertEqual(
+      resolve_placement_tags(
+        {
+          "placement_tags": ["sa-nuus"],
+          "blog_preferences": {"placement_tags": ["topstories"]},
+        }
+      ),
+      ["sa-nuus"],
+    )
+
   def test_resolve_page_uri_and_embed_uri(self):
     blog = {
       "title": "Verkiesing 2026",
