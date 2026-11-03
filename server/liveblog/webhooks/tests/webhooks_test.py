@@ -3,7 +3,7 @@ import liveblog.core as core
 import liveblog.posts as posts
 import liveblog.webhooks as webhooks
 import superdesk.users as users_app
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from bson import ObjectId
 from superdesk import get_resource_service
@@ -109,10 +109,10 @@ class WebhooksModuleTestCase(TestCase):
 
     mock_delay.assert_called_once_with(webhook_match, post_id, "created")
 
-  @patch("liveblog.webhooks.tasks.deliver_webhook.delay")
+  @patch("liveblog.webhooks.test_delivery.post_webhook_payload")
   @patch("liveblog.webhooks.test_delivery.resolve_webhook_test_post")
-  def test_queue_webhook_test(self, mock_resolve, mock_delay):
-    from liveblog.webhooks.test_delivery import queue_webhook_test
+  def test_run_webhook_test_reports_destination_success(self, mock_resolve, mock_post):
+    from liveblog.webhooks.test_delivery import run_webhook_test
 
     webhook_id = self.webhooks_service.post(
       [
@@ -127,14 +127,87 @@ class WebhooksModuleTestCase(TestCase):
     )[0]
     post_id = "urn:newsml:localhost:test-post"
     mock_resolve.return_value = (post_id, None)
+    mock_post.return_value = {
+      "ok": True,
+      "status_code": 200,
+      "destination": "http://127.0.0.1:3000/hook/",
+      "response_body": '{"ok":true,"blogKey":"verkiesing-2026"}',
+      "blogKey": "verkiesing-2026",
+      "error": None,
+    }
 
-    result, error, status = queue_webhook_test(webhook_id)
+    posts_service = MagicMock()
+    posts_service.find_one.return_value = {"_id": post_id, "blog": "blog-1"}
+    blogs_service = MagicMock()
+    blogs_service.find_one.return_value = {"_id": "blog-1", "title": "Verkiesing"}
+
+    with patch(
+      "liveblog.webhooks.test_delivery.get_resource_service",
+      side_effect=lambda name: {
+        "webhooks": self.webhooks_service,
+        "posts": posts_service,
+        "client_blogs": blogs_service,
+      }[name],
+    ):
+      result, error, status = run_webhook_test(webhook_id)
+
     self.assertIsNone(error)
-    self.assertEqual(status, 202)
-    self.assertTrue(result["queued"])
+    self.assertEqual(status, 200)
+    self.assertTrue(result["ok"])
+    self.assertFalse(result["queued"])
     self.assertEqual(result["post_id"], post_id)
     self.assertEqual(result["action"], "updated")
-    mock_delay.assert_called_once_with(webhook_id, post_id, "updated")
+    self.assertEqual(result["blogKey"], "verkiesing-2026")
+    self.assertEqual(result["status_code"], 200)
+    mock_post.assert_called_once()
+
+  @patch("liveblog.webhooks.test_delivery.post_webhook_payload")
+  @patch("liveblog.webhooks.test_delivery.resolve_webhook_test_post")
+  def test_run_webhook_test_reports_destination_failure(self, mock_resolve, mock_post):
+    from liveblog.webhooks.test_delivery import run_webhook_test
+
+    webhook_id = self.webhooks_service.post(
+      [
+        {
+          "name": "Fail hook",
+          "destination_url": "http://127.0.0.1:3000/hook/",
+          "action": "post_created",
+          "data_format": "news_card",
+          "enabled": True,
+        }
+      ]
+    )[0]
+    post_id = "urn:newsml:localhost:test-post-2"
+    mock_resolve.return_value = (post_id, None)
+    mock_post.return_value = {
+      "ok": False,
+      "status_code": 502,
+      "destination": "http://127.0.0.1:3000/hook/",
+      "response_body": "bad gateway",
+      "blogKey": None,
+      "error": "Destination returned HTTP 502",
+    }
+
+    posts_service = MagicMock()
+    posts_service.find_one.return_value = {"_id": post_id, "blog": "blog-1"}
+    blogs_service = MagicMock()
+    blogs_service.find_one.return_value = {"_id": "blog-1"}
+
+    with patch(
+      "liveblog.webhooks.test_delivery.get_resource_service",
+      side_effect=lambda name: {
+        "webhooks": self.webhooks_service,
+        "posts": posts_service,
+        "client_blogs": blogs_service,
+      }[name],
+    ):
+      result, error, status = run_webhook_test(webhook_id)
+
+    self.assertIsNone(error)
+    self.assertEqual(status, 200)
+    self.assertFalse(result["ok"])
+    self.assertEqual(result["status_code"], 502)
+    self.assertIn("502", result["error"])
 
   def test_queue_webhook_test_no_posts(self):
     from liveblog.webhooks.test_delivery import queue_webhook_test

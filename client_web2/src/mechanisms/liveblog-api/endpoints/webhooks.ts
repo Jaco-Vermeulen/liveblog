@@ -25,10 +25,17 @@ export function removeWebhook(webhook: Webhook): Promise<void> {
 }
 
 export interface WebhookTestResult {
+  /** True only when the destination returned HTTP 200 (consumer success). */
+  ok: boolean;
   queued: boolean;
   post_id: string;
   action: string;
   webhook_id: string;
+  destination?: string;
+  status_code?: number | null;
+  response_body?: string;
+  blogKey?: string | null;
+  error?: string | null;
 }
 
 export function testWebhook(webhook: Webhook): Promise<WebhookTestResult> {

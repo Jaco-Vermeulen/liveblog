@@ -117,7 +117,18 @@ export function useWebhooks() {
     setMessage(null);
     try {
       const result = await testWebhook(webhook);
-      setMessage(AF.integrations.webhooks.testQueued(result.post_id));
+      if (result.ok) {
+        setMessage(
+          AF.integrations.webhooks.testOk(result.status_code ?? 200, result.blogKey),
+        );
+      } else {
+        const detail =
+          result.error ||
+          (result.status_code != null
+            ? `HTTP ${result.status_code}`
+            : 'geen respons van bestemming');
+        setError(AF.integrations.webhooks.testFailed(detail));
+      }
     } catch (err) {
       if (err instanceof LiveblogApiError) {
         const body = err.body as { _error?: string | { message?: string }; _message?: string };

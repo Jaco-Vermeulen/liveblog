@@ -12,7 +12,8 @@ def deliver_webhook(self, webhook_id, post_id, action):
     """Deliver a webhook payload for a post event."""
     from superdesk import get_resource_service
 
-    from .payloads import WEBHOOK_ACTIONS, build_webhook_payload
+    from .delivery import post_webhook_payload
+    from .payloads import WEBHOOK_ACTIONS
 
     webhooks = get_resource_service("webhooks")
     posts = get_resource_service("posts")
@@ -37,37 +38,16 @@ def deliver_webhook(self, webhook_id, post_id, action):
         return
 
     blog = blogs.find_one(req=None, _id=blog_id)
-    payload = build_webhook_payload(
-        post, data_format=webhook.get("data_format", "news_card"), blog=blog
-    )
-    from liveblog.syndication.utils import resolve_webhook_delivery_url
+    result = post_webhook_payload(webhook, post, blog=blog)
 
-    destination = resolve_webhook_delivery_url(webhook.get("destination_url"))
-
-    logger.info(
-        "Delivering webhook %s to %s for post %s (action=%s, format=%s)",
-        webhook_id,
-        destination,
-        post_id,
-        action,
-        webhook.get("data_format"),
-    )
-
-    try:
-        response = requests.post(destination, json=payload, timeout=15)
-        logger.info(
-            "Webhook %s response: status=%s body=%s",
-            webhook_id,
-            response.status_code,
-            response.text[:500],
-        )
-        if response.status_code >= 500:
-            raise requests.HTTPError(
-                "Webhook destination returned {}".format(response.status_code)
+    if result.get("status_code") is not None and result["status_code"] >= 500:
+        raise self.retry(
+            exc=requests.HTTPError(
+                "Webhook destination returned {}".format(result["status_code"])
             )
-    except Exception as exc:
-        logger.exception("Webhook %s delivery failed", webhook_id)
-        raise self.retry(exc=exc)
+        )
+    if result.get("error") and result.get("status_code") is None:
+        raise self.retry(exc=requests.RequestException(result["error"]))
 
 
 @celery.task

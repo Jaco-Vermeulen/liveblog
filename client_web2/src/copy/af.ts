@@ -766,8 +766,11 @@ export const AF = {
       removed: 'Webhook verwyder.',
       test: 'Toets',
       testing: 'Besig…',
-      testQueued: (postId: string) =>
-        `Webhook-toets is in die ry geplaas (laaste plasing: ${postId}).`,
+      testOk: (status: number, blogKey?: string | null) =>
+        blogKey
+          ? `Webhook sukses (HTTP ${status}, blogKey: ${blogKey}).`
+          : `Webhook sukses (HTTP ${status}).`,
+      testFailed: (detail: string) => `Webhook het misluk: ${detail}`,
       disabled: 'Gedeaktiveer',
       allBlogs: 'Alle blogs',
       newsCardHint:

@@ -97,14 +97,23 @@ def resolve_webhook_test_post(webhook):
     return None, "No published posts found."
 
 
-def queue_webhook_test(webhook_id):
-    """Queue a test delivery for the webhook's configured action and latest post."""
-    from .tasks import deliver_webhook
+def run_webhook_test(webhook_id):
+    """
+    Deliver a test payload synchronously and report whether the destination
+    accepted it (HTTP 200). Does not use the Celery queue.
+    """
+    from .delivery import post_webhook_payload
 
     webhooks = get_resource_service("webhooks")
+    posts = get_resource_service("posts")
+    blogs = get_resource_service("client_blogs")
+
     webhook = webhooks.find_one(req=None, _id=webhook_id)
     if not webhook:
         return None, "Webhook not found.", 404
+
+    if not (webhook.get("destination_url") or "").strip():
+        return None, "Webhook has no destination URL.", 400
 
     post_id, error = resolve_webhook_test_post(webhook)
     if not post_id:
@@ -114,16 +123,34 @@ def queue_webhook_test(webhook_id):
     if not action:
         return None, "Webhook action is not supported for testing.", 400
 
-    deliver_webhook.delay(webhook_id, post_id, action)
+    post = posts.find_one(req=None, _id=post_id)
+    if not post:
+        return None, "Test post not found.", 404
+
+    blog = blogs.find_one(req=None, _id=post.get("blog"))
+    delivery = post_webhook_payload(webhook, post, blog=blog)
+
     logger.info(
-        "Queued webhook test %s for post %s (action=%s)",
+        "Webhook test %s post=%s ok=%s status=%s",
         webhook_id,
         post_id,
-        action,
+        delivery.get("ok"),
+        delivery.get("status_code"),
     )
+
     return {
-        "queued": True,
-        "post_id": post_id,
+        "ok": bool(delivery.get("ok")),
+        "queued": False,
+        "post_id": str(post_id),
         "action": action,
-        "webhook_id": webhook_id,
-    }, None, 202
+        "webhook_id": str(webhook_id),
+        "destination": delivery.get("destination"),
+        "status_code": delivery.get("status_code"),
+        "response_body": delivery.get("response_body") or "",
+        "blogKey": delivery.get("blogKey"),
+        "error": delivery.get("error"),
+    }, None, 200
+
+
+# Backwards-compatible alias
+queue_webhook_test = run_webhook_test
