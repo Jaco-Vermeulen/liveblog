@@ -12,11 +12,22 @@ class PostWebhookPayloadTestCase(unittest.TestCase):
         self, mock_post, mock_resolve, mock_build
     ):
         mock_resolve.return_value = "https://example.com/hook"
-        mock_build.return_value = {"data": {}}
+        mock_build.return_value = {
+            "blogKey": "verkiesing-2026",
+            "placementTags": ["topstories", "sa-nuus"],
+            "pageUri": "/regstreeks/verkiesing-2026/",
+            "data": {},
+        }
         response = MagicMock()
         response.status_code = 200
-        response.text = '{"ok": true, "blogKey": "verkiesing-2026"}'
-        response.json.return_value = {"ok": True, "blogKey": "verkiesing-2026"}
+        response.text = (
+            '{"ok": true, "blogKey": "verkiesing-2026", "placementTags": null}'
+        )
+        response.json.return_value = {
+            "ok": True,
+            "blogKey": "verkiesing-2026",
+            "placementTags": None,
+        }
         mock_post.return_value = response
 
         result = post_webhook_payload(
@@ -27,9 +38,11 @@ class PostWebhookPayloadTestCase(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertEqual(result["status_code"], 200)
-        self.assertEqual(result["blogKey"], "verkiesing-2026")
-        self.assertEqual(result["sent"]["blogKey"], mock_build.return_value.get("blogKey"))
-        self.assertIn("request_body", result)
+        self.assertEqual(result["sent"]["placementTags"], ["topstories", "sa-nuus"])
+        self.assertTrue(result["sent"]["hasPlacementTagsKey"])
+        self.assertIsNone(result["received"]["placementTags"])
+        self.assertIn('"placementTags": ["topstories", "sa-nuus"]', result["request_body"])
+        self.assertIn("placementTags", result["response_body"])
         self.assertIsNone(result["error"])
 
     @patch("liveblog.webhooks.delivery.build_webhook_payload")
