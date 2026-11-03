@@ -226,6 +226,36 @@ export function GeneralSettings({
         </select>
       </LbFormField>
 
+      <LbFormField label={AF.editor.settings.blogKey} htmlFor="settings-blog-key">
+        <LbInput
+          id="settings-blog-key"
+          value={form.blogKey}
+          onChange={(e) => onChange({ blogKey: e.target.value })}
+          placeholder="verkiesing-2026"
+        />
+        <p className="mt-1 text-xs text-mar-muted">{AF.editor.settings.blogKeyHint}</p>
+      </LbFormField>
+
+      <LbFormField label={AF.editor.settings.placementTags} htmlFor="settings-placement-tags">
+        <LbInput
+          id="settings-placement-tags"
+          value={form.placementTags}
+          onChange={(e) => onChange({ placementTags: e.target.value })}
+          placeholder={AF.editor.settings.placementTagsPlaceholder}
+        />
+        <p className="mt-1 text-xs text-mar-muted">{AF.editor.settings.placementTagsHint}</p>
+      </LbFormField>
+
+      <LbFormField label={AF.editor.settings.pageUri} htmlFor="settings-page-uri">
+        <LbInput
+          id="settings-page-uri"
+          value={form.pageUri}
+          onChange={(e) => onChange({ pageUri: e.target.value })}
+          placeholder={AF.editor.settings.pageUriPlaceholder}
+        />
+        <p className="mt-1 text-xs text-mar-muted">{AF.editor.settings.pageUriHint}</p>
+      </LbFormField>
+
       <LbFormField label={AF.editor.settings.allowComments} htmlFor="settings-comments">
         <select
           id="settings-comments"

@@ -142,6 +142,11 @@ export interface Blog extends EveResource {
   total_posts?: number;
   posts_limit?: number;
   category?: string;
+  /** Stable liveblog identity for site webhooks (not the category shelf). */
+  blog_key?: string | null;
+  /** Optional placement shelves for webhook envelope; omit/null = legacy match. */
+  placement_tags?: string[] | null;
+  main_page_url?: string | null;
   users_can_comment?: string;
   syndication_enabled?: boolean;
   market_enabled?: boolean;

@@ -3,8 +3,8 @@ import { normalizeWebhookUrl } from './normalizeWebhookUrl';
 
 describe('normalizeWebhookUrl', () => {
   it('prepends http when scheme is missing', () => {
-    expect(normalizeWebhookUrl('192.168.1.10:3000/api/webhooks/liveblog/nuus/')).toBe(
-      'http://192.168.1.10:3000/api/webhooks/liveblog/nuus/',
+    expect(normalizeWebhookUrl('192.168.1.10:3000/api/webhooks/liveblog/verkiesing-2026/')).toBe(
+      'http://192.168.1.10:3000/api/webhooks/liveblog/verkiesing-2026/',
     );
   });
 

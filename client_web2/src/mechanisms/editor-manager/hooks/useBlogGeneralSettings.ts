@@ -38,11 +38,23 @@ export interface BlogGeneralForm {
   language: string;
   embedResponsive: boolean;
   category: string;
+  blogKey: string;
+  placementTags: string;
+  pageUri: string;
   postsLimit: number;
   usersCanComment: string;
   pictureUrl: string;
   pictureId: string;
   pictureRenditions: Record<string, { href?: string }>;
+}
+
+export function parsePlacementTagsInput(value: string): string[] | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function themeNameFromBlog(blog: Blog): string {
@@ -56,6 +68,7 @@ function themeNameFromBlog(blog: Blog): string {
 
 export function blogToGeneralForm(blog: Blog): BlogGeneralForm {
   const prefs = blog.blog_preferences ?? {};
+  const placement = blog.placement_tags;
   return {
     title: blog.title,
     description: blog.description ?? '',
@@ -63,7 +76,10 @@ export function blogToGeneralForm(blog: Blog): BlogGeneralForm {
     themeName: themeNameFromBlog(blog),
     language: String(prefs.language ?? blog.language ?? ''),
     embedResponsive: Boolean(prefs.embed_height_responsive_default),
-    category: String((blog as Blog & { category?: string }).category ?? ''),
+    category: String(blog.category ?? ''),
+    blogKey: String(blog.blog_key ?? ''),
+    placementTags: Array.isArray(placement) ? placement.join(', ') : '',
+    pageUri: String(blog.main_page_url ?? ''),
     postsLimit: blog.posts_limit ?? 0,
     usersCanComment: String(blog.users_can_comment ?? 'unset'),
     pictureUrl: blog.picture_url ?? '',
@@ -85,6 +101,8 @@ export function buildBlogPatchFromForm(blog: Blog, form: BlogGeneralForm): Parti
     embed_height_responsive_default: form.embedResponsive,
   };
 
+  const placementTags = parsePlacementTagsInput(form.placementTags);
+
   const patch: Partial<Blog> = {
     title: form.title,
     description: form.description,
@@ -93,6 +111,9 @@ export function buildBlogPatchFromForm(blog: Blog, form: BlogGeneralForm): Parti
     posts_limit: form.postsLimit,
     users_can_comment: form.usersCanComment,
     category: form.category,
+    blog_key: form.blogKey.trim() || '',
+    placement_tags: placementTags,
+    main_page_url: form.pageUri.trim() || null,
     original_creator: creatorId,
   };
 

@@ -9,6 +9,10 @@ from liveblog.webhooks.payloads import (
     build_news_card_payload,
     graphql_post_id,
     object_id_to_database_id,
+    resolve_blog_key,
+    resolve_embed_uri,
+    resolve_page_uri,
+    resolve_placement_tags,
     slugify,
 )
 
@@ -88,12 +92,15 @@ class WebhookPayloadsTestCase(unittest.TestCase):
     blog = {
       "title": "SA-nuus",
       "category": "Nuus",
-      "public_url": "https://example.com/nuus/sa-nuus",
+      "public_url": "https://live.example.com/embed/507f1f77bcf86cd799439011",
     }
 
     payload = build_news_card_payload(post, blog=blog)
     node = payload["data"]["posts"]["nodes"][0]
 
+    self.assertEqual(payload["blogKey"], "sa-nuus")
+    self.assertEqual(payload["pageUri"], "/regstreeks/sa-nuus/")
+    self.assertNotIn("placementTags", payload)
     self.assertEqual(node["id"], graphql_post_id(database_id))
     self.assertEqual(node["databaseId"], database_id)
     self.assertEqual(node["title"], "Headline")
@@ -101,6 +108,10 @@ class WebhookPayloadsTestCase(unittest.TestCase):
     self.assertEqual(node["date"], "2026-06-09T08:30:00")
     self.assertEqual(node["modified"], "2026-06-09T10:15:00")
     self.assertEqual(node["slug"], "headline")
+    self.assertEqual(
+      node["uri"],
+      "https://live.example.com/embed/507f1f77bcf86cd799439011/sa-nuus",
+    )
     self.assertEqual(node["author"]["node"]["name"], "Jane Doe")
     self.assertEqual(node["tags"]["nodes"][0]["slug"], "politiek")
     self.assertEqual(node["categories"]["nodes"][0]["name"], "Nuus")
@@ -151,3 +162,84 @@ class WebhookPayloadsTestCase(unittest.TestCase):
     self.assertEqual(
       node["featuredImage"]["node"]["sourceUrl"], "https://example.com/blog-cover.jpg"
     )
+
+  def test_resolve_blog_key_prefers_explicit_over_category_and_title(self):
+    blog = {
+      "blog_key": "verkiesing-2026",
+      "title": "SA-nuus",
+      "category": "sa-nuus",
+      "main_page_url": "/regstreeks/other/",
+    }
+    self.assertEqual(resolve_blog_key(blog), "verkiesing-2026")
+
+  def test_resolve_blog_key_from_main_page_url_then_title(self):
+    self.assertEqual(
+      resolve_blog_key({"main_page_url": "/regstreeks/verkiesing-2026/", "title": "X"}),
+      "verkiesing-2026",
+    )
+    self.assertEqual(resolve_blog_key({"title": "Verkiesing 2026"}), "verkiesing-2026")
+
+  def test_resolve_blog_key_never_uses_category(self):
+    self.assertEqual(
+      resolve_blog_key({"title": "Verkiesing 2026", "category": "sa-nuus"}),
+      "verkiesing-2026",
+    )
+
+  def test_resolve_placement_tags_omits_when_unset(self):
+    self.assertIsNone(resolve_placement_tags({"title": "X"}))
+    self.assertIsNone(resolve_placement_tags({"placement_tags": None}))
+    self.assertEqual(resolve_placement_tags({"placement_tags": []}), [])
+    self.assertEqual(
+      resolve_placement_tags({"placement_tags": ["topstories", " sa-nuus ", ""]}),
+      ["topstories", "sa-nuus"],
+    )
+
+  def test_resolve_page_uri_and_embed_uri(self):
+    blog = {
+      "title": "Verkiesing 2026",
+      "blog_key": "verkiesing-2026",
+      "main_page_url": "/regstreeks/verkiesing-2026/",
+      "public_url": "https://live.example.com/embed/abc123",
+    }
+    self.assertEqual(resolve_page_uri(blog, "verkiesing-2026"), "/regstreeks/verkiesing-2026/")
+    self.assertEqual(
+      resolve_embed_uri(blog, "verkiesing-2026"),
+      "https://live.example.com/embed/abc123/verkiesing-2026",
+    )
+
+  @patch("liveblog.webhooks.payloads.extract_post_items_data")
+  @patch("liveblog.webhooks.payloads.extract_creator_data")
+  def test_verkiesing_envelope_does_not_use_story_slug_as_identity(
+    self, mock_creator, mock_items
+  ):
+    mock_creator.return_value = {"display_name": "Author"}
+    mock_items.return_value = [{"text": "<p>Stemme…</p>"}]
+    post = {
+      "_id": ObjectId("507f1f77bcf86cd799439011"),
+      "headline": "Stemme begin binnevloei in Gauteng",
+      "published_date": "2026-11-03T08:30:00",
+      "tags": ["politiek"],
+      "blog": ObjectId(),
+    }
+    blog = {
+      "title": "Verkiesing 2026",
+      "blog_key": "verkiesing-2026",
+      "category": "SA-nuus",
+      "placement_tags": ["topstories", "sa-nuus"],
+      "main_page_url": "/regstreeks/verkiesing-2026/",
+      "public_url": "https://live.maroelamedia.co.za/embed/507f1f77bcf86cd799439011",
+    }
+    payload = build_news_card_payload(post, blog=blog)
+    node = payload["data"]["posts"]["nodes"][0]
+
+    self.assertEqual(payload["blogKey"], "verkiesing-2026")
+    self.assertEqual(payload["placementTags"], ["topstories", "sa-nuus"])
+    self.assertEqual(payload["pageUri"], "/regstreeks/verkiesing-2026/")
+    self.assertEqual(
+      node["uri"],
+      "https://live.maroelamedia.co.za/embed/507f1f77bcf86cd799439011/verkiesing-2026",
+    )
+    self.assertEqual(node["slug"], "stemme-begin-binnevloei-in-gauteng")
+    self.assertNotEqual(payload["blogKey"], node["slug"])
+    self.assertEqual(node["categories"]["nodes"][0]["slug"], "sa-nuus")
+    self.assertEqual(node["tags"]["nodes"][0]["slug"], "politiek")

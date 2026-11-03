@@ -265,6 +265,70 @@ def _build_categories_nodes(blog):
     }
 
 
+def _last_path_segment(url_or_path):
+    text = (url_or_path or "").strip()
+    if not text:
+        return None
+    if "://" in text:
+        without_scheme = text.split("://", 1)[1]
+        path = without_scheme.split("/", 1)[1] if "/" in without_scheme else ""
+    else:
+        path = text
+    parts = [p for p in path.strip("/").split("/") if p]
+    return parts[-1] if parts else None
+
+
+def resolve_blog_key(blog):
+    """Stable liveblog identity — never category, never per-update post slug."""
+    explicit = (blog.get("blog_key") or "").strip()
+    if explicit:
+        return slugify(explicit)
+
+    from_page = _last_path_segment(blog.get("main_page_url"))
+    if from_page:
+        return slugify(from_page)
+
+    return slugify(blog.get("title") or "liveblog")
+
+
+def resolve_page_uri(blog, blog_key):
+    main = (blog.get("main_page_url") or "").strip()
+    if main:
+        return main
+    return "/regstreeks/{}/".format(blog_key)
+
+
+def resolve_placement_tags(blog):
+    """
+    Return placement list when configured; None means omit the envelope field
+    so the consumer keeps legacy category matching.
+    """
+    if "placement_tags" not in blog:
+        return None
+    raw = blog.get("placement_tags")
+    if raw is None:
+        return None
+    tags = []
+    for tag in raw:
+        if tag is None:
+            continue
+        text = str(tag).strip()
+        if text:
+            tags.append(text)
+    return tags
+
+
+def resolve_embed_uri(blog, blog_key):
+    """
+    post.uri last embed segment must be the stable blog key (fallback identity),
+    not the per-update story slug.
+    """
+    public_url = (blog.get("public_url") or "").rstrip("/")
+    if public_url:
+        return "{}/{}".format(public_url, blog_key)
+    return "/embed/{}/{}".format(slugify(blog.get("title") or "liveblog"), blog_key)
+
+
 def build_news_card_payload(post, blog=None):
     """Build WP GraphQL-compatible news card payload for a single post."""
     if blog is None:
@@ -275,10 +339,10 @@ def build_news_card_payload(post, blog=None):
     database_id = post_id_to_database_id(post["_id"])
     title = _resolve_title(post, items, blog)
     slug = slugify(title)
-    public_url = blog.get("public_url") or ""
-    uri = "{}/{}".format(public_url.rstrip("/"), slug) if public_url else "/{}/{}".format(
-        slugify(blog.get("title") or "liveblog"), slug
-    )
+    blog_key = resolve_blog_key(blog)
+    uri = resolve_embed_uri(blog, blog_key)
+    page_uri = resolve_page_uri(blog, blog_key)
+    placement_tags = resolve_placement_tags(blog)
 
     featured_image = _resolve_featured_image(post, blog, items)
 
@@ -303,7 +367,9 @@ def build_news_card_payload(post, blog=None):
         "frontPageBoostTest": None,
     }
 
-    return {
+    payload = {
+        "blogKey": blog_key,
+        "pageUri": page_uri,
         "data": {
             "posts": {
                 "nodes": [node],
@@ -312,8 +378,11 @@ def build_news_card_payload(post, blog=None):
                     "endCursor": None,
                 },
             }
-        }
+        },
     }
+    if placement_tags is not None:
+        payload["placementTags"] = placement_tags
+    return payload
 
 
 def build_raw_payload(post):

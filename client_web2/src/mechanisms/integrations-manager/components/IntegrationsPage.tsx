@@ -164,7 +164,7 @@ export function IntegrationsPage() {
               autoComplete="url"
               value={form.destination_url}
               onChange={(e) => setForm((f) => ({ ...f, destination_url: e.target.value }))}
-              placeholder="192.168.1.10:3000/api/webhooks/liveblog/nuus/"
+              placeholder="192.168.1.10:3000/api/webhooks/liveblog/verkiesing-2026/"
               required
             />
             <p className="mt-1 text-xs text-mar-muted">

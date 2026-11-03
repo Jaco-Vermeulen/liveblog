@@ -461,6 +461,16 @@ export const AF = {
       embedCode: 'Embed-kode',
       category: 'Kategorie',
       categoryNone: '— Geen —',
+      blogKey: 'Liveblog-sleutel (blogKey)',
+      blogKeyHint:
+        'Stabiele identiteit vir die webwerf (bv. verkiesing-2026). Nie die kategorie-rak nie. Kaart open /regstreeks/{sleutel}/.',
+      placementTags: 'Plasing-rakke (placementTags)',
+      placementTagsHint:
+        'Komma-geskei, bv. topstories, sa-nuus. Leeg = legacy kategorie-passing. Moenie die kategorie as blogKey gebruik vir ’n ander liveblog nie.',
+      placementTagsPlaceholder: 'topstories, sa-nuus',
+      pageUri: 'Regstreeks-bladsy (pageUri)',
+      pageUriHint: 'Opsioneel. Verstek is /regstreeks/{blogKey}/.',
+      pageUriPlaceholder: '/regstreeks/verkiesing-2026/',
       allowComments: 'Gebruikers kan kommentaar lewer',
       postLimit: 'Plasing-limiet',
       blogId: 'Blog-ID',

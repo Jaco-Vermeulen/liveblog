@@ -38,6 +38,19 @@ blogs_schema = {
         "type": "string",
         "default": "",
     },
+    # Stable liveblog identity for Maroela webhook consumers (not the shelf/category).
+    "blog_key": {
+        "type": "string",
+        "default": "",
+        "nullable": True,
+    },
+    # Optional placement shelves for webhook envelope (topstories, sa-nuus, …).
+    # Absent/null → omit placementTags (legacy category match). [] → nowhere except blogKey.
+    "placement_tags": {
+        "type": "list",
+        "schema": {"type": "string"},
+        "nullable": True,
+    },
     "start_date": {"type": "datetime", "default": None},
     "end_date": {
         "type": "datetime",
