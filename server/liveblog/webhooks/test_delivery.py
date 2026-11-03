@@ -151,11 +151,13 @@ def run_webhook_test(webhook_id):
         "webhook_id": str(webhook_id),
         "destination": delivery.get("destination"),
         "status_code": delivery.get("status_code"),
+        "request_body": delivery.get("request_body") or "",
         "response_body": delivery.get("response_body") or "",
         "blogKey": delivery.get("blogKey"),
         "placementTags": delivery.get("placementTags"),
         "pageUri": delivery.get("pageUri"),
         "sent": delivery.get("sent") or {},
+        "received": delivery.get("received"),
         "error": delivery.get("error"),
     }, None, 200
 

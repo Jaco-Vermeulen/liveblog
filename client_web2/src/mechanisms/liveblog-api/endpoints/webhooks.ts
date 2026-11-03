@@ -33,16 +33,28 @@ export interface WebhookTestResult {
   webhook_id: string;
   destination?: string;
   status_code?: number | null;
+  /** Exact outbound JSON we POSTed (truncated). */
+  request_body?: string;
+  /** Raw destination response text (truncated). */
   response_body?: string;
   blogKey?: string | null;
-  /** What we attached on the root payload (null/undefined = field omitted). */
   placementTags?: string[] | null;
   pageUri?: string | null;
+  /** Root envelope taken from the outbound payload (not the settings form). */
   sent?: {
-    blogKey?: string;
+    blogKey?: string | null;
     placementTags?: string[] | null;
-    pageUri?: string;
+    pageUri?: string | null;
+    hasPlacementTagsKey?: boolean;
+    placementTagsType?: string | null;
   };
+  /** Parsed destination JSON echo when available. */
+  received?: {
+    ok?: unknown;
+    blogKey?: string | null;
+    placementTags?: string[] | null;
+    hasPlacementTagsKey?: boolean;
+  } | null;
   error?: string | null;
 }
 

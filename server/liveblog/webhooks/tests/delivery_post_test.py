@@ -28,6 +28,8 @@ class PostWebhookPayloadTestCase(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["status_code"], 200)
         self.assertEqual(result["blogKey"], "verkiesing-2026")
+        self.assertEqual(result["sent"]["blogKey"], mock_build.return_value.get("blogKey"))
+        self.assertIn("request_body", result)
         self.assertIsNone(result["error"])
 
     @patch("liveblog.webhooks.delivery.build_webhook_payload")

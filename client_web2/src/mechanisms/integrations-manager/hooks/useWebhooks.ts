@@ -117,23 +117,33 @@ export function useWebhooks() {
     setMessage(null);
     try {
       const result = await testWebhook(webhook);
-      const placement =
-        result.sent?.placementTags ?? result.placementTags ?? null;
+      const fmtPlacement = (value: unknown, hasKey?: boolean) => {
+        if (Array.isArray(value)) return JSON.stringify(value);
+        if (hasKey && value == null) return 'null';
+        if (value == null) return '(sleutel ontbreek)';
+        return JSON.stringify(value);
+      };
+      const report = AF.integrations.webhooks.testReport({
+        status: result.status_code ?? 0,
+        sentPlacement: fmtPlacement(
+          result.sent?.placementTags,
+          result.sent?.hasPlacementTagsKey,
+        ),
+        receivedPlacement: fmtPlacement(
+          result.received?.placementTags,
+          result.received?.hasPlacementTagsKey,
+        ),
+        responseBody: (result.response_body || '').slice(0, 400),
+      });
       if (result.ok) {
-        setMessage(
-          AF.integrations.webhooks.testOk(
-            result.status_code ?? 200,
-            result.sent?.blogKey ?? result.blogKey,
-            placement,
-          ),
-        );
+        setMessage(AF.integrations.webhooks.testOk(report));
       } else {
         const detail =
           result.error ||
           (result.status_code != null
             ? `HTTP ${result.status_code}`
             : 'geen respons van bestemming');
-        setError(AF.integrations.webhooks.testFailed(detail));
+        setError(AF.integrations.webhooks.testFailed(`${detail}. ${report}`));
       }
     } catch (err) {
       if (err instanceof LiveblogApiError) {
