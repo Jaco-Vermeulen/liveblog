@@ -48,6 +48,8 @@ AMAZON_SECRET_ACCESS_KEY=""
 AMAZON_REGION=""
 AMAZON_CONTAINER_NAME=""
 SENTRY_DSN=""
+# Must match Maroela web LIVEBLOG_WEBHOOK_SECRET when web auth is enabled.
+LIVEBLOG_WEBHOOK_SECRET=""
 
 # Mandrill (Mailchimp Transactional) — password is the API key; username is not validated by Mandrill
 MAIL_SERVER="smtp.mandrillapp.com"
@@ -546,6 +548,9 @@ EOF
   fi
   if [[ -n "${SENTRY_DSN}" ]]; then
     echo "SENTRY_DSN=${SENTRY_DSN}" >>"${f}"
+  fi
+  if [[ -n "${LIVEBLOG_WEBHOOK_SECRET}" ]]; then
+    echo "LIVEBLOG_WEBHOOK_SECRET=${LIVEBLOG_WEBHOOK_SECRET}" >>"${f}"
   fi
   local mail_from="${MAIL_FROM}"
   if [[ -z "${mail_from}" ]]; then

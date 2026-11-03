@@ -34,6 +34,8 @@ x-liveblog-env: &liveblog-env
   ELASTIC_AUTO_REINDEX_ON_500: ${ELASTIC_AUTO_REINDEX_ON_500:-False}
   SYNDICATION: ${SYNDICATION:-True}
   LIVEBLOG_DEBUG: ${LIVEBLOG_DEBUG:-True}
+  # Must match Maroela web LIVEBLOG_WEBHOOK_SECRET when that env is set on web.
+  LIVEBLOG_WEBHOOK_SECRET: ${LIVEBLOG_WEBHOOK_SECRET:-}
   EMBED_PROTOCOL: ${EMBED_PROTOCOL:-}
   C_FORCE_ROOT: "true"
   # Public Iframely key (MD5); editor uses key= on iframe.ly/api/oembed

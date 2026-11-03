@@ -452,4 +452,8 @@ MOBILE_APP_WORKAROUND = env("MOBILE_APP_WORKAROUND", False)
 APM_SERVER_URL = env("APM_SERVER_URL")
 APM_SECRET_TOKEN = env("APM_SECRET_TOKEN")
 
+# Shared with Maroela web (LIVEBLOG_WEBHOOK_SECRET). When set, outbound
+# webhooks send x-liveblog-secret / x-webhook-secret. Unset/empty → no auth headers.
+LIVEBLOG_WEBHOOK_SECRET = env("LIVEBLOG_WEBHOOK_SECRET")
+
 HIDE_USERS_SENSITIVE_DATA = env("HIDE_USERS_SENSITIVE_DATA", False)
