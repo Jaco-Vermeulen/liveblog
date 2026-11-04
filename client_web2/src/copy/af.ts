@@ -790,6 +790,7 @@ export const AF = {
         enabled: 'Aktief',
       },
       actions: {
+        post_all: 'Alle plasings-gebeurtenisse (nuut, opgedateer, verwyder)',
         post_created: 'Nuwe plasing gepubliseer',
         post_updated: 'Plasing opgedateer',
         post_deleted: 'Plasing verwyder',

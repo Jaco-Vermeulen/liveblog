@@ -26,6 +26,7 @@ export interface WebhookFormState {
 }
 
 export const WEBHOOK_ACTIONS: WebhookAction[] = [
+  'post_all',
   'post_created',
   'post_updated',
   'post_deleted',
@@ -36,7 +37,7 @@ export const WEBHOOK_DATA_FORMATS: WebhookDataFormat[] = ['news_card', 'raw'];
 export const emptyWebhookForm = (): WebhookFormState => ({
   name: '',
   destination_url: '',
-  action: 'post_created',
+  action: 'post_all',
   blog_id: '',
   data_format: 'news_card',
   enabled: true,

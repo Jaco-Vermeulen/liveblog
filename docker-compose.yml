@@ -136,6 +136,9 @@ services:
       - ./server/liveblog/themes/themes.py:/opt/server/liveblog/themes/themes.py:ro
       - ./server/liveblog/themes/__init__.py:/opt/server/liveblog/themes/__init__.py:ro
       - ./server/liveblog/themes/utils.py:/opt/server/liveblog/themes/utils.py:ro
+      # Webhook publish path — keep in sync without image rebuild (was Celery-only before).
+      - ./server/liveblog/webhooks:/opt/server/liveblog/webhooks:ro
+      - ./server/liveblog/posts/posts.py:/opt/server/liveblog/posts/posts.py:ro
       - ./server/app.py:/opt/server/app.py:ro
       - ./server/settings.py:/opt/server/settings.py:ro
       - ./server/liveblog/elastic_recovery.py:/opt/server/liveblog/elastic_recovery.py:ro

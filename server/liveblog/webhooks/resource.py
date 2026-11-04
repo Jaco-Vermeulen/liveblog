@@ -8,7 +8,7 @@ from liveblog.syndication.utils import normalize_http_url, trailing_slash
 
 logger = logging.getLogger(__name__)
 
-WEBHOOK_ACTIONS = ["post_created", "post_updated", "post_deleted"]
+WEBHOOK_ACTIONS = ["post_all", "post_created", "post_updated", "post_deleted"]
 WEBHOOK_DATA_FORMATS = ["news_card", "raw"]
 
 

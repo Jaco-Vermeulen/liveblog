@@ -52,16 +52,20 @@ class WebhooksModuleTestCase(TestCase):
     self.assertEqual(webhook["data_format"], "news_card")
     self.assertTrue(webhook["enabled"])
 
-  @patch("liveblog.webhooks.tasks.deliver_webhook.delay")
-  def test_dispatch_post_webhooks_filters_by_action_and_blog(self, mock_delay):
+  @patch("liveblog.webhooks.delivery.post_webhook_payload")
+  def test_dispatch_post_webhooks_filters_by_action_and_blog(self, mock_post):
     from unittest.mock import MagicMock, patch
 
     blog_a = ObjectId()
     blog_b = ObjectId()
     post_id = ObjectId()
+    post_doc = {"_id": post_id, "blog": blog_a}
+    blog_doc = {"_id": blog_a, "title": "A"}
 
     posts_service = MagicMock()
-    posts_service.find_one.return_value = {"_id": post_id, "blog": blog_a}
+    posts_service.find_one.return_value = post_doc
+    blogs_service = MagicMock()
+    blogs_service.find_one.return_value = blog_doc
 
     webhook_match = self.webhooks_service.post(
       [
@@ -94,12 +98,17 @@ class WebhooksModuleTestCase(TestCase):
         },
       ]
     )
+    mock_post.return_value = {"ok": True, "status_code": 200}
 
     original_get = get_resource_service
 
     def service_router(name):
       if name == "posts":
         return posts_service
+      if name == "blogs":
+        return blogs_service
+      if name == "client_blogs":
+        return blogs_service
       return original_get(name)
 
     from liveblog.webhooks.tasks import dispatch_post_webhooks
@@ -107,7 +116,52 @@ class WebhooksModuleTestCase(TestCase):
     with patch("superdesk.get_resource_service", side_effect=service_router):
       dispatch_post_webhooks(post_id, "created")
 
-    mock_delay.assert_called_once_with(webhook_match, post_id, "created")
+    mock_post.assert_called_once()
+    args, kwargs = mock_post.call_args
+    self.assertEqual(args[0]["_id"], webhook_match)
+    self.assertEqual(args[1]["_id"], post_id)
+
+  @patch("liveblog.webhooks.delivery.post_webhook_payload")
+  def test_dispatch_post_all_fires_for_updated_event(self, mock_post):
+    from unittest.mock import MagicMock, patch
+
+    blog_id = ObjectId()
+    post_id = ObjectId()
+    posts_service = MagicMock()
+    posts_service.find_one.return_value = {"_id": post_id, "blog": blog_id}
+    blogs_service = MagicMock()
+    blogs_service.find_one.return_value = {"_id": blog_id}
+
+    webhook_id = self.webhooks_service.post(
+      [
+        {
+          "name": "All events",
+          "destination_url": "http://localhost:9999/all/",
+          "action": "post_all",
+          "blog_id": blog_id,
+          "data_format": "news_card",
+          "enabled": True,
+        }
+      ]
+    )[0]
+    mock_post.return_value = {"ok": True, "status_code": 200}
+
+    original_get = get_resource_service
+
+    def service_router(name):
+      if name == "posts":
+        return posts_service
+      if name in ("blogs", "client_blogs"):
+        return blogs_service
+      return original_get(name)
+
+    from liveblog.webhooks.tasks import dispatch_post_webhooks
+
+    with patch("superdesk.get_resource_service", side_effect=service_router):
+      dispatch_post_webhooks(post_id, "updated")
+
+    mock_post.assert_called_once()
+    self.assertEqual(mock_post.call_args[0][0]["_id"], webhook_id)
 
   @patch("liveblog.webhooks.test_delivery.post_webhook_payload")
   @patch("liveblog.webhooks.test_delivery.resolve_webhook_test_post")

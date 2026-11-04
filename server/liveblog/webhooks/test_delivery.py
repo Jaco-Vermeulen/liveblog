@@ -4,7 +4,7 @@ import logging
 from eve.utils import ParsedRequest
 from superdesk import get_resource_service
 
-from .payloads import WEBHOOK_ACTIONS
+from .payloads import WEBHOOK_ACTION_POST_ALL, WEBHOOK_ACTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,14 @@ def _blog_last_post_field(action_key):
     if action_key == "post_updated":
         return "last_updated_post"
     return "last_created_post"
+
+
+def _event_label_for_webhook(webhook):
+    """Concrete lifecycle label for test responses (post_all → created)."""
+    action_key = webhook.get("action")
+    if action_key == WEBHOOK_ACTION_POST_ALL:
+        return "created"
+    return WEBHOOK_ACTIONS.get(action_key)
 
 
 def _latest_post_for_blog(posts_service, blog_id):
@@ -119,7 +127,7 @@ def run_webhook_test(webhook_id):
     if not post_id:
         return None, error, 404
 
-    action = WEBHOOK_ACTIONS.get(webhook.get("action"))
+    action = _event_label_for_webhook(webhook)
     if not action:
         return None, "Webhook action is not supported for testing.", 400
 

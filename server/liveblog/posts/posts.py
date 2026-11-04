@@ -416,9 +416,9 @@ class PostsService(ArchiveService):
                     "Send document to consumers (if syndicated): {}".format(doc["_id"])
                 )
                 out_service.send_syndication_post(doc, action="created")
-                from liveblog.webhooks.tasks import dispatch_post_webhooks
+                from liveblog.webhooks.tasks import notify_post_webhooks
 
-                dispatch_post_webhooks.delay(doc["_id"], "created")
+                notify_post_webhooks(doc["_id"], "created")
 
             # let's check for posts limits in blog and remove old one if needed
             if blog_id:
@@ -526,9 +526,9 @@ class PostsService(ArchiveService):
             update_post_blog_embed.delay(doc)
             # Syndication.
             out_service.send_syndication_post(original, action="deleted")
-            from liveblog.webhooks.tasks import dispatch_post_webhooks
+            from liveblog.webhooks.tasks import notify_post_webhooks
 
-            dispatch_post_webhooks.delay(original["_id"], "deleted")
+            notify_post_webhooks(original["_id"], "deleted")
             # Push notification.
             _posts = [{"post_id": original.get("_id"), "blog": blog_id}]
             push_notification("posts", deleted=True, posts=_posts)
@@ -549,25 +549,23 @@ class PostsService(ArchiveService):
 
             self._scheduled_notification_if_needed(doc, action="updated")
 
-            if updates.get("post_status") == "open":
-                if original["post_status"] in ("submitted", "draft", "comment"):
-                    # Post has been saved as contribution/draft, then published.
-                    # Syndication will be sent with 'created' action.
-                    out_service.send_syndication_post(doc, action="created")
-                    from liveblog.webhooks.tasks import dispatch_post_webhooks
+            # Use merged status: updates may omit post_status (e.g. sticky toggle).
+            # Previously that fell through to "deleted" and wrongly notified consumers.
+            from liveblog.webhooks.tasks import notify_post_webhooks
 
-                    dispatch_post_webhooks.delay(doc["_id"], "created")
+            merged_status = updates.get("post_status", original.get("post_status"))
+            if merged_status == "open":
+                if original.get("post_status") in ("submitted", "draft", "comment"):
+                    # Post has been saved as contribution/draft, then published.
+                    out_service.send_syndication_post(doc, action="created")
+                    notify_post_webhooks(doc["_id"], "created")
                 else:
                     out_service.send_syndication_post(doc, action="updated")
-                    from liveblog.webhooks.tasks import dispatch_post_webhooks
-
-                    dispatch_post_webhooks.delay(doc["_id"], "updated")
-            # as far as the consumer is concerned, if a post is unpublished, it is effectively deleted
-            elif original["post_status"] == "open":
+                    notify_post_webhooks(doc["_id"], "updated")
+            elif original.get("post_status") == "open":
+                # Unpublished (or otherwise left open) — consumer treats as deleted.
                 out_service.send_syndication_post(doc, action="deleted")
-                from liveblog.webhooks.tasks import dispatch_post_webhooks
-
-                dispatch_post_webhooks.delay(doc["_id"], "deleted")
+                notify_post_webhooks(doc["_id"], "deleted")
 
             push_notification("posts", updated=True, posts=posts)
 
@@ -591,9 +589,9 @@ class PostsService(ArchiveService):
         # Syndication
         out_service = get_resource_service("syndication_out")
         out_service.send_syndication_post(doc, action="deleted")
-        from liveblog.webhooks.tasks import dispatch_post_webhooks
+        from liveblog.webhooks.tasks import notify_post_webhooks
 
-        dispatch_post_webhooks.delay(doc["_id"], "deleted")
+        notify_post_webhooks(doc["_id"], "deleted")
 
         # Send notifications
         push_notification("posts", deleted=True)

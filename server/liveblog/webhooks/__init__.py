@@ -2,9 +2,18 @@ import superdesk
 
 from liveblog.webhooks.resource import WebhooksResource, WebhooksService
 from liveblog.webhooks.routes import webhooks_blueprint
-from liveblog.webhooks.tasks import deliver_webhook, dispatch_post_webhooks
+from liveblog.webhooks.tasks import (
+    deliver_webhook,
+    dispatch_post_webhooks,
+    notify_post_webhooks,
+)
 
-__all__ = ["deliver_webhook", "dispatch_post_webhooks", "webhooks_blueprint"]
+__all__ = [
+    "deliver_webhook",
+    "dispatch_post_webhooks",
+    "notify_post_webhooks",
+    "webhooks_blueprint",
+]
 
 
 def init_app(app):

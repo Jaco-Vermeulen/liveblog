@@ -14,13 +14,27 @@ from liveblog.syndication.utils import extract_creator_data, extract_post_items_
 
 logger = logging.getLogger(__name__)
 
-WEBHOOK_ACTIONS = {
+# Single-event actions map to one lifecycle event. post_all matches every event.
+WEBHOOK_ACTION_POST_ALL = "post_all"
+WEBHOOK_EVENT_ACTIONS = {
     "post_created": "created",
     "post_updated": "updated",
     "post_deleted": "deleted",
 }
+WEBHOOK_ACTIONS = dict(WEBHOOK_EVENT_ACTIONS)
+WEBHOOK_ACTIONS[WEBHOOK_ACTION_POST_ALL] = "created"  # default event label for tests/UI
 
-POST_EVENT_TO_ACTION = {v: k for k, v in WEBHOOK_ACTIONS.items()}
+POST_EVENTS = ("created", "updated", "deleted")
+POST_EVENT_TO_ACTION = {v: k for k, v in WEBHOOK_EVENT_ACTIONS.items()}
+
+
+def webhook_matches_event(webhook_action, event):
+    """True when a webhook's configured action should fire for this post event."""
+    if event not in POST_EVENTS:
+        return False
+    if webhook_action == WEBHOOK_ACTION_POST_ALL:
+        return True
+    return WEBHOOK_EVENT_ACTIONS.get(webhook_action) == event
 
 
 class _HTMLTextExtractor(HTMLParser):

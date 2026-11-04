@@ -386,7 +386,7 @@ export interface SyndicationOut extends EveResource {
   consumer_id: string;
 }
 
-export type WebhookAction = 'post_created' | 'post_updated' | 'post_deleted';
+export type WebhookAction = 'post_all' | 'post_created' | 'post_updated' | 'post_deleted';
 export type WebhookDataFormat = 'news_card' | 'raw';
 
 export interface Webhook extends EveResource {
