@@ -423,17 +423,22 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
   );
 
   const resolveHeadlinePatch = useCallback(() => {
+    const trimmed = headline.trim();
+    const previous = currentPost?.headline?.trim() ?? '';
+    // Empty field keeps the post's existing title instead of clearing it.
+    const resolved = trimmed || previous;
+
     if (hasWebhook) {
       return {
-        headline: headline.trim(),
+        headline: resolved,
         show_headline: false,
       };
     }
     return {
-      headline: showHeadline ? headline.trim() : '',
+      headline: showHeadline ? resolved : '',
       show_headline: showHeadline,
     };
-  }, [hasWebhook, headline, showHeadline]);
+  }, [currentPost, hasWebhook, headline, showHeadline]);
 
   const uploadFeaturedImage = useCallback(async (file: File) => {
     setUploadError(null);

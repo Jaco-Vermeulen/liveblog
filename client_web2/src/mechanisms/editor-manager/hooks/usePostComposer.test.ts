@@ -80,4 +80,97 @@ describe('usePostComposer', () => {
     expect(result.current.composer.blocks[0]?.data.text).toContain('Original text');
     expect(result.current.composer.editSession).toBeGreaterThan(1);
   });
+
+  it('reuses the previous headline when the pasgemaakte titel field is empty (webhook)', async () => {
+    const post = makePost({ headline: 'Vorige titel', show_headline: false });
+    const { result } = renderHook(() => usePostComposer(blog, true));
+
+    act(() => {
+      result.current.loadPost(post);
+      result.current.setHeadline('');
+      result.current.updateBlock(0, { text: '<p>Updated body</p>' });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(savePost).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        headline: 'Vorige titel',
+        show_headline: false,
+      }),
+    );
+  });
+
+  it('sends a typed headline when the pasgemaakte titel field is filled (webhook)', async () => {
+    const post = makePost({ headline: 'Vorige titel', show_headline: false });
+    const { result } = renderHook(() => usePostComposer(blog, true));
+
+    act(() => {
+      result.current.loadPost(post);
+      result.current.setHeadline('Nuwe titel');
+      result.current.updateBlock(0, { text: '<p>Updated body</p>' });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(savePost).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        headline: 'Nuwe titel',
+        show_headline: false,
+      }),
+    );
+  });
+
+  it('reuses the previous headline when custom title is enabled but empty', async () => {
+    const post = makePost({ headline: 'Vorige titel', show_headline: true });
+    const { result } = renderHook(() => usePostComposer(blog, false));
+
+    act(() => {
+      result.current.loadPost(post);
+      result.current.setShowHeadline(true);
+      result.current.setHeadline('');
+      result.current.updateBlock(0, { text: '<p>Updated body</p>' });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(savePost).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        headline: 'Vorige titel',
+        show_headline: true,
+      }),
+    );
+  });
+
+  it('clears the headline when custom title is turned off', async () => {
+    const post = makePost({ headline: 'Vorige titel', show_headline: true });
+    const { result } = renderHook(() => usePostComposer(blog, false));
+
+    act(() => {
+      result.current.loadPost(post);
+      result.current.setShowHeadline(false);
+      result.current.updateBlock(0, { text: '<p>Updated body</p>' });
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(savePost).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        headline: '',
+        show_headline: false,
+      }),
+    );
+  });
 });
