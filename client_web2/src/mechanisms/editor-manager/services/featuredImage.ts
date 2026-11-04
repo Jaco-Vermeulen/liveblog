@@ -1,4 +1,5 @@
 import type { ArchivePicture, BlogImageItem, Blog, Post } from '@/mechanisms/liveblog-api';
+import { normalizeMediaHref } from '@/mechanisms/liveblog-api';
 import type { SirTrevorBlock } from '../types';
 export type FeaturedImageSource =
   | { type: 'none' }
@@ -16,7 +17,7 @@ export function featuredImageSourceFromPost(post: Post | null): FeaturedImageSou
     return {
       type: 'custom',
       picture: post.featured_image ?? '',
-      picture_url: post.featured_image_url ?? '',
+      picture_url: normalizeMediaHref(post.featured_image_url ?? ''),
       picture_renditions: (post.featured_image_renditions ?? {}) as Record<
         string,
         { href?: string; width?: number; height?: number }
@@ -32,14 +33,14 @@ export function previewUrlForFeaturedSource(
   blog?: Blog | null,
 ): string {
   if (source.type === 'custom') {
-    return source.picture_url;
+    return normalizeMediaHref(source.picture_url);
   }
   if (source.type === 'block') {
     const block = blocks[source.index];
     if (!block || block.type !== 'Image') return '';
-    return String(block.data.picture_url ?? block.data.url ?? '');
+    return normalizeMediaHref(String(block.data.picture_url ?? block.data.url ?? ''));
   }
-  return blog?.picture_url ?? '';
+  return normalizeMediaHref(blog?.picture_url ?? '');
 }
 
 function mediaFromImageBlock(block: SirTrevorBlock) {
@@ -105,11 +106,14 @@ export function listImageBlockOptions(blocks: SirTrevorBlock[]) {
   return blocks
     .map((block, index) => ({ block, index }))
     .filter(({ block }) => block.type === 'Image')
-    .map(({ block, index }) => ({
-      index,
-      label: String(block.data.picture_url ?? block.data.url ?? `Beeld ${index + 1}`),
-      url: String(block.data.picture_url ?? block.data.url ?? ''),
-    }));
+    .map(({ block, index }) => {
+      const url = normalizeMediaHref(String(block.data.picture_url ?? block.data.url ?? ''));
+      return {
+        index,
+        label: url || `Beeld ${index + 1}`,
+        url,
+      };
+    });
 }
 
 export type FeaturedImageOption = {
@@ -142,8 +146,9 @@ export function featuredSourceFromArchivePicture(
   picture: Pick<ArchivePicture, '_id' | 'renditions'>,
 ): FeaturedImageSource | null {
   const renditions = picture.renditions ?? {};
-  const pictureUrl =
-    renditions.viewImage?.href ?? renditions.thumbnail?.href ?? renditions.baseImage?.href ?? '';
+  const pictureUrl = normalizeMediaHref(
+    renditions.viewImage?.href ?? renditions.thumbnail?.href ?? renditions.baseImage?.href ?? '',
+  );
   if (!pictureUrl) return null;
   return {
     type: 'custom',
@@ -161,7 +166,7 @@ export function featuredSourceFromBlogImageItem(item: BlogImageItem): FeaturedIm
     media?.renditions?.thumbnail?.href ??
     media?.renditions?.baseImage?.href ??
     '';
-  const pictureUrl = textUrl || mediaUrl;
+  const pictureUrl = normalizeMediaHref(textUrl || mediaUrl);
   if (!pictureUrl) return null;
   return {
     type: 'custom',
@@ -208,7 +213,7 @@ export function buildFeaturedImageLibraryOptions(
   if (blog.picture_url?.trim()) {
     addOption({
       key: 'blog',
-      url: blog.picture_url,
+      url: normalizeMediaHref(blog.picture_url),
       label: labels.blogImage,
       source: { type: 'blog' },
     });

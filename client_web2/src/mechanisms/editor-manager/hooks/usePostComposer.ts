@@ -449,6 +449,7 @@ export function usePostComposer(blog: Blog | undefined, hasWebhook = false) {
       setIsDirty(true);
     } catch (err) {
       reportUploadError(err);
+      throw err;
     } finally {
       setFeaturedImageUploading(false);
     }

@@ -1,6 +1,7 @@
 import { api } from '../client';
 import { logger } from '@/mechanisms/request-logger';
 import { LiveblogApiError, resolveUrl } from '../client';
+import { normalizeMediaHref, normalizeRenditionHrefs } from '../mediaUrl';
 import { assertImageUploadSize } from '../uploadLimits';
 import type { EveList } from '../types';
 
@@ -158,10 +159,11 @@ export async function uploadArchiveMedia(file: File): Promise<{
       throw new LiveblogApiError('No image rendition returned', res.status, data);
     }
 
+    const renditions = normalizeRenditionHrefs(data.renditions ?? {});
     return {
       picture: data._id,
-      picture_url: viewHref,
-      picture_renditions: data.renditions ?? {},
+      picture_url: normalizeMediaHref(viewHref),
+      picture_renditions: renditions,
     };
   } catch (err) {
     if (!(err instanceof LiveblogApiError)) {

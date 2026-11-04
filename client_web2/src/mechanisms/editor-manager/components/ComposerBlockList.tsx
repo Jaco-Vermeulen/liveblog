@@ -4,6 +4,7 @@ import { LbButton } from '@/components/ui/LbButton';
 import { LbFormField } from '@/components/ui/LbFormField';
 import { LbInput } from '@/components/ui/LbInput';
 import type { PollBody } from '@/mechanisms/liveblog-api';
+import { normalizeMediaHref } from '@/mechanisms/liveblog-api';
 import { AF } from '@/copy';
 import { EmbedPreview, type EmbedMeta } from '../subsystems/embed-handlers';
 import { PollBlockEditor } from '../subsystems/polls';
@@ -217,9 +218,9 @@ export function ComposerBlockList({
                   onBlur={() => onRemoveBlockIfEmpty(index)}
                   placeholder="https://…"
                 />
-                {String(block.data.url ?? '').trim() ? (
+                {normalizeMediaHref(String(block.data.url ?? '')).trim() ? (
                   <img
-                    src={String(block.data.url)}
+                    src={normalizeMediaHref(String(block.data.url))}
                     alt=""
                     className="mt-2 max-h-40 rounded-lg border border-mar-border object-contain"
                   />

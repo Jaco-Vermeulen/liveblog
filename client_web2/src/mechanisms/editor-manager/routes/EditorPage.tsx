@@ -319,7 +319,7 @@ export function EditorPage() {
             onHeadlineChange={composerApi.setHeadline}
             onShowHeadlineChange={composerApi.setShowHeadline}
             onFeaturedImageSourceChange={composerApi.setFeaturedImageSource}
-            onUploadFeaturedImage={(file) => void composerApi.uploadFeaturedImage(file)}
+            onUploadFeaturedImage={composerApi.uploadFeaturedImage}
             featuredImageUploading={composerApi.featuredImageUploading}
             uploadError={composerApi.uploadError}
             onStickyChange={composerApi.setSticky}

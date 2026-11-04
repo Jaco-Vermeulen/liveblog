@@ -65,7 +65,7 @@ export interface PostComposerProps {
   onHeadlineChange: (headline: string) => void;
   onShowHeadlineChange: (show: boolean) => void;
   onFeaturedImageSourceChange: (source: FeaturedImageSource) => void;
-  onUploadFeaturedImage: (file: File) => void;
+  onUploadFeaturedImage: (file: File) => void | Promise<void>;
   featuredImageUploading?: boolean;
   uploadError?: string | null;
   onStickyChange: (sticky: boolean) => void;
@@ -165,6 +165,7 @@ export function PostComposer({
               blocks={composer.blocks}
               source={composer.featuredImageSource}
               uploading={featuredImageUploading}
+              uploadError={uploadError}
               onSourceChange={onFeaturedImageSourceChange}
               onUpload={onUploadFeaturedImage}
             />

@@ -23,6 +23,8 @@ x-liveblog-env: &liveblog-env
   SUPERDESK_CLIENT_URL: ${SUPERDESK_CLIENT_URL:-http://localhost:9000}
   SUPERDESK_TESTING: ${SUPERDESK_TESTING:-True}
   LIVEBLOG_MULTI_HOST: ${LIVEBLOG_MULTI_HOST:-True}
+  # Host-agnostic media hrefs (avoids baking cloudlet Host into HTTPS-unsafe image URLs).
+  MEDIA_PREFIX: ${MEDIA_PREFIX:-/api/upload-raw}
   # Single worker in Docker dev — reload + Windows volume mounts otherwise spawn dozens of stale gunicorn workers (auth 404 / instant "session expired").
   SUPERDESK_RELOAD: ${SUPERDESK_RELOAD:-False}
   WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}

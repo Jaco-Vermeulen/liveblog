@@ -103,6 +103,12 @@ CANONICAL_HOST = server_url.netloc or None
 LIVEBLOG_MULTI_HOST = env("LIVEBLOG_MULTI_HOST", False)
 SERVER_NAME = None if LIVEBLOG_MULTI_HOST else CANONICAL_HOST
 
+# Relative media URLs so multi-host deploys do not bake the request Host (e.g. the
+# cloudlet alias with a broken TLS cert) into picture_url / rendition hrefs.
+# Override with an absolute S3/CDN prefix when using object storage.
+MEDIA_PREFIX = env("MEDIA_PREFIX", "/api/upload-raw")
+
+
 VALIDATION_ERROR_STATUS = 400
 JSON_SORT_KEYS = True
 

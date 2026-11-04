@@ -24,6 +24,7 @@ export interface FeaturedImagePickerProps {
   blocks: SirTrevorBlock[];
   source: FeaturedImageSource;
   uploading?: boolean;
+  uploadError?: string | null;
   onSourceChange: (source: FeaturedImageSource) => void;
   onUpload: (file: File) => void | Promise<void>;
 }
@@ -164,6 +165,7 @@ export function FeaturedImagePicker({
   blocks,
   source,
   uploading = false,
+  uploadError = null,
   onSourceChange,
   onUpload,
 }: FeaturedImagePickerProps) {
@@ -197,7 +199,12 @@ export function FeaturedImagePicker({
   };
 
   const handleUpload = async (file: File) => {
-    await onUpload(file);
+    try {
+      await onUpload(file);
+    } catch {
+      // Keep the modal open so the composer upload error stays visible here.
+      return;
+    }
     if (blog._id) {
       await queryClient.invalidateQueries({ queryKey: featuredImageLibraryQueryKey(blog._id) });
     }
@@ -257,6 +264,11 @@ export function FeaturedImagePicker({
         className="max-w-lg"
       >
         <p className="mb-4 text-xs text-mar-muted">{AF.editor.featuredImage.hint}</p>
+        {uploadError ? (
+          <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            {uploadError}
+          </p>
+        ) : null}
 
         {libraryQuery.isLoading ? (
           <LoadingGrid />

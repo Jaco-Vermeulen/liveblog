@@ -1,4 +1,5 @@
 export { api, apiRequest, LiveblogApiError, resolveUrl, setOnUnauthorized } from './client';
+export { normalizeMediaHref, normalizeRenditionHrefs } from './mediaUrl';
 export type { ApiRequestOptions, LiveblogApiClient } from './client';
 export { login, getUser, logoutSession } from './endpoints/auth';
 export {
