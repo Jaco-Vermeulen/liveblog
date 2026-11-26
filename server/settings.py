@@ -450,6 +450,14 @@ LIVEBLOG_CACHE_TYPE = env("LIVEBLOG_CACHE_TYPE", "simple")
 # used if LIVEBLOG_CACHE_TYPE='redis' otherwise is ignored
 LIVEBLOG_CACHE_REDIS_URL = env("LIVEBLOG_CACHE_REDIS_URL", "redis://localhost:6379/0")
 
+# Client blog posts API cache TTLs (seconds).
+# Flask-Cache defaults to 300s when timeout is omitted. Caching an empty "no new
+# posts" poll for that long after invalidate can hide a just-published post until
+# the entry expires (~5 minutes). Keep empty polls short; filled responses can
+# live longer because writes call blog_cache.invalidate.
+BLOG_CACHE_TIMEOUT = int(env("BLOG_CACHE_TIMEOUT", 30))
+BLOG_CACHE_EMPTY_TIMEOUT = int(env("BLOG_CACHE_EMPTY_TIMEOUT", 5))
+
 # original_creator in posts and items used to be a string. This has been changed to avoid extra api hits
 # to complete author information. Next setting is to enable a workaround to behave like before to avoid
 # breaking the Liveblog Reporter app

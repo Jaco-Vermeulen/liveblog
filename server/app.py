@@ -77,8 +77,12 @@ def get_app(config=None):
     )
     app.jinja_loader = custom_loader
 
-    # Caching. By default 'simple' cache will be used
-    cache_config = {"CACHE_TYPE": settings.LIVEBLOG_CACHE_TYPE}
+    # Caching. By default 'simple' cache will be used.
+    # Explicit default timeout avoids Flask-Cache's 300s when callers omit timeout.
+    cache_config = {
+        "CACHE_TYPE": settings.LIVEBLOG_CACHE_TYPE,
+        "CACHE_DEFAULT_TIMEOUT": settings.BLOG_CACHE_TIMEOUT,
+    }
     if cache_config["CACHE_TYPE"] == "redis":
         cache_config.update(
             {

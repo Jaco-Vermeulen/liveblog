@@ -47,13 +47,31 @@ class BlogCache(object):
         """retrieve value from the cache"""
         return self.cache.get(self.__create_blog_cache_key(blog, key))
 
-    def set(self, blog, key, value):
-        """save value to the cache"""
-        return self.cache.set(self.__create_blog_cache_key(blog, key), value)
+    def set(self, blog, key, value, timeout=None):
+        """save value to the cache
+
+        :param timeout: seconds to keep the entry. None uses Flask-Cache default
+            (CACHE_DEFAULT_TIMEOUT). Prefer an explicit timeout for live poll data.
+        """
+        cache_key = self.__create_blog_cache_key(blog, key)
+        if timeout is None:
+            return self.cache.set(cache_key, value)
+        return self.cache.set(cache_key, value, timeout=timeout)
 
     def invalidate(self, blog):
         """invalidate the cache for the given blog"""
         return self.__get_blog_version(blog, invalidate=True)
+
+
+def client_posts_cache_timeout(docs, empty_timeout, filled_timeout):
+    """TTL for client blog posts cache entries.
+
+    Empty poll results must not outlive a short window: after invalidate, the first
+    miss can race Elasticsearch and cache "no posts" until expiry.
+    """
+    if not docs:
+        return empty_timeout
+    return filled_timeout
 
 
 class BlogCacheTestCase(unittest.TestCase):
@@ -71,6 +89,29 @@ class BlogCacheTestCase(unittest.TestCase):
             self.assertEqual(blog_cache.get("blog", "key"), "value")
             blog_cache.invalidate("blog")
             self.assertEqual(blog_cache.get("blog", "key"), None)
+
+    def test_set_passes_explicit_timeout(self):
+        class RecordingCache(object):
+            def __init__(self):
+                self.calls = []
+
+            def get(self, key):
+                return None
+
+            def set(self, key, value, timeout=None):
+                self.calls.append({"key": key, "value": value, "timeout": timeout})
+                return True
+
+        cache = RecordingCache()
+        blog_cache = BlogCache(cache)
+        blog_cache.set("blog", "key", "value", timeout=5)
+        self.assertEqual(len(cache.calls), 1)
+        self.assertEqual(cache.calls[0]["timeout"], 5)
+        self.assertEqual(cache.calls[0]["value"], "value")
+
+    def test_client_posts_cache_timeout_empty_vs_filled(self):
+        self.assertEqual(client_posts_cache_timeout([], 5, 30), 5)
+        self.assertEqual(client_posts_cache_timeout([{"_id": "1"}], 5, 30), 30)
 
 
 def run_once(func):

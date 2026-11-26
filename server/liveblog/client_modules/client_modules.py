@@ -31,7 +31,7 @@ from liveblog.posts.posts import (
 )
 from liveblog.items.items import ItemsResource, ItemsService
 from liveblog.polls.polls import PollsResource, PollsService, poll_calculations
-from liveblog.common import check_comment_length
+from liveblog.common import check_comment_length, client_posts_cache_timeout
 from liveblog.blogs.blog import Blog
 from liveblog.posts.mixins import AuthorsMixin
 from liveblog.posts import utils as post_utils
@@ -356,7 +356,15 @@ class ClientBlogPostsService(BlogPostsService, AuthorsMixin):
                 post_utils.calculate_post_type(post)
                 post_utils.attach_syndication(post)
 
-            app.blog_cache.set(blog_id, cache_key, blog_posts)
+            # Empty "no new posts" polls must use a short TTL. Caching them with
+            # Flask-Cache's default 300s after invalidate can hide a new post for
+            # ~5 minutes if the first miss raced Elasticsearch.
+            timeout = client_posts_cache_timeout(
+                blog_posts.docs,
+                app.config.get("BLOG_CACHE_EMPTY_TIMEOUT", 5),
+                app.config.get("BLOG_CACHE_TIMEOUT", 30),
+            )
+            app.blog_cache.set(blog_id, cache_key, blog_posts, timeout=timeout)
 
         return blog_posts
 
